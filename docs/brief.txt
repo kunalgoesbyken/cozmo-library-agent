@@ -1,0 +1,221 @@
+﻿Take-Home Assignment: Library Contents Claim Agent
+
+
+The brief
+Build a live voice-and-vision insurance agent that inventories and values a home library in one continuous camera sweep. The policyholder walks the room once while talking to the agent. The agent returns a contents claim packet: every book identified from its spine and priced at local market value, every non-book item identified and priced, and the surface area of the room.
+You have 48 hours from the time you receive this. Expect 15 to 20 hours of real work. 
+
+
+This is a test of three things: whether you can get real measurements out of messy real-world capture, whether you can keep a model from inventing facts when money is attached, and whether you report your own failures honestly.
+Reference and how this differs
+Start from the Insurance Claim Live Agent Team example. Read it and run it before you write any code. It shows the interaction pattern we want: a claimant talks, the camera is on, a claim file builds itself in real time, and background agents assemble the adjuster packet.
+The reference describes what it sees. Yours has to measure, count and price it. That gap is the assignment.
+
+
+	Reference app
+	Your agent
+	Interaction
+	Live voice and camera intake
+	Same, and the agent actively directs the sweep
+	Vision
+	Describes damage in a frame
+	Detects every spine, reads it, measures it
+	Output
+	Narrative notebook and adjuster packet
+	Itemised, priced inventory with sources and confidence
+	Numbers
+	None that need to be right
+	Counts, dimensions, prices and areas checked against ground truth
+	Background agents
+	Policy check, intake rules
+	Identification, pricing, measurement, review flagging
+	You may use any model provider and any framework. Gemini Live is what the reference uses, not a requirement.
+The scenario
+A policyholder is documenting the contents of their home library for a contents claim. They open your app on a phone and start talking.
+1. The agent greets them, confirms the country and currency, and explains the sweep in one or two sentences.
+2. The policyholder walks the room once, panning across every shelf, wall and floor area. Target sweep time is under 3 minutes for a single room.
+3. While they walk, the agent talks back. It says what it is logging, asks them to slow down or step closer when spines are unreadable, and asks short questions it cannot answer from video (for example, "is that portrait an original or a print?").
+4. The inventory fills in live on screen as items are recognised.
+5. When the sweep ends, background agents finish identification, pricing and measurement.
+6. Within 5 minutes of the sweep ending, the agent reads back a summary and produces the claim packet.
+"One sweep" means one continuous pass. The agent may ask for a re-capture of a specific shelf or corner during that pass. It may not ask the user to pull books out, scan barcodes, or photograph items one by one.
+What to build
+Six capabilities are required. Each one has a pass bar in the table at the end of this section.
+1. Live sweep agent
+* Real-time voice in and out, with the camera on, in a browser or phone app.
+* The agent directs the capture: it notices blur, glare, occlusion and missed shelves, and says so while the user is still standing there.
+* The inventory updates on screen during the sweep, not only at the end.
+* The user can interrupt and correct it by voice ("that is a first edition", "skip that shelf, those are not mine").
+2. Books from the spine
+* Detect and count every book from its spine alone, including books lying flat or stacked.
+* Read the spine: title, author and publisher where visible. Resolve it to a specific work, and an edition where the evidence supports it.
+* Measure each spine: height and thickness in centimetres. Report total shelf run in metres.
+* Explain how you get metric scale. LiDAR, a reference object, known shelf dimensions and standard book formats are all acceptable. "The model estimated it" is not.
+* If a spine cannot be read, log it as an unidentified book with its dimensions. Do not guess a title.
+3. Book valuation at local prices
+* Price each identified book in the policyholder's country and currency.
+* Give two figures per book: replacement cost (buying it new or equivalent today) and used market value.
+* Every price carries its source, the retrieval date and the condition you assumed.
+* If no local price exists, convert from another market and label it as converted. If no price exists at all, say so and exclude it from the total.
+* Flag anything that looks rare, signed, antiquarian or above a value threshold you set for human appraisal. Do not auto-price these.
+* Show the same 10 books priced for a second country, to prove locale is a setting and not hardcoded.
+4. Non-book contents
+* Detect and classify everything in the room that is not a book: shelving, furniture, coffee machine, lamps, portraits and framed art, rugs, electronics, decor.
+* Record what can be seen: category, material, approximate dimensions, brand or model if legible.
+* Price each item at local replacement cost with a source, or give a sourced range when brand and model are unknown.
+* Art and portraits default to "needs appraisal" unless the user states it is a print. The agent should ask.
+5. Surface area of the room
+* Floor area and total wall area in square metres and square feet.
+* Report room dimensions (length, width, ceiling height) and how the shape was handled if the room is not a rectangle.
+* Report the wall area covered by shelving as a separate figure.
+* Come from the same sweep. No separate measuring pass.
+6. Claim packet
+* One structured file and one human-readable report per sweep, as specified in the next section.
+* A review queue: every line the system is not confident in, with the reason.
+* Totals that add up from the lines. An adjuster must be able to trace any figure back to a frame and a price source.
+Pass bars
+Measured against ground truth you collect yourself (see Deliverables).
+Measure
+	Pass bar
+	Book count
+	Within 5% of the true count
+	Title identification
+	At least 70% of human-legible spines correct, and no more than 3% confidently wrong
+	Spine dimensions
+	Within 15% on a hand-measured sample of 20
+	Book prices
+	Within 25% of your hand-checked price on a sample of 15, same source type
+	Non-book items
+	At least 80% of items found, with correct category
+	Floor area
+	Within 10% of tape-measured area
+	Wall area
+	Within 15% of tape-measured area
+	Time to packet
+	Under 5 minutes after the sweep ends
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+Output contract
+Each sweep produces one claim_packet.json and one readable report (PDF or HTML) built from it. You may add fields. You may not drop these.
+{
+ "sweep": { "id": "", "captured_at": "", "device": "", "duration_s": 0, "country": "", "currency": "" },
+ "room": {
+   "length_m": 0, "width_m": 0, "height_m": 0,
+   "floor_area_m2": 0, "wall_area_m2": 0, "shelved_wall_area_m2": 0,
+   "scale_method": "", "confidence": 0
+ },
+ "books": [
+   {
+     "id": "", "shelf": "", "position": 0, "frame_ref": "",
+     "status": "identified | unidentified | needs_appraisal",
+     "title": "", "author": "", "edition": "", "isbn": "",
+     "spine_height_cm": 0, "spine_thickness_cm": 0,
+     "id_confidence": 0,
+     "replacement_cost": { "amount": 0, "source": "", "url": "", "retrieved_at": "", "converted": false },
+     "used_value": { "amount": 0, "source": "", "url": "", "retrieved_at": "", "condition_assumed": "" }
+   }
+ ],
+ "items": [
+   {
+     "id": "", "category": "", "description": "", "brand_model": "", "frame_ref": "",
+     "dimensions_cm": { "w": 0, "h": 0, "d": 0 },
+     "status": "priced | range | needs_appraisal",
+     "replacement_cost": { "low": 0, "high": 0, "source": "", "url": "", "retrieved_at": "" },
+     "confidence": 0
+   }
+ ],
+ "totals": {
+   "book_count": 0, "books_identified": 0, "books_unidentified": 0, "shelf_run_m": 0,
+   "books_replacement_cost": 0, "books_used_value": 0,
+   "items_replacement_cost_low": 0, "items_replacement_cost_high": 0,
+   "excluded_from_totals": 0
+ },
+ "review_queue": [ { "ref_id": "", "reason": "" } ]
+}
+Three rules on this file:
+* An empty field is correct when the system does not know. A filled field with no evidence behind it is a defect.
+* Every frame_ref must point to a saved frame or timestamp we can open.
+* Totals are computed in code from the lines, never written by a language model.
+Do and do not
+Do
+* Run the reference app first and say in your README what you kept, changed and threw away.
+* Capture a real space yourself: at least 60 books across at least 2 shelving units, at least 8 non-book items, one enclosed room. Your home, an office, a library corner or a bookshop with permission all work.
+* Build your own ground truth before you tune anything: true book count, hand-read titles, tape-measured room, hand-checked prices.
+* Use pretrained models, hosted APIs, open-source libraries and AI coding tools freely. Tell us which.
+* Keep identification, pricing and measurement as separate, testable steps with their own outputs.
+* Make every number traceable to evidence: a frame for what was seen, a URL and date for what was priced.
+* Let the system say "I do not know". Route those lines to the review queue.
+* Report cost per sweep and latency per stage.
+* Write down what broke, what you tried, and what you would do with two more weeks.
+* State your assumptions when this brief is ambiguous, and move on. Deciding well under ambiguity is part of the test.
+Do not
+* Do not fork the reference, change the prompt and submit it. 
+* Do not ask the user to scan barcodes, type ISBNs, pull books off shelves or photograph items one at a time.
+* Do not let a language model produce prices from memory. A price with no retrievable source counts as a fabricated price.
+* Do not hardcode a catalogue, a price list or room dimensions for your test space.
+* Do not guess titles for unreadable spines to raise your identification rate. Confident wrong answers are penalised harder than blanks.
+* Do not auto-price art, signed copies or rare editions.
+* Do not edit, speed up or stitch the demo video. One take, start to finish.
+* Do not report accuracy only on the frames or shelves that worked.
+* Do not spend your time on visual polish, authentication, deployment or a policy database. None of it is scored.
+* Do not train a model from scratch. If you fine-tune, justify why a pretrained model was not enough.
+* Do not submit code you cannot explain line by line in the review call.
+Deliverables
+Submit all six. A missing item is scored as zero for the part of the rubric it supports.
+1. Repository. Private GitHub repo shared with us. A stranger should get it running in under 15 minutes from the README, with an .env.example and no secrets committed.
+2. Demo video. One unedited take, 6 minutes or less: the full sweep with the agent's voice audible, the inventory filling in, and the final packet.
+3. Claim packet. The claim_packet.json and readable report from the sweep in the video, plus the saved frames it references.
+4. Ground truth and results. A sheet with your true book count, hand-read titles for every legible spine, 20 hand-measured spines, 15 hand-checked prices, the non-book item list and tape measurements of the room. Next to it, your system's numbers against each pass bar.
+5. Architecture note. One page: a diagram of the pipeline, which model does what, where the system gets metric scale, and where prices come from.
+6. Failure log. One page: the three worst errors in your run, the root cause of each, and what you would change. Include cost per sweep and latency per stage.
+How we evaluate
+Area
+	Weight
+	Strong
+	Weak
+	Measured accuracy
+	30%
+	Meets most pass bars on honest ground truth; misses are quantified
+	Numbers quoted without ground truth, or only on the easy shelves
+	Pricing integrity
+	20%
+	Every price sourced, dated and local; unknowns left blank; rare items flagged
+	Plausible-looking prices with no source; totals written by a model
+	Live agent and one-sweep capture
+	20%
+	Agent catches bad capture in the moment and recovers within the same pass
+	A video upload with a voice layer added afterwards
+	Engineering
+	15%
+	Separate, testable stages; runs from the README; sensible cost and latency
+	One long prompt; cannot be run by anyone else
+	Failure analysis
+	15%
+	Names root causes and shows a measured fix for at least one
+	"Could be improved with better models"
+	The review call is 60 minutes. You walk us through the architecture for 15 minutes. Then we point your agent at a shelf and a room you have not seen, live, and compare its packet with our own count and tape measure. We finish with questions on your code and your failure log.
+A system that scores lower on our shelf than on yours is normal. A system that collapses on ours tells us it was tuned to one room.
+Stretch goals
+Optional. None of these makes up for a missed core requirement.
+* A floor plan sketch of the room with shelving and items placed on it.
+* Condition grading per book (spine wear, sun fade, water damage) feeding the used value.
+* Multi-room sweeps merged into one packet.
+* A second pass by an independent checker agent that audits the packet and reports disagreement.
+* Running on smart glasses or another head-worn camera as well as a phone.
+Logistics
+* Timebox. 48 hours from when you receive this brief. Late submissions are reviewed with the delay noted.
+* Submission. Reply to the email this brief arrived in, with the repo link, the video link and the four documents.
+* Privacy. Do not capture people, or documents with personal data, in your sweep. Get permission for any space that is not yours.
+* Ownership. Your code stays yours. We use it only to evaluate your application.
