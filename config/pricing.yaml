@@ -1,0 +1,10 @@
+used_value_policy: derived_from_new
+condition_factors:
+  v1:
+    new: 1.0
+    like_new: 0.8
+    very_good: 0.65
+    good: 0.5
+    acceptable: 0.35
+bookswagon:
+  enabled: false

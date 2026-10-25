@@ -1,0 +1,6 @@
+country: US
+currency: USD
+new_sources: []
+used_sources: [derived]
+appraisal_threshold: 60
+antiquarian_year: 1950

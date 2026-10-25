@@ -1,0 +1,24 @@
+item_categories:
+  - furniture
+  - appliance
+  - electronics
+  - decor
+  - lighting
+  - textile
+  - storage
+  - tableware
+  - artwork
+  - other
+book_formats:
+  mass_market:
+    height_cm: 17.5
+    thickness_cm: 2.5
+  trade_paperback:
+    height_cm: 21.0
+    thickness_cm: 2.5
+  hardcover:
+    height_cm: 23.5
+    thickness_cm: 3.5
+  large_format:
+    height_cm: 30.0
+    thickness_cm: 3.0
