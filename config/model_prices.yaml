@@ -1,0 +1,15 @@
+unit: usd_per_million_tokens
+models:
+  gemini-3.5-flash-lite:
+    text: {input: 0.10, output: 0.40}
+  gemini-3.1-flash-lite:
+    text: {input: 0.10, output: 0.40}
+  gemini-3.8-flash:
+    text: {input: 0.50, output: 3.00}
+  gemini-3.8-live:
+    text: {input: 0.50, output: 2.00}
+    audio: {input: 3.00, output: 12.00}
+    video: {input: 1.00, output: 2.00}
+    image: {input: 1.00, output: 2.00}
+  gemma-4-31b-it:
+    text: {input: 0, output: 0}
