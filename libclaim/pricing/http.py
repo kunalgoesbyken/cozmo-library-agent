@@ -2,11 +2,12 @@ import asyncio
 import hashlib
 import json
 import os
-from datetime import UTC, datetime
+from collections.abc import Awaitable, Callable
+from datetime import UTC, datetime, timedelta
 from functools import cached_property
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlsplit
+from urllib.parse import urljoin, urlsplit
 
 import httpx
 from aiolimiter import AsyncLimiter
@@ -19,7 +20,11 @@ from libclaim.pricing.markup import Page, jsonld_blocks
 from libclaim.settings import load_settings
 
 HTML_TYPES = ("text/html", "application/xhtml")
-ERROR_CLASS = 400
+REDIRECT_HEADER = "location"
+CLOSED_ROBOTS = "User-agent: *\nDisallow: /\n"
+NOT_FOUND = 404
+REDIRECT_FLOOR = 300
+SERVER_ERROR = 500
 
 
 class PriceFetchError(RuntimeError):
@@ -109,10 +114,10 @@ class PriceHttp(CatalogHttp):
                 "Accept-Language": self.pricing.http.accept_language,
             },
             timeout=self.pricing.http.timeout_seconds,
-            follow_redirects=True,
         )
         super().__init__(cache_dir, client=client)
         self.robots: dict[str, Protego] = {}
+        self.inflight: dict[str, asyncio.Future] = {}
 
     def body_path(self, key: str) -> Path:
         return self.cache_dir / f"{key}.body"
@@ -127,6 +132,17 @@ class PriceHttp(CatalogHttp):
         meta = json.loads(self.meta_path(key).read_bytes())
         return CachedResponse(meta, self.body_path(key).read_bytes(), self.pricing)
 
+    def fresh(self, response: CachedResponse) -> bool:
+        if is_offline():
+            return True
+        cfg = self.pricing.cache
+        ttl = (
+            timedelta(hours=cfg.not_found_ttl_hours)
+            if response.status == NOT_FOUND
+            else timedelta(days=cfg.price_ttl_days)
+        )
+        return datetime.now(UTC) - response.retrieved_at <= ttl
+
     def interval(self, host: str) -> float:
         cfg = self.pricing.http
         return cfg.host_min_interval_seconds.get(host, cfg.min_interval_seconds)
@@ -136,37 +152,58 @@ class PriceHttp(CatalogHttp):
             self.limiters[host] = AsyncLimiter(1, self.interval(host))
         return self.limiters[host]
 
+    def pause(self, response: httpx.Response, attempt: int) -> float:
+        cfg = self.pricing.http
+        backoff = cfg.backoff_seconds * 2**attempt
+        advised = response.headers.get("retry-after", "")
+        if advised.isdigit():
+            return min(max(float(advised), backoff), cfg.retry_after_max_seconds)
+        return backoff
+
     async def send(self, url: str, headers: dict[str, str] | None) -> httpx.Response:
         cfg = self.pricing.http
         host = urlsplit(url).netloc
-        failure = "no response"
+        failure, wait = "no response", 0.0
         for attempt in range(cfg.max_retries + 1):
             if attempt:
-                await asyncio.sleep(cfg.backoff_seconds * 2 ** (attempt - 1))
+                await asyncio.sleep(wait)
             try:
                 async with self.limiter(host):
-                    response = await self.client.get(url, headers=headers)
+                    response = await self.client.get(url, headers=headers, follow_redirects=False)
             except httpx.TransportError as error:
-                failure = type(error).__name__
+                failure, wait = type(error).__name__, cfg.backoff_seconds * 2**attempt
                 continue
             if response.status_code not in cfg.retry_statuses:
                 return response
-            failure = f"status {response.status_code}"
+            failure, wait = f"status {response.status_code}", self.pause(response, attempt)
         raise PriceFetchError(f"{host}: {failure} after {cfg.max_retries} retries")
 
-    async def store(self, url: str, headers: dict[str, str] | None) -> CachedResponse:
+    async def follow(self, url: str, headers: dict[str, str] | None, enforce: bool) -> tuple[httpx.Response, str]:
+        current = url
+        for _ in range(self.pricing.http.max_redirects + 1):
+            if enforce:
+                await self.require_allowed(current)
+            response = await self.send(current, headers)
+            target = response.headers.get(REDIRECT_HEADER)
+            if not response.is_redirect or not target:
+                return response, current
+            current = urljoin(current, target)
+        raise PriceFetchError(f"{urlsplit(url).netloc}: too many redirects")
+
+    async def store(self, url: str, headers: dict[str, str] | None, enforce: bool) -> CachedResponse:
         if is_offline():
             raise CatalogOffline(f"price request not cached while offline: {urlsplit(url).netloc}")
-        response = await self.send(url, headers)
+        response, final = await self.follow(url, headers, enforce)
         key = digest(url)
         content_type = response.headers.get("content-type", "")
         blocks, repairs = [], []
         if content_type.startswith(HTML_TYPES):
-            blocks, repairs = jsonld_blocks(Page(response.text), self.pricing.jsonld_repairs)
+            blocks, repairs = jsonld_blocks(Page(response.text), self.pricing.jsonld_repairs.get(urlsplit(final).netloc, []))
+        cacheable = response.status_code not in self.pricing.cache.uncached_statuses
         meta = {
-            "key": key,
+            "key": key if cacheable else "",
             "url": url,
-            "final_url": str(response.url),
+            "final_url": final,
             "status": response.status_code,
             "content_type": content_type,
             "retrieved_at": datetime.now(UTC).isoformat(),
@@ -175,34 +212,53 @@ class PriceHttp(CatalogHttp):
             "jsonld": blocks,
             "jsonld_repairs": repairs,
         }
-        self.cache_dir.mkdir(parents=True, exist_ok=True)
-        self.body_path(key).write_bytes(response.content)
-        self.meta_path(key).write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
+        if cacheable:
+            self.cache_dir.mkdir(parents=True, exist_ok=True)
+            self.body_path(key).write_bytes(response.content)
+            self.meta_path(key).write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
         return CachedResponse(meta, response.content, self.pricing)
+
+    def once(self, key: str, factory: Callable[[], Awaitable[Any]]) -> asyncio.Future:
+        if key not in self.inflight:
+            task = asyncio.ensure_future(factory())
+            self.inflight[key] = task
+            task.add_done_callback(lambda _: self.inflight.pop(key, None))
+        return self.inflight[key]
+
+    async def load_robots(self, origin: str) -> Protego:
+        cfg = self.pricing.http
+        response = await self.fetch(origin + cfg.robots_path)
+        if response.status < REDIRECT_FLOOR:
+            return Protego.parse(response.text)
+        if response.status in cfg.robots_open_statuses:
+            return Protego.parse("")
+        if response.status >= SERVER_ERROR:
+            raise PriceFetchError(f"{urlsplit(origin).netloc}: robots.txt status {response.status}")
+        return Protego.parse(CLOSED_ROBOTS)
 
     async def robots_for(self, url: str) -> Protego:
         origin = origin_of(url)
         if origin not in self.robots:
-            robots_url = origin + self.pricing.http.robots_path
-            response = await self.fetch(robots_url, None)
-            if response.status >= 500:
-                raise PriceFetchError(f"{urlsplit(url).netloc}: robots.txt status {response.status}")
-            parsed = Protego.parse(response.text if response.status < ERROR_CLASS else "")
-            self.robots[origin] = parsed
-            delay = parsed.crawl_delay(self.pricing.http.robots_agent)
+            self.robots[origin] = await self.once("robots " + origin, lambda: self.load_robots(origin))
+            delay = self.robots[origin].crawl_delay(self.pricing.http.robots_agent)
             if delay:
                 host = urlsplit(url).netloc
                 self.limiters[host] = AsyncLimiter(1, max(delay, self.interval(host)))
         return self.robots[origin]
 
-    async def fetch(self, url: str, headers: dict[str, str] | None) -> CachedResponse:
-        return self.read(url) or await self.store(url, headers)
-
-    async def cached_get(self, url: str, headers: dict[str, str] | None = None) -> CachedResponse:
-        hit = self.read(url)
-        if hit:
-            return hit
+    async def require_allowed(self, url: str) -> None:
         robots = await self.robots_for(url)
         if not robots.can_fetch(url, self.pricing.http.robots_agent):
             raise RobotsDisallowed(f"robots.txt disallows {urlsplit(url).netloc}{urlsplit(url).path}")
-        return await self.store(url, headers)
+
+    async def get(self, url: str, headers: dict[str, str] | None, enforce: bool) -> CachedResponse:
+        hit = self.read(url)
+        if hit and self.fresh(hit):
+            return hit
+        return await self.once(f"{enforce} {url}", lambda: self.store(url, headers, enforce))
+
+    async def fetch(self, url: str, headers: dict[str, str] | None = None) -> CachedResponse:
+        return await self.get(url, headers, False)
+
+    async def cached_get(self, url: str, headers: dict[str, str] | None = None) -> CachedResponse:
+        return await self.get(url, headers, True)

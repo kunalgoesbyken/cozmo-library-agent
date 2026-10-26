@@ -43,7 +43,13 @@ class NotFound(BaseModel):
     source: str
     isbn: str
     reason: Literal[
-        "not_found", "equivalent_edition", "unsupported_condition", "disabled", "blocked", "unavailable"
+        "not_found",
+        "equivalent_edition",
+        "unsupported_condition",
+        "disabled",
+        "blocked",
+        "unavailable",
+        "currency_mismatch",
     ]
     evidence: Evidence | None = None
 

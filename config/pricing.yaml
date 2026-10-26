@@ -19,24 +19,37 @@ http:
   accept_language: en-IN,en;q=0.9
   robots_agent: libclaim
   robots_path: /robots.txt
+  robots_open_statuses: [404, 410]
+  max_redirects: 5
+  retry_after_max_seconds: 30
 conditions:
   new: NewCondition
   used: UsedCondition
+cache:
+  price_ttl_days: 7
+  not_found_ttl_hours: 24
+  uncached_statuses: [401, 403, 429]
+offers:
+  in_stock_availability: InStock
 jsonld_repairs:
-  - name: unquoted_url_value
-    pattern: '(:\s*)(https?://[^"\s,}]*")'
-    replacement: '\1"\2'
-  - name: trailing_comma
-    pattern: ',\s*([}\]])'
-    replacement: '\1'
+  www.bookswagon.com:
+    - name: unquoted_url_value
+      pattern: '(:\s*)(https?://[^"\s,}]*")'
+      replacement: '\1"\2'
+    - name: trailing_comma
+      pattern: ',\s*([}\]])'
+      replacement: '\1'
 sources:
   bookchor:
     url: https://www.bookchor.com/book/{isbn}/x
+    currency: INR
   bookswagon:
     url: https://www.bookswagon.com/book/x/{isbn}
+    currency: INR
     isbn_label: "ISBN-13:"
   pustakkosh:
     url: https://pustakkosh.com/wp-json/wc/store/v1/products?search={isbn}
+    currency: INR
     used_sku_suffix: _Used
     in_stock: InStock
     out_of_stock: OutOfStock
@@ -50,6 +63,7 @@ sources:
     provider_label: ECB via Frankfurter v2
 listings:
   min_matches: 5
+  min_price_ratio_of_median: 0.1
   low_percentile: 0.25
   high_percentile: 0.75
   max_product_pages: 12
@@ -62,3 +76,18 @@ listings:
     label_attr: aria-label
     label_separator: "product comparison, "
   product_url_marker: /product/
+books:
+  factor_version: v1
+  default_condition: good
+  disagreement_ratio: 0.25
+  used_new_ratio: 1.5
+  rounding: "0.01"
+  appraisal_triggers: [signed, autographed, inscribed, first edition, first printing]
+calibration:
+  grade: good
+  max_requests: 15
+  min_pairs: 10
+  sources: [bookchor, pustakkosh]
+  snapshot_dir: calibration
+  ground_truth_csv: ground_truth/prices15.csv
+  isbn_column: isbn

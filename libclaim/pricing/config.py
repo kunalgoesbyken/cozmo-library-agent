@@ -1,3 +1,4 @@
+from decimal import Decimal
 from functools import cache
 
 import yaml
@@ -16,6 +17,9 @@ class HttpConfig(BaseModel):
     accept_language: str
     robots_agent: str
     robots_path: str
+    robots_open_statuses: list[int]
+    max_redirects: int
+    retry_after_max_seconds: float
 
 
 class Repair(BaseModel):
@@ -26,6 +30,7 @@ class Repair(BaseModel):
 
 class UrlSource(BaseModel):
     url: str
+    currency: str = ""
 
 
 class BookswagonSource(UrlSource):
@@ -66,6 +71,7 @@ class IkeaCards(BaseModel):
 
 class ListingsConfig(BaseModel):
     min_matches: int
+    min_price_ratio_of_median: float
     low_percentile: float
     high_percentile: float
     max_product_pages: int
@@ -74,15 +80,49 @@ class ListingsConfig(BaseModel):
     product_url_marker: str
 
 
+class CacheConfig(BaseModel):
+    price_ttl_days: float
+    not_found_ttl_hours: float
+    uncached_statuses: list[int]
+
+
+class OffersConfig(BaseModel):
+    in_stock_availability: str
+
+
 class Flag(BaseModel):
     enabled: bool
 
 
+class BooksConfig(BaseModel):
+    factor_version: str
+    default_condition: str
+    disagreement_ratio: Decimal
+    used_new_ratio: Decimal
+    rounding: Decimal
+    appraisal_triggers: list[str]
+
+
+class CalibrationConfig(BaseModel):
+    grade: str
+    max_requests: int
+    min_pairs: int
+    sources: list[str]
+    snapshot_dir: str
+    ground_truth_csv: str
+    isbn_column: str
+
+
 class PricingConfig(BaseModel):
+    condition_factors: dict[str, dict[str, Decimal]]
+    books: BooksConfig
+    calibration: CalibrationConfig
     bookswagon: Flag
     http: HttpConfig
     conditions: dict[str, str]
-    jsonld_repairs: list[Repair]
+    cache: CacheConfig
+    offers: OffersConfig
+    jsonld_repairs: dict[str, list[Repair]]
     sources: Sources
     listings: ListingsConfig
 

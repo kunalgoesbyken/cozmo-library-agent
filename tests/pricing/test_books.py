@@ -90,10 +90,10 @@ async def test_penguin_uk_reads_rrp_from_next_data(http):
     assert quote.url.endswith(f"/{SAPIENS}")
 
 
-async def test_penguin_uk_search_results_redirect_is_not_found(http):
+async def test_penguin_uk_redirect_to_disallowed_search_results_is_never_fetched(http, site):
     result = await PenguinUk(http).quote(EINTY, "new")
-    assert isinstance(result, NotFound) and result.reason == "not_found"
-    assert result.evidence.url.endswith("/search-results")
+    assert isinstance(result, NotFound) and result.reason == "blocked"
+    assert not any(url.endswith("/search-results") for url in site.requests)
 
 
 async def test_penguin_uk_has_no_used_price(http, site):

@@ -1,7 +1,8 @@
 import logging
 import math
 from decimal import Decimal, InvalidOperation
-from urllib.parse import urljoin
+from statistics import median
+from urllib.parse import urljoin, urlsplit
 
 from libclaim.models import ItemRange, ListingRow, NotEnough
 from libclaim.pricing.config import ItemSources, ListingSpec, PricingConfig, CategorySpec, load_item_sources, load_pricing_config
@@ -12,12 +13,10 @@ from libclaim.settings import load_locale
 
 logger = logging.getLogger(__name__)
 
-PRICE_TYPES = ("Offer", "AggregateOffer")
-PRICE_KEYS = ("price", "lowPrice")
 
 
 def host_of(url: str) -> str:
-    return url.split("/")[2]
+    return urlsplit(url).netloc
 
 
 def decimal_or_none(value: object) -> Decimal | None:
@@ -57,7 +56,7 @@ class Listings:
             card = tags[start][1]
             inner = tags[start + 1 : end]
             label = next((a[cfg.label_attr] for _, a in inner if cfg.label_attr in a), "")
-            link = next((a["href"] for t, a in inner if t == "a" and a.get("href")), "")
+            link = next((urljoin(response.final_url, a["href"]) for t, a in inner if t == "a" and a.get("href")), "")
             amount = decimal_or_none(card.get(cfg.price_attr))
             if amount is None or not link:
                 continue
@@ -78,7 +77,9 @@ class Listings:
         path = self.config.listings.shopify_product_path
         rows = []
         for product in response.json().get("products", []):
-            amount = decimal_or_none(product["variants"][0]["price"]) if product.get("variants") else None
+            prices = [decimal_or_none(v.get("price")) for v in product.get("variants", []) if v.get("available", True)]
+            prices = [price for price in prices if price is not None]
+            amount = min(prices) if prices else None
             if amount is not None:
                 url = urljoin(response.final_url, path + product["handle"])
                 rows.append(
@@ -100,15 +101,18 @@ class Listings:
         return list(entries.items())
 
     def product_offer(self, response: CachedResponse) -> tuple[str, Decimal, str] | None:
-        name = ""
-        for node in walk(response.jsonld):
-            if has_type(node, "Product"):
-                name = name or str(node.get("name", ""))
-            if any(has_type(node, kind) for kind in PRICE_TYPES):
-                for key in PRICE_KEYS:
+        for product in (node for node in walk(response.jsonld) if has_type(node, "Product")):
+            for node in walk(product.get("offers")):
+                if has_type(node, "Offer"):
+                    keys = ("price",)
+                elif has_type(node, "AggregateOffer"):
+                    keys = ("price", "lowPrice")
+                else:
+                    continue
+                for key in keys:
                     amount = decimal_or_none(node[key]) if node.get(key) not in (None, "") else None
                     if amount is not None:
-                        return name, amount, str(node.get("priceCurrency", ""))
+                        return str(product.get("name", "")), amount, str(node.get("priceCurrency", ""))
         return None
 
     async def itemlist_rows(self, response: CachedResponse, category: CategorySpec) -> list[ListingRow]:
@@ -151,6 +155,9 @@ class Listings:
                 if row.currency == currency and matches(row.name, spec):
                     found.setdefault(row.url, row)
         rows = sorted(found.values(), key=lambda row: (row.amount, row.url))
+        if rows:
+            floor = median(row.amount for row in rows) * Decimal(str(cfg.min_price_ratio_of_median))
+            rows = [row for row in rows if row.amount >= floor]
         if len(rows) < cfg.min_matches:
             return NotEnough(category=category, locale=locale, needed=cfg.min_matches, rows=rows)
         return ItemRange(
