@@ -3,7 +3,12 @@ import { Camera, Loop, enableMotion, stillFps } from "./capture";
 import { Ui } from "./ui";
 import { KIND_LIVE_FRAME, KIND_MIC, KIND_STILL, SweepSocket, type ServerMessage } from "./ws";
 
-const accessToken = new URLSearchParams(location.search).get("t") ?? "";
+const urlToken = new URLSearchParams(location.search).get("t");
+if (urlToken) {
+  sessionStorage.setItem("t", urlToken);
+  history.replaceState(null, "", location.pathname);
+}
+const accessToken = sessionStorage.getItem("t") ?? "";
 const ui = new Ui(accessToken);
 const camera = new Camera(ui.video);
 const mic = new MicCapture();

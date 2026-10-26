@@ -1,4 +1,9 @@
 host: 127.0.0.1
+min_token_length: 24
+max_preauth_bytes: 2048
+max_unauthenticated: 4
+allowed_origin_suffixes:
+  - .trycloudflare.com
 max_sessions: 1
 hello_timeout_seconds: 10
 ws_max_size_bytes: 9000000

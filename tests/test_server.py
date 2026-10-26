@@ -10,7 +10,7 @@ from starlette.websockets import WebSocketDisconnect
 from libclaim.server import KIND_LIVE_FRAME, KIND_MIC, KIND_STILL, create_app, load_server_config, pack_binary
 from libclaim.settings import Settings
 
-TOKEN = "secret-token"
+TOKEN = "secret-token-0123456789abcdef"
 MAX_MESSAGES = 30
 SECRET_SPEND = "secret spend"
 
@@ -241,7 +241,6 @@ def test_bad_input_does_not_crash_socket(tmp_path):
         bytes([KIND_MIC]) + (3).to_bytes(4, "big") + b"zzz",
     ]
     with TestClient(h.app) as client, client.websocket_connect("/ws/sweep") as ws:
-        ws.send_bytes(pack_binary(KIND_MIC, {"seq": 0, "t_ms": 0}, b"beforehello"))
         hello(ws)
         for frame in bad:
             ws.send_bytes(frame)
@@ -334,6 +333,9 @@ def test_runs_serves_only_scoped_files_with_token(tmp_path):
         "/runs/{sid}/../spend.jsonl",
         "/runs/{sid}/frames/../../spend.jsonl",
         "/runs/{sid}/frames/%2e%2e/%2e%2e/spend.jsonl",
+        "/runs/{sid}/frames/../stages/_ledger.json",
+        "/runs/{sid}/frames/%2e%2e/stages/_ledger.json",
+        "/runs/{sid}/frames/..%2fstages/_ledger.json",
         "/runs/%2e%2e/spend.jsonl",
         "/runs/../spend.jsonl",
         "/runs/..%2f/spend.jsonl",
@@ -341,10 +343,11 @@ def test_runs_serves_only_scoped_files_with_token(tmp_path):
 )
 def test_runs_traversal_and_global_files_not_served(tmp_path, path):
     h = Harness(tmp_path)
-    sid = make_sweep(h, {"report.html": "report", "frames/a.jpg": "jpg"})
+    sid = make_sweep(h, {"report.html": "report", "frames/a.jpg": "jpg", "stages/_ledger.json": "ledger"})
     with TestClient(h.app) as client:
         response = client.get(path.format(sid=sid) + f"?t={TOKEN}")
-        assert SECRET_SPEND not in response.text and response.text != "quota"
+        assert response.status_code == 404
+        assert SECRET_SPEND not in response.text and response.text != "quota" and response.text != "ledger"
 
 
 def test_ws_rejects_bad_and_missing_token(tmp_path):
@@ -360,14 +363,53 @@ def test_ws_rejects_bad_and_missing_token(tmp_path):
     assert h.bridges == []
 
 
-def test_ws_rejects_cross_origin(tmp_path):
+@pytest.mark.parametrize(
+    "headers",
+    [
+        {"origin": "https://evil.example"},
+        {"origin": "https://evil-trycloudflare.com"},
+        {"origin": "https://x.trycloudflare.com.evil.example"},
+        {"origin": "https://evil.example", "x-forwarded-host": "other.example"},
+    ],
+)
+def test_ws_rejects_hostile_origin(tmp_path, headers):
     h = Harness(tmp_path)
     with TestClient(h.app) as client:
         with pytest.raises(WebSocketDisconnect):
-            with client.websocket_connect("/ws/sweep", headers={"origin": "https://evil.example"}):
+            with client.websocket_connect("/ws/sweep", headers=headers):
                 pass
-        with client.websocket_connect("/ws/sweep", headers={"origin": "http://testserver"}) as ws:
-            assert hello(ws)["state"] == "connecting"
+
+
+@pytest.mark.parametrize(
+    "headers",
+    [
+        {"origin": "http://testserver"},
+        {"origin": "https://quiet-name-1.trycloudflare.com", "host": "localhost:8000"},
+        {"origin": "https://my.tunnel.example", "host": "localhost:8000", "x-forwarded-host": "my.tunnel.example"},
+        {},
+    ],
+)
+def test_ws_allows_same_suffix_forwarded_and_non_browser_origins(tmp_path, headers):
+    h = Harness(tmp_path)
+    with TestClient(h.app) as client, client.websocket_connect("/ws/sweep", headers=headers) as ws:
+        assert hello(ws)["state"] == "connecting"
+
+
+def test_short_access_token_is_replaced_by_random(tmp_path):
+    h = Harness(tmp_path)
+    short = create_app(Settings(access_token="short"), lambda hooks: None, runs_dir=h.runs, web_dist=tmp_path / "none")
+    assert short.state.access_token != "short" and len(short.state.access_token) >= 24
+
+
+def test_responses_carry_no_referrer_policy_and_secure_cookie(tmp_path):
+    h = Harness(tmp_path)
+    sid = make_sweep(h, {"report.html": "report"})
+    with TestClient(h.app) as client:
+        assert client.get("/").headers["referrer-policy"] == "no-referrer"
+        plain = client.get(f"/runs/{sid}/report.html?t={TOKEN}")
+        assert "secure" not in plain.headers["set-cookie"].lower()
+        proxied = client.get(f"/runs/{sid}/report.html?t={TOKEN}", headers={"x-forwarded-proto": "https"})
+        assert "secure" in proxied.headers["set-cookie"].lower()
 
 
 def test_second_concurrent_session_is_refused_and_slot_is_freed(tmp_path):
@@ -389,6 +431,38 @@ def test_hello_timeout_closes_unauthenticated_socket(tmp_path):
         assert ws.receive_json()["reason"] == "hello_timeout"
 
 
+def test_pre_auth_deadline_is_total_not_per_message(tmp_path):
+    h = Harness(tmp_path, hello_timeout_seconds=0.3)
+    with TestClient(h.app) as client, client.websocket_connect("/ws/sweep") as ws:
+        assert ws.receive_json()["reason"] == "hello_timeout"
+
+
+def test_non_hello_message_before_auth_closes_socket(tmp_path):
+    h = Harness(tmp_path)
+    junk = ['{"type":"control","action":"mute"}', "not json", "[]", "x" * 5000]
+    with TestClient(h.app) as client:
+        for text in junk:
+            with client.websocket_connect("/ws/sweep") as ws:
+                ws.send_text(text)
+                assert ws.receive_json()["reason"] == "unauthorized"
+        with client.websocket_connect("/ws/sweep") as ws:
+            ws.send_bytes(pack_binary(KIND_MIC, {"seq": 1}, b"pcm"))
+            assert ws.receive_json()["reason"] == "unauthorized"
+    assert h.bridges == []
+
+
+def test_unauthenticated_socket_cap(tmp_path):
+    h = Harness(tmp_path, max_unauthenticated=1)
+    with TestClient(h.app) as client:
+        with client.websocket_connect("/ws/sweep"):
+            with pytest.raises(WebSocketDisconnect):
+                with client.websocket_connect("/ws/sweep"):
+                    pass
+        client.portal.call(asyncio.sleep, 0.2)
+        with client.websocket_connect("/ws/sweep") as ws:
+            assert hello(ws)["state"] == "connecting"
+
+
 def test_forged_sweep_id_is_ignored(tmp_path):
     h = Harness(tmp_path)
     with TestClient(h.app) as client, client.websocket_connect("/ws/sweep") as ws:
@@ -404,6 +478,7 @@ def test_bridge_factory_failure_reports_reason(tmp_path):
         with client.websocket_connect("/ws/sweep") as ws:
             reply = hello(ws)
             assert reply["state"] == "closed" and reply["reason"] == "bridge_unavailable"
+        assert not any(h.runs.iterdir())
         client.portal.call(asyncio.sleep, 0.2)
         h.fail_factory = False
         with client.websocket_connect("/ws/sweep") as ws:

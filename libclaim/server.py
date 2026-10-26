@@ -61,6 +61,10 @@ class AlertText(BaseModel):
 
 class ServerConfig(BaseModel):
     host: str
+    min_token_length: int
+    max_preauth_bytes: int
+    max_unauthenticated: int
+    allowed_origin_suffixes: list[str]
     max_header_bytes: int
     max_mic_bytes: int
     max_frame_bytes: int
@@ -222,8 +226,15 @@ def token_matches(given: str | None, expected: str) -> bool:
     return given is not None and secrets.compare_digest(given.encode(), expected.encode())
 
 
-def same_origin(origin: str | None, host: str | None) -> bool:
-    return origin is None or (host is not None and urlparse(origin).netloc == host)
+def allowed_origin(
+    origin: str | None, host: str | None, forwarded_host: str | None, suffixes: list[str]
+) -> bool:
+    if origin is None:
+        return True
+    parsed = urlparse(origin)
+    if parsed.netloc in (host, forwarded_host):
+        return True
+    return parsed.hostname is not None and any(parsed.hostname.endswith(suffix) for suffix in suffixes)
 
 
 class Connection:
@@ -233,6 +244,7 @@ class Connection:
         settings: Settings,
         token: str,
         slots: Slots,
+        preauth: Slots,
         background: set[asyncio.Task],
         bridge_factory: BridgeFactory,
         on_end: EndHook,
@@ -245,6 +257,8 @@ class Connection:
         self.settings = settings
         self.token = token
         self.slots = slots
+        self.preauth = preauth
+        self.preauth_held = True
         self.background = background
         self.bridge_factory = bridge_factory
         self.on_end = on_end
@@ -323,14 +337,34 @@ class Connection:
         finally:
             await self.shutdown()
 
+    async def authenticate(self) -> bool:
+        message = await self.websocket.receive()
+        if message["type"] == "websocket.disconnect":
+            return False
+        text = message.get("text")
+        if text is None or len(text) > self.config.max_preauth_bytes:
+            raise Rejected("unauthorized")
+        try:
+            payload = json.loads(text)
+            if payload["type"] != "hello":
+                raise Rejected("unauthorized")
+            hello = Hello.model_validate(payload)
+        except (ValueError, KeyError, TypeError, ValidationError):
+            raise Rejected("unauthorized")
+        await self.hello(hello)
+        return True
+
     async def receive_loop(self) -> None:
         try:
+            try:
+                async with asyncio.timeout(self.config.hello_timeout_seconds):
+                    authenticated = await self.authenticate()
+            except TimeoutError:
+                raise Rejected("hello_timeout")
+            if not authenticated:
+                return
             while True:
-                timeout = None if self.bridge else self.config.hello_timeout_seconds
-                try:
-                    message = await asyncio.wait_for(self.websocket.receive(), timeout)
-                except TimeoutError:
-                    raise Rejected("hello_timeout")
+                message = await self.websocket.receive()
                 if message["type"] == "websocket.disconnect":
                     return
                 if message.get("bytes") is not None:
@@ -357,6 +391,7 @@ class Connection:
             return
         if not token_matches(hello.token, self.token):
             raise Rejected("unauthorized")
+        self.release_preauth()
         if not self.slots.acquire():
             raise Rejected("busy")
         self.slot_held = True
@@ -503,7 +538,13 @@ class Connection:
                 {"type": "coverage", "regions": [{"id": region, "state": state} for region, state in sorted(states.items())]}
             )
 
+    def release_preauth(self) -> None:
+        if self.preauth_held:
+            self.preauth_held = False
+            self.preauth.release()
+
     async def shutdown(self) -> None:
+        self.release_preauth()
         if self.slot_held:
             self.slots.release()
         if self.watcher_task:
@@ -534,40 +575,53 @@ def create_app(
     capture = capture or load_capture_config()
     live = live or load_live_config()
     runs_dir.mkdir(parents=True, exist_ok=True)
-    token = settings.access_token or secrets.token_urlsafe(TOKEN_BYTES)
+    token = settings.access_token
+    if len(token) < config.min_token_length:
+        if token:
+            logger.warning("ACCESS_TOKEN is shorter than %d characters, using a random token", config.min_token_length)
+        token = secrets.token_urlsafe(TOKEN_BYTES)
     slots = Slots(config.max_sessions)
+    preauth = Slots(config.max_unauthenticated)
     background: set[asyncio.Task] = set()
     app = FastAPI()
     app.state.access_token = token
 
     @app.websocket("/ws/sweep")
     async def sweep_socket(websocket: WebSocket) -> None:
-        if not same_origin(websocket.headers.get("origin"), websocket.headers.get("host")):
+        headers = websocket.headers
+        if not allowed_origin(
+            headers.get("origin"), headers.get("host"), headers.get("x-forwarded-host"), config.allowed_origin_suffixes
+        ) or not preauth.acquire():
             await websocket.close(code=WS_POLICY_VIOLATION)
             return
         await websocket.accept()
         await Connection(
-            websocket, settings, token, slots, background, bridge_factory, on_end, runs_dir, config, capture, live
+            websocket, settings, token, slots, preauth, background, bridge_factory, on_end, runs_dir, config, capture, live
         ).run()
+
+    @app.middleware("http")
+    async def no_referrer(request: Request, call_next):
+        response = await call_next(request)
+        response.headers["Referrer-Policy"] = "no-referrer"
+        return response
 
     @app.get("/runs/{sweep_id}/{name:path}")
     async def run_file(sweep_id: str, name: str, request: Request) -> FileResponse:
         given = request.query_params.get(TOKEN_PARAM) or request.cookies.get(TOKEN_PARAM)
         if not token_matches(given, token):
             raise HTTPException(status_code=401)
-        parts = Path(name).parts
-        allowed = name in config.report_files or (len(parts) > 1 and parts[0] in config.public_dirs)
         root = (runs_dir / sweep_id).resolve()
         path = (root / name).resolve()
-        if (
-            not allowed
-            or root.parent != runs_dir.resolve()
-            or not path.is_relative_to(root)
-            or not path.is_file()
+        if root.parent != runs_dir.resolve() or not path.is_relative_to(root) or not path.is_file():
+            raise HTTPException(status_code=404)
+        relative = path.relative_to(root)
+        if relative.as_posix() not in config.report_files and (
+            len(relative.parts) < 2 or relative.parts[0] not in config.public_dirs
         ):
             raise HTTPException(status_code=404)
+        secure = "https" in (request.url.scheme, request.headers.get("x-forwarded-proto"))
         response = FileResponse(path)
-        response.set_cookie(TOKEN_PARAM, token, httponly=True, samesite="strict", secure=request.url.scheme == "https")
+        response.set_cookie(TOKEN_PARAM, token, httponly=True, samesite="strict", secure=secure)
         return response
 
     if web_dist.is_dir():
@@ -580,7 +634,7 @@ def main() -> None:
     config = load_server_config()
     app = create_app(settings, live_bridge_factory(settings, Budget(RUNS_DIR / "spend.jsonl")), config=config)
     print(f"Open http://localhost:{settings.port}/?{TOKEN_PARAM}={app.state.access_token}", flush=True)
-    uvicorn.run(app, host=config.host, port=settings.port, ws_max_size=config.ws_max_size_bytes)
+    uvicorn.run(app, host=config.host, port=settings.port, ws_max_size=config.ws_max_size_bytes, access_log=False)
 
 
 if __name__ == "__main__":
