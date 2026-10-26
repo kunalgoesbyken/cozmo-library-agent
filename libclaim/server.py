@@ -31,6 +31,7 @@ from libclaim.live.monitor import Alert, Monitor
 from libclaim.live.session import SessionClosed
 from libclaim.live.tools import SPECS, LiveTools
 from libclaim.models import Still
+from libclaim.pipeline import LiveHooks, sweep_pipeline
 from libclaim.settings import CONFIG_DIR, ROOT, Settings, load_settings
 from libclaim.sweep import SweepDir
 
@@ -52,7 +53,6 @@ TOKEN_BYTES = 32
 logger = logging.getLogger(__name__)
 
 Emit = Callable[[dict[str, Any]], Awaitable[None]]
-EndHook = Callable[[SweepDir, Emit], Awaitable[None]]
 
 
 class AlertText(BaseModel):
@@ -136,6 +136,15 @@ class Hooks:
 BridgeFactory = Callable[[Hooks], Bridge]
 
 
+class SweepPipeline(Protocol):
+    def add_still(self, still: Still) -> None: ...
+
+    async def finish(self) -> Any: ...
+
+
+PipelineFactory = Callable[[SweepDir, LiveHooks], SweepPipeline]
+
+
 class Preauth:
     def __init__(self, total: int, per_client: int):
         self.total = total
@@ -172,8 +181,16 @@ class Slots:
         self.active -= 1
 
 
-async def no_end_hook(sweep: SweepDir, emit: Emit) -> None:
-    return None
+class NoPipeline:
+    def add_still(self, still: Still) -> None:
+        return None
+
+    async def finish(self) -> None:
+        return None
+
+
+def no_pipeline(sweep: SweepDir, hooks: LiveHooks) -> SweepPipeline:
+    return NoPipeline()
 
 
 def live_bridge_factory(settings: Settings, budget: Budget | None = None) -> BridgeFactory:
@@ -290,7 +307,7 @@ class Connection:
         on_authenticated: Callable[[], None],
         background: set[asyncio.Task],
         bridge_factory: BridgeFactory,
-        on_end: EndHook,
+        pipeline_factory: PipelineFactory,
         runs_dir: Path,
         config: ServerConfig,
         capture: CaptureConfig,
@@ -303,7 +320,8 @@ class Connection:
         self.on_authenticated = on_authenticated
         self.background = background
         self.bridge_factory = bridge_factory
-        self.on_end = on_end
+        self.pipeline_factory = pipeline_factory
+        self.pipeline: SweepPipeline = NoPipeline()
         self.runs_dir = runs_dir
         self.config = config
         self.capture = capture
@@ -460,6 +478,9 @@ class Connection:
             raise Rejected("bridge_unavailable")
         self.bridge = bridge
         self.monitor = Monitor(bridge.inject, self.live)
+        self.pipeline = self.pipeline_factory(
+            self.sweep, LiveHooks(emit=self.send_json, inject=bridge.inject, recapture=self.recapture)
+        )
         await self.send_session("connecting")
         self.bridge_task = asyncio.create_task(bridge.run())
         self.bridge_task.add_done_callback(self.bridge_stopped)
@@ -504,7 +525,7 @@ class Connection:
         self.bridge.end_sweep()
         await self.send_session("processing")
         try:
-            await self.on_end(self.sweep, self.send_json)
+            await self.pipeline.finish()
         except Exception:
             logger.exception("end of sweep processing failed")
             await self.send_session("closed", "processing_failed")
@@ -554,6 +575,7 @@ class Connection:
             return
         self.stills.append(still)
         self.still_bytes += len(payload)
+        self.pipeline.add_still(still)
         region = self.config.unassigned_region
         self.coverage.record(region, still)
         quality = Quality(blur=still.blur, glare=still.glare)
@@ -571,6 +593,9 @@ class Connection:
             await self.send_json(
                 {"type": "capture_alert", "code": code.value, "region": region, "severity": text.severity, "say": text.say}
             )
+
+    async def recapture(self, region: str) -> None:
+        await self.alert(AlertCode.missed_region, region)
 
     async def send_coverage(self) -> None:
         states = {region: "sharp" if region in self.coverage.sharp else "partial" for region in self.coverage.seen}
@@ -603,7 +628,7 @@ class Connection:
 def create_app(
     settings: Settings,
     bridge_factory: BridgeFactory,
-    on_end: EndHook = no_end_hook,
+    pipeline_factory: PipelineFactory = no_pipeline,
     *,
     runs_dir: Path = RUNS_DIR,
     web_dist: Path = WEB_DIST,
@@ -648,7 +673,8 @@ def create_app(
         try:
             await websocket.accept()
             await Connection(
-                websocket, settings, token, slots, release, background, bridge_factory, on_end, runs_dir, config, capture, live
+                websocket, settings, token, slots, release, background, bridge_factory, pipeline_factory, runs_dir, config,
+                capture, live
             ).run()
         finally:
             release()
@@ -686,7 +712,8 @@ def create_app(
 def main() -> None:
     settings = load_settings()
     config = load_server_config()
-    app = create_app(settings, live_bridge_factory(settings, Budget(RUNS_DIR / "spend.jsonl")), config=config)
+    budget = Budget(RUNS_DIR / "spend.jsonl")
+    app = create_app(settings, live_bridge_factory(settings, budget), sweep_pipeline(settings, budget), config=config)
     print(f"Open http://localhost:{settings.port}/?{TOKEN_PARAM}={app.state.access_token}", flush=True)
     uvicorn.run(app, host=config.host, port=settings.port, ws_max_size=config.ws_max_size_bytes, access_log=False)
 

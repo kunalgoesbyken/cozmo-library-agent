@@ -60,10 +60,24 @@ class Harness:
             self.bridges.append(bridge)
             return bridge
 
-        async def on_end(sweep, emit):
-            await asyncio.sleep(end_delay)
-            self.end_calls.append(sweep.root)
-            await emit({"type": "packet_ready", "json": "/runs/x/claim_packet.json", "report": "/runs/x/report.html"})
+        harness = self
+
+        class FakePipeline:
+            def __init__(self, sweep, hooks):
+                self.sweep = sweep
+                self.hooks = hooks
+
+            def add_still(self, still):
+                harness.stills.append(still)
+
+            async def finish(self):
+                await asyncio.sleep(end_delay)
+                harness.end_calls.append(self.sweep.root)
+                await self.hooks.emit(
+                    {"type": "packet_ready", "json": "/runs/x/claim_packet.json", "report": "/runs/x/report.html"}
+                )
+
+        self.stills = []
 
         self.runs = tmp_path / "runs"
         dist = tmp_path / "dist"
@@ -73,7 +87,7 @@ class Harness:
         self.app = create_app(
             Settings(live_model="fake-live", access_token=TOKEN, public_origin=public_origin),
             factory,
-            on_end,
+            FakePipeline,
             runs_dir=self.runs,
             web_dist=dist,
             config=config,
@@ -135,6 +149,17 @@ def test_blurred_still_is_stored_and_alerts(tmp_path):
         assert coverage["regions"][0]["state"] == "partial"
     assert len(list((h.runs / sweep_id / "frames").glob("*.jpg"))) == 1
     assert h.bridges[0].injected[0]["alert"] == "blur"
+
+
+def test_stored_stills_are_fed_to_the_pipeline(tmp_path):
+    h = Harness(tmp_path)
+    with TestClient(h.app) as client, client.websocket_connect("/ws/sweep") as ws:
+        hello(ws)
+        ws.send_bytes(still_frame(checkerboard(), seq=1))
+        ws.send_bytes(still_frame(checkerboard(), seq=2))
+        end_sweep(ws)
+        read_until(ws, "packet_ready")
+    assert [still.seq for still in h.stills] == [1, 2]
 
 
 def test_sharp_still_marks_region_sharp_without_alert(tmp_path):
