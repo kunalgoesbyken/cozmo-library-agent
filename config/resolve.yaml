@@ -1,0 +1,39 @@
+reading:
+  batch_size: 24
+  jpeg_quality: 90
+  jpeg_mime: image/jpeg
+  vertical_rotation: ROTATE_90_CLOCKWISE
+  prompt: >-
+    Each image is one book spine, rotated so the text reads left to right, and is preceded by its crop_id.
+    For every crop_id return the title, the author and the publisher exactly as printed on the spine.
+    Transcribe only characters you can see; empty if unsure. Do not complete a title from memory.
+    Set legible to false when the text cannot be read.
+ocr:
+  use_dml: false
+  log_level: error
+gates:
+  ocr_overlap_min: 0.6
+  token_match: 80
+  score_min: 90
+  margin_min: 8
+  distinctive_min_tokens: 2
+  distinctive_min_chars: 4
+  author_match: 80
+  author_weight: 0.3
+  confident_score: 95
+  agree_score: 85
+  publisher_match: 80
+catalog:
+  cache_dir: cache
+  timeout_seconds: 20
+  requests_per_second: 1
+  search_limit: 5
+  editions_limit: 100
+  openlibrary:
+    search_url: https://openlibrary.org/search.json
+    editions_url: https://openlibrary.org/works/{work}/editions.json
+    site_url: https://openlibrary.org
+    search_fields: key,title,author_name,first_publish_year
+  googlebooks:
+    volumes_url: https://www.googleapis.com/books/v1/volumes
+    key_header: X-goog-api-key

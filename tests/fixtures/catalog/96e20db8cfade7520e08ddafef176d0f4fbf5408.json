@@ -1,0 +1,414 @@
+{
+  "kind": "books#volumes",
+  "totalItems": 1,
+  "items": [
+    {
+      "kind": "books#volume",
+      "id": "fUdq0AEACAAJ",
+      "etag": "f0JudFhErik",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/fUdq0AEACAAJ",
+      "volumeInfo": {
+        "title": "The Psychology of Money",
+        "subtitle": "Timeless Lessons on Wealth, Greed, and Happiness",
+        "authors": [
+          "Morgan Housel"
+        ],
+        "publishedDate": "2023-11-22",
+        "description": "Doing well with money isn't necessarily about what you know. It's about how you behave. And behavior is hard to teach, even to really smart people.Money - investing, personal finance, and business decisions - is typically taught as a math-based field, where data and formulas tell us exactly what to do. But in the real world people don't make financial decisions on a spreadsheet. They make them at the dinner table, or in a meeting room, where personal history, your own unique view of the world, ego, pride, marketing, and odd incentives are scrambled together.In The Psychology of Money, award-winning author Morgan Housel shares 19 short stories exploring the strange ways people think about money and teaches you how to make better sense of one of life's most important topics.Praise for the book:'It's one of the best and most original finance books in years.' - Jason Zweig, The Wall Street Journal'The Psychology of Money is bursting with interesting ideas and practical takeaways. Quite simply, it is essential reading for anyone interested in being better with money. Everyone should own a copy.' - James Clear, Author, million-copy bestseller, Atomic Habits'Few people write about finance with the graceful clarity of Morgan Housel. The Psychology of Money is an essential read for anyone who wants to make wiser decisions or live a richer life.' - Daniel H. Pink, #1 New York Times Bestselling Author of When, To Sell Is Human, and Drive 'Morgan Housel is that rare writer who can translate complex concepts into gripping, easy-to-digest narrative. The Psychology of Money is a fast-paced, engaging read that will leave you with both the knowledge to understand why we make bad financial decisions and the tools to make better ones.' - Annie Duke, Author, Thinking in Bets'Housel's observations often hit the daily double: they say things that haven't been said before, and they make sense.' - Howard Marks, Director and Co-Chairman, Oaktree Capital & Author, The Most Important Thing and Mastering the Market Cycle'Morgan Housel is one of the brightest new lights among financial writers. He is accessible to everyone wanting to learn more about the psychology of money. I highly recommend this book.' - James P. O'Shaughnessy, Author, What Works on Wall Street",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "1804091049"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9781804091043"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 0,
+        "printType": "BOOK",
+        "categories": [
+          "Business & Economics"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=fUdq0AEACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=fUdq0AEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.co.in/books?id=fUdq0AEACAAJ&dq=intitle:the+psychology+of+mony+inauthor:housel&hl=&cd=1&source=gbs_api",
+        "infoLink": "http://books.google.co.in/books?id=fUdq0AEACAAJ&dq=intitle:the+psychology+of+mony+inauthor:housel&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/The_Psychology_of_Money.html?hl=&id=fUdq0AEACAAJ"
+      },
+      "saleInfo": {
+        "country": "IN",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "IN",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=fUdq0AEACAAJ&hl=&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "He is accessible to everyone wanting to learn more about the psychology of money. I highly recommend this book.&#39; - James P. O&#39;Shaughnessy, Author, What Works on Wall Street"
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "DILKEQAAQBAJ",
+      "etag": "wZKG/gNpeXQ",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/DILKEQAAQBAJ",
+      "volumeInfo": {
+        "title": "The Psychology of Money: Timeless Lessons on Wealth, Greed, and Happiness – Special Edition Includes 2 Bonus Chapters",
+        "authors": [
+          "Morgan Housel"
+        ],
+        "publisher": "Jaico Publishing House",
+        "publishedDate": "2026-01-10",
+        "description": "Doing well with money isn’t necessarily about what you know. It’s about how you behave. And behavior is hard to teach, even to really smart people. Money—investing, personal finance, and business decisions—is typically taught as a math-based field, where data and formulas tell us exactly what to do. But in the real world people don’t make financial decisions on a spreadsheet. They make them at the dinner table, or in a meeting room, where personal history, your own unique view of the world, ego, pride, marketing, and odd incentives are scrambled together. In The Psychology of Money, award-winning author Morgan Housel shares 19 short stories exploring the strange ways people think about money and teaches you how to make better sense of one of life’s most important topics. This special edition includes two bonus chapters—Keep It Going and The Neverending Story.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_13",
+            "identifier": "9789347027840"
+          },
+          {
+            "type": "ISBN_10",
+            "identifier": "9347027847"
+          }
+        ],
+        "readingModes": {
+          "text": true,
+          "image": true
+        },
+        "pageCount": 244,
+        "printType": "BOOK",
+        "categories": [
+          "Business & Economics"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": true,
+        "contentVersion": "0.1.1.0.preview.3",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=DILKEQAAQBAJ&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=DILKEQAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.co.in/books?id=DILKEQAAQBAJ&printsec=frontcover&dq=intitle:the+psychology+of+mony+inauthor:housel&hl=&cd=2&source=gbs_api",
+        "infoLink": "https://play.google.com/store/books/details?id=DILKEQAAQBAJ&source=gbs_api",
+        "canonicalVolumeLink": "https://play.google.com/store/books/details?id=DILKEQAAQBAJ"
+      },
+      "saleInfo": {
+        "country": "IN",
+        "saleability": "FOR_SALE",
+        "isEbook": true,
+        "listPrice": {
+          "amount": 531,
+          "currencyCode": "INR"
+        },
+        "retailPrice": {
+          "amount": 265.5,
+          "currencyCode": "INR"
+        },
+        "buyLink": "https://play.google.com/store/books/details?id=DILKEQAAQBAJ&rdid=book-DILKEQAAQBAJ&rdot=1&source=gbs_api",
+        "offers": [
+          {
+            "finskyOfferType": 1,
+            "listPrice": {
+              "amountInMicros": 531000000,
+              "currencyCode": "INR"
+            },
+            "retailPrice": {
+              "amountInMicros": 265500000,
+              "currencyCode": "INR"
+            }
+          }
+        ]
+      },
+      "accessInfo": {
+        "country": "IN",
+        "viewability": "PARTIAL",
+        "embeddable": true,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": true,
+          "acsTokenLink": "http://books.google.co.in/books/download/The_Psychology_of_Money_Timeless_Lessons-sample-epub.acsm?id=DILKEQAAQBAJ&format=epub&output=acs4_fulfillment_token&dl_type=sample&source=gbs_api"
+        },
+        "pdf": {
+          "isAvailable": true,
+          "acsTokenLink": "http://books.google.co.in/books/download/The_Psychology_of_Money_Timeless_Lessons-sample-pdf.acsm?id=DILKEQAAQBAJ&format=pdf&output=acs4_fulfillment_token&dl_type=sample&source=gbs_api"
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=DILKEQAAQBAJ&hl=&source=gbs_api",
+        "accessViewStatus": "SAMPLE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "This special edition includes two bonus chapters—Keep It Going and The Neverending Story."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "GOXYzwEACAAJ",
+      "etag": "DJ6W9zeVRAg",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/GOXYzwEACAAJ",
+      "volumeInfo": {
+        "title": "The Psychology of Money",
+        "subtitle": "Lessons on Greed, Wealth, and Happiness that Never Fade (A Concise And Precise Summary)",
+        "authors": [
+          "Melody Jefferson",
+          "Morgan Housel"
+        ],
+        "publishedDate": "2023-04-13",
+        "description": "A Brief Synopsis of Morgan Housel's The Psychology of Money: Eternal truths about gain, greed, and contentment. This Concise Overview has been written to assist readers in grasping the fundamentals of the monetary system. Because it doesn't matter how much money you have if you don't act accordingly. This book is for you if you hope to one day retire early without having to work, or if you want to work solely for the sake of it and not worry about money because you have enough. This workbook is for you if you want to learn the ins and outs of the money mind, including why we make poor financial choices and how to avoid them. This book is for you if you wish to gain knowledge in the areas of personal finance, investing, and company management. Morgan Housel, a partner at The Collaborative Fund and two-time winner of the Best in Business Award from the Society of American Business Editors, shares some mind-blowing information you need to develop your financial culture in his book \"The Psychology of Money.\" This information pertains to financial wisdom, greed, wealth creation, financial happiness, and financial peace. Housel believed that financial success could be achieved regardless of academic credentials. What matters is how you act. And it's not easy to instill that kind of conduct in even the most brilliant minds. This Concise for The Psychology of Money distills the most important takeaways from Morgan Housel's The Psychology of Money into bite-sized chunks. We achieved this by include a wide range of learning methods, including concise summaries, lessons, and objectives; detailed bulleted action plans and questions to test knowledge and aid with comprehension; and a wide range of learning styles.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "1312682345"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9781312682344"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 0,
+        "printType": "BOOK",
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=GOXYzwEACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=GOXYzwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.co.in/books?id=GOXYzwEACAAJ&dq=intitle:the+psychology+of+mony+inauthor:housel&hl=&cd=3&source=gbs_api",
+        "infoLink": "http://books.google.co.in/books?id=GOXYzwEACAAJ&dq=intitle:the+psychology+of+mony+inauthor:housel&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/The_Psychology_of_Money.html?hl=&id=GOXYzwEACAAJ"
+      },
+      "saleInfo": {
+        "country": "IN",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "IN",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=GOXYzwEACAAJ&hl=&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "This book is for you if you hope to one day retire early without having to work, or if you want to work solely for the sake of it and not worry about money because you have enough."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "DILKEQAAQBAJ",
+      "etag": "o9RCZHwU438",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/DILKEQAAQBAJ",
+      "volumeInfo": {
+        "title": "The Psychology of Money: Timeless Lessons on Wealth, Greed, and Happiness – Special Edition Includes 2 Bonus Chapters",
+        "authors": [
+          "Morgan Housel"
+        ],
+        "publisher": "Jaico Publishing House",
+        "publishedDate": "2026-01-10",
+        "description": "Doing well with money isn’t necessarily about what you know. It’s about how you behave. And behavior is hard to teach, even to really smart people. Money—investing, personal finance, and business decisions—is typically taught as a math-based field, where data and formulas tell us exactly what to do. But in the real world people don’t make financial decisions on a spreadsheet. They make them at the dinner table, or in a meeting room, where personal history, your own unique view of the world, ego, pride, marketing, and odd incentives are scrambled together. In The Psychology of Money, award-winning author Morgan Housel shares 19 short stories exploring the strange ways people think about money and teaches you how to make better sense of one of life’s most important topics. This special edition includes two bonus chapters—Keep It Going and The Neverending Story.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_13",
+            "identifier": "9789347027840"
+          },
+          {
+            "type": "ISBN_10",
+            "identifier": "9347027847"
+          }
+        ],
+        "readingModes": {
+          "text": true,
+          "image": true
+        },
+        "pageCount": 244,
+        "printType": "BOOK",
+        "categories": [
+          "Business & Economics"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": true,
+        "contentVersion": "0.1.1.0.preview.3",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=DILKEQAAQBAJ&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=DILKEQAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.co.in/books?id=DILKEQAAQBAJ&pg=PT61&dq=intitle:the+psychology+of+mony+inauthor:housel&hl=&cd=4&source=gbs_api",
+        "infoLink": "https://play.google.com/store/books/details?id=DILKEQAAQBAJ&source=gbs_api",
+        "canonicalVolumeLink": "https://play.google.com/store/books/details?id=DILKEQAAQBAJ"
+      },
+      "saleInfo": {
+        "country": "IN",
+        "saleability": "FOR_SALE",
+        "isEbook": true,
+        "listPrice": {
+          "amount": 531,
+          "currencyCode": "INR"
+        },
+        "retailPrice": {
+          "amount": 265.5,
+          "currencyCode": "INR"
+        },
+        "buyLink": "https://play.google.com/store/books/details?id=DILKEQAAQBAJ&rdid=book-DILKEQAAQBAJ&rdot=1&source=gbs_api",
+        "offers": [
+          {
+            "finskyOfferType": 1,
+            "listPrice": {
+              "amountInMicros": 531000000,
+              "currencyCode": "INR"
+            },
+            "retailPrice": {
+              "amountInMicros": 265500000,
+              "currencyCode": "INR"
+            }
+          }
+        ]
+      },
+      "accessInfo": {
+        "country": "IN",
+        "viewability": "PARTIAL",
+        "embeddable": true,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": true,
+          "acsTokenLink": "http://books.google.co.in/books/download/The_Psychology_of_Money_Timeless_Lessons-sample-epub.acsm?id=DILKEQAAQBAJ&format=epub&output=acs4_fulfillment_token&dl_type=sample&source=gbs_api"
+        },
+        "pdf": {
+          "isAvailable": true,
+          "acsTokenLink": "http://books.google.co.in/books/download/The_Psychology_of_Money_Timeless_Lessons-sample-pdf.acsm?id=DILKEQAAQBAJ&format=pdf&output=acs4_fulfillment_token&dl_type=sample&source=gbs_api"
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=DILKEQAAQBAJ&hl=&source=gbs_api",
+        "accessViewStatus": "SAMPLE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "... \u003cb\u003emoney\u003c/b\u003e. to. another. family. member . 17. Capitalism is hard . But part of the reason this happens is because getting \u003cb\u003emoney\u003c/b\u003e and keeping \u003cb\u003emoney\u003c/b\u003e are two different skills . Getting \u003cb\u003emoney\u003c/b\u003e requires taking risks , being optimistic , and putting&nbsp;..."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "DTR3zwEACAAJ",
+      "etag": "GvZdX/f9u08",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/DTR3zwEACAAJ",
+      "volumeInfo": {
+        "title": "The Psychology of Money",
+        "subtitle": "Timeless Lessons on Wealth, Greed, and Happiness \"New Synopsis and Analysis\"",
+        "authors": [
+          "Morgan Housel"
+        ],
+        "publishedDate": "2022-10-03",
+        "description": "Doing well with money isn't necessarily about what you know. It's about how you behave. And behavior is hard to teach, even to really smart people. The field of finance, including investment, personal finance, and business decisions, is typically presented as a mathematical one, where we are given precise instructions based on data and formulas. However, people in the real world don't use spreadsheets to make important financial decisions. At the dinner table or in the conference room, people mix in their own backgrounds, perspectives, egos, prides, marketing strategies, and peculiar motivations to come up with these decisions. To help you better understand one of life's most important themes, award-winning author Morgan Housel presents 19 short stories in his book The Psychology of Money.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "1387580086"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9781387580088"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 0,
+        "printType": "BOOK",
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=DTR3zwEACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=DTR3zwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.co.in/books?id=DTR3zwEACAAJ&dq=intitle:the+psychology+of+mony+inauthor:housel&hl=&cd=5&source=gbs_api",
+        "infoLink": "http://books.google.co.in/books?id=DTR3zwEACAAJ&dq=intitle:the+psychology+of+mony+inauthor:housel&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/The_Psychology_of_Money.html?hl=&id=DTR3zwEACAAJ"
+      },
+      "saleInfo": {
+        "country": "IN",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "IN",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=DTR3zwEACAAJ&hl=&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "To help you better understand one of life&#39;s most important themes, award-winning author Morgan Housel presents 19 short stories in his book The Psychology of Money."
+      }
+    }
+  ]
+}
