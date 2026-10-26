@@ -21,6 +21,7 @@ from libclaim.pricing.books import BookPrices
 from libclaim.settings import Locale
 from libclaim.stages import BookSlot, PipelineConfig, Results, item_key
 from libclaim.sweep import Ledger, SweepDir
+from libclaim.vision.boxes import Box, iou, load_vision_config
 from libclaim.vision.resolve import Resolution
 from libclaim.vision.scale import ScaleMethod, SpineDims, cross_check
 from libclaim.vision.spines import ReviewEntry as ReconcileNote
@@ -33,9 +34,40 @@ def frame_ref(sweep: SweepDir, path: str) -> str:
     return (sweep.frames / Path(path).name).relative_to(sweep.root).as_posix() if path else ""
 
 
+def revisits(results: Results) -> dict[str, str]:
+    threshold = load_vision_config().tracks.track_iou
+    placed: dict[int, list[tuple[int, str, Box]]] = defaultdict(list)
+    found: dict[str, str] = {}
+    for plan in results.spines.segments:
+        segment = results.tracks.segments.get(plan.index)
+        if plan.unit is None or segment is None:
+            continue
+        for book in segment.books:
+            plane = results.scale.planes.get(book.id)
+            if plane is None:
+                continue
+            earlier = next((key for index, key, box in placed[plan.unit]
+                            if index != plan.index and iou(box, plane) >= threshold), None)
+            if earlier is None:
+                placed[plan.unit].append((plan.index, book.id, plane))
+            else:
+                found[book.id] = earlier
+    return found
+
+
 def slots(results: Results) -> Iterator[BookSlot]:
+    repeated = revisits(results)
     for index in sorted(results.tracks.segments):
-        yield from results.tracks.segments[index].books
+        yield from (book for book in results.tracks.segments[index].books if book.id not in repeated)
+
+
+def positions(results: Results) -> dict[str, int]:
+    counters: dict[str, int] = defaultdict(int)
+    numbered = {}
+    for book in slots(results):
+        counters[book.shelf] += 1
+        numbered[book.id] = counters[book.shelf]
+    return numbered
 
 
 def book_status(resolution: Resolution | None, prices: BookPrices | None) -> str:
@@ -44,7 +76,7 @@ def book_status(resolution: Resolution | None, prices: BookPrices | None) -> str
     return "identified" if resolution is not None and resolution.status == "identified" else "unidentified"
 
 
-def book_line(slot: BookSlot, results: Results, sweep: SweepDir, cfg: PipelineConfig) -> Book:
+def book_line(slot: BookSlot, position: int, results: Results, sweep: SweepDir, cfg: PipelineConfig) -> Book:
     dims = results.scale.dims.get(slot.id)
     resolution = results.resolution.resolutions.get(slot.id)
     prices = results.pricing.books.get(slot.id)
@@ -54,7 +86,7 @@ def book_line(slot: BookSlot, results: Results, sweep: SweepDir, cfg: PipelineCo
     return Book(
         id=slot.id,
         shelf=slot.shelf,
-        position=slot.position,
+        position=position,
         frame_ref=frame_ref(sweep, slot.frame.path),
         status=status,
         title=named.title,
@@ -200,6 +232,12 @@ def frame_review(review: Review, results: Results, sweep: SweepDir) -> None:
     for plan in results.spines.segments:
         if plan.index not in results.tracks.segments:
             review.unfinished(plan.label, "tracks", "frames")
+    planned = {seq for plan in results.spines.segments for seq in plan.seqs}
+    for frame in results.spines.frames:
+        if frame.rows and frame.still.seq not in planned:
+            review.unfinished(f"frame {frame.still.seq}", "segments", "frames", frame_ref(sweep, frame.still.path))
+    for key, earlier in revisits(results).items():
+        review.add("revisit", key, f"already counted as {earlier} (same place on the unit marker plane)", "tracks")
 
 
 def room_review(review: Review, results: Results) -> None:
@@ -235,7 +273,8 @@ def pipeline_review(packet: ClaimPacket, results: Results, sweep: SweepDir, cfg:
 
 
 def book_lines(results: Results, sweep: SweepDir, cfg: PipelineConfig) -> list[Book]:
-    return [book_line(slot, results, sweep, cfg) for slot in slots(results)]
+    numbered = positions(results)
+    return [book_line(slot, numbered[slot.id], results, sweep, cfg) for slot in slots(results)]
 
 
 def build_packet(results: Results, sweep: SweepDir, locale: Locale, cfg: PipelineConfig,

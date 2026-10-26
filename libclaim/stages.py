@@ -46,7 +46,9 @@ class PipelineConfig(BaseModel):
     deadline_s: float
     deadline_poll_s: float
     row_min_spines: int
+    row_min_spine_height_frac: float
     segment_max_frames: int
+    revisit_tails: int
     statement_subject_match: float
     stage_aliases: dict[str, str]
     packet_name: str
@@ -98,6 +100,7 @@ class SegmentPlan(BaseModel):
     label: str
     unit: int | None = None
     seqs: list[int]
+    carry: list[int] = Field(default_factory=list)
 
 
 class SpinesStage(BaseModel):
@@ -132,6 +135,7 @@ class TracksStage(BaseModel):
 
 class ScaleStage(BaseModel):
     dims: dict[str, SpineDims] = Field(default_factory=dict)
+    planes: dict[str, Box] = Field(default_factory=dict)
 
 
 class BookRead(BaseModel):

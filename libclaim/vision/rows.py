@@ -1,5 +1,5 @@
 from collections import Counter
-from statistics import mean
+from statistics import mean, median
 
 import cv2
 import numpy as np
@@ -14,6 +14,7 @@ from libclaim.vision.scale import (
     UnitScale,
     aruco_detector,
     fallback_reason,
+    frame_scale,
     measure,
     measure_row,
     middle,
@@ -141,6 +142,19 @@ def measure_rows(tracks: list[BookTrack], stills: list[Still], rows: list[list[i
         dims.update(measure_upright([i for i in row if i not in lying], tracks, stills, cfg, unit))
         dims.update({i: flat_dims(tracks[i], stills, cfg, unit) for i in row if i in lying})
     return dims
+
+
+def is_row(boxes: list[Box], still: Still, min_spines: int, min_height_frac: float) -> bool:
+    return len(boxes) >= min_spines and median(box.height for box in boxes) >= min_height_frac * still.h
+
+
+def plane_boxes(frames: dict[str, tuple[Still, Box]], cfg: MeasureConfig, unit: UnitScale | None) -> dict[str, Box]:
+    planes = {}
+    for key, (still, box) in frames.items():
+        scale = frame_scale(still, cfg, unit)
+        if scale is not None:
+            planes[key] = project(box, scale[0])
+    return planes
 
 
 def shelf_units(rows_by_unit: dict[int, list[list[SpineDims]]]) -> list[ShelfUnit]:

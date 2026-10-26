@@ -36,6 +36,8 @@ ROW_SHIFT = 300
 ROOM_SHIFT = 400
 SHELF_Y = 430
 SHELF_PITCH = 200
+SLOT = 60
+SLOT_MARGIN = 20
 GAP = 6
 MARKER_PX = 120
 MARKER_BORDER = 16
@@ -227,6 +229,43 @@ def build(root: Path = ROOT) -> None:
         cv2.imwrite(str(path), view, [cv2.IMWRITE_JPEG_QUALITY, JPEG_QUALITY])
     sweep.write_stage("statements", StatementLog(items=STATEMENTS))
     sweep.write_stage("locale", LocaleChoice(country="IN", currency="INR"))
+
+
+@dataclass(frozen=True)
+class Pan:
+    seed: int
+    slots: dict[int, Book]
+    marker_slot: int | None = None
+    marker: int = 7
+
+
+def pan_panorama(pan: Pan, width: int) -> np.ndarray:
+    canvas = background(pan.seed, width)
+    for slot, book in pan.slots.items():
+        x = slot * SLOT + SLOT_MARGIN
+        paint(canvas, BOOK_COLOURS[book.key], x, SHELF_Y - book.height, x + book.width, SHELF_Y, pan.seed * 100 + slot)
+    if pan.marker_slot is not None:
+        x, y = pan.marker_slot * SLOT + SLOT_MARGIN + MARKER_BORDER, MARKER_AT[1]
+        dictionary = cv2.aruco.getPredefinedDictionary(getattr(cv2.aruco, load_vision_config().scale.aruco_dictionary))
+        canvas[y - MARKER_BORDER : y + MARKER_PX + MARKER_BORDER, x - MARKER_BORDER : x + MARKER_PX + MARKER_BORDER] = 255
+        canvas[y : y + MARKER_PX, x : x + MARKER_PX] = cv2.aruco.generateImageMarker(dictionary, pan.marker, MARKER_PX)[:, :, None]
+    return canvas
+
+
+def write_pans(root: Path, views: list[tuple[Pan, int]]) -> SweepDir:
+    sweep = SweepDir(root)
+    sweep.frames.mkdir(parents=True)
+    width = WIDTH + max(offset for _, offset in views)
+    panoramas = {pan.seed: pan_panorama(pan, width) for pan, _ in views}
+    for seq, (pan, offset) in enumerate(views, 1):
+        view = panoramas[pan.seed][:, offset : offset + WIDTH]
+        cv2.imwrite(str(sweep.frame_path(seq, T0_MS + seq * STEP_MS)), view, [cv2.IMWRITE_JPEG_QUALITY, JPEG_QUALITY])
+    sweep.write_stage("locale", LocaleChoice(country="IN", currency="INR"))
+    return sweep
+
+
+def upright(count: int, start: int = 0) -> list[Book]:
+    return [book for book in BOOKS if book.width <= SLOT - SLOT_MARGIN][start : start + count]
 
 
 def copy_sweep(target: Path) -> SweepDir:

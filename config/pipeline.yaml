@@ -1,7 +1,9 @@
 deadline_s: 240
 deadline_poll_s: 0.5
-row_min_spines: 3
+row_min_spines: 1
+row_min_spine_height_frac: 0.2
 segment_max_frames: 12
+revisit_tails: 4
 statement_subject_match: 80
 stage_aliases:
   price: pricing
@@ -20,6 +22,7 @@ severity:
   room: medium
   items: low
   excluded: medium
+  revisit: low
 money_format: ",.0f"
 area_format: ".1f"
 summary:

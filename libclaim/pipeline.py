@@ -85,7 +85,17 @@ from libclaim.vision.reading import Reading, SpineCrop, crop_spine, read_spines
 from libclaim.vision.resolve import Catalogs, Resolution, read_text, resolve
 from libclaim.vision.resolve import SpineDims as ResolveDims
 from libclaim.vision.rfdetr import rfdetr_boxes
-from libclaim.vision.rows import anchor_boxes, best_ref, continues, marker_unit, measure_rows, shelf_units, split_rows
+from libclaim.vision.rows import (
+    anchor_boxes,
+    best_ref,
+    continues,
+    is_row,
+    marker_unit,
+    measure_rows,
+    plane_boxes,
+    shelf_units,
+    split_rows,
+)
 from libclaim.vision.scale import SpineDims, load_measure_config, unit_scale
 from libclaim.vision.spines import Orientation, Source, SpineDet, detect_spines, local_orientation, reconcile
 from libclaim.vision.tracks import BookTrack, Frame, merge_tracks
@@ -196,9 +206,12 @@ def det_of(track: BookTrack, frames: list[FrameSpines], stills: list[Still]) -> 
     return dets[[det.box_px for det in dets].index(ref.box)]
 
 
-def build_segment(plan: SegmentPlan, frames: list[FrameSpines], cfg: TrackConfig) -> SegmentTracks:
+def build_segment(plan: SegmentPlan, carried: list[FrameSpines], frames: list[FrameSpines],
+                  cfg: TrackConfig) -> SegmentTracks:
+    frames = carried + frames
     stills = [frame.still for frame in frames]
-    tracks = merge_tracks([Frame(still=f.still, boxes=[d.box_px for d in f.dets]) for f in frames])
+    merged = merge_tracks([Frame(still=f.still, boxes=[d.box_px for d in f.dets]) for f in frames])
+    tracks = [track for track in merged if min(ref.frame for ref in track.refs) >= len(carried)]
     if not tracks:
         return SegmentTracks(index=plan.index, stills=stills, tracks=[], rows=[], flat=[], books=[])
     orientation = [det_of(track, frames, stills).orientation for track in tracks]
@@ -294,6 +307,8 @@ class SweepRun:
         self.detections: list[asyncio.Task] = []
         self.segment_tasks: list[asyncio.Task] = []
         self.open: list[FrameSpines] = []
+        self.carry: tuple[SegmentPlan, list[FrameSpines]] | None = None
+        self.tails: list[tuple[SegmentPlan, list[FrameSpines]]] = []
         self.requeries = 0
         self.timings: dict[str, float] = defaultdict(float)
         self.done: dict[str, int] = defaultdict(int)
@@ -332,48 +347,65 @@ class SweepRun:
     async def consume(self) -> None:
         while (task := await self.queue.get()) is not None:
             try:
-                frame = await task
+                await self.place(await task)
             except Exception as error:
-                logger.error("spine detection step failed: %s", type(error).__name__, exc_info=error)
-                continue
-            await self.place(frame)
+                logger.error("frame placement failed: %s", type(error).__name__, exc_info=error)
         await self.close_segment()
+
+    async def follows(self, frames: list[FrameSpines], frame: FrameSpines) -> bool:
+        return await asyncio.to_thread(continues, [f.still for f in frames], frame.still, self.tracks_cfg)
 
     async def place(self, frame: FrameSpines) -> None:
         self.results.spines.frames.append(frame)
         if not frame.rows:
-            await self.close_segment()
             return
-        if self.open and len(self.open) < self.cfg.segment_max_frames and await asyncio.to_thread(
-            continues, [f.still for f in self.open], frame.still, self.tracks_cfg
-        ):
+        if self.open and len(self.open) < self.cfg.segment_max_frames and await self.follows(self.open, frame):
             self.open.append(frame)
             return
         await self.close_segment()
         self.open = [frame]
+        self.carry = await self.find_carry(frame)
+
+    async def find_carry(self, frame: FrameSpines) -> tuple[SegmentPlan, list[FrameSpines]] | None:
+        for plan, tail in list(reversed(self.tails))[: self.cfg.revisit_tails]:
+            if await self.follows(tail, frame):
+                return plan, tail
+        return None
 
     async def close_segment(self) -> None:
         if not self.open:
             return
+        unit = await asyncio.to_thread(marker_unit, [f.still for f in self.open], self.measure_cfg.scale)
+        self.start_segment(self.plan_open(unit), SEGMENT_STAGES[0])
+
+    def plan_open(self, unit: int | None) -> SegmentPlan:
         frames, self.open = self.open, []
-        unit = await asyncio.to_thread(marker_unit, [f.still for f in frames], self.measure_cfg.scale)
+        source, carried = self.carry or (None, [])
+        self.carry = None
         index = len(self.results.spines.segments)
-        plan = SegmentPlan(index=index, label=self.label(unit, index), unit=unit, seqs=[f.still.seq for f in frames])
+        unit = unit if unit is not None or source is None else source.unit
+        label = source.label if source is not None else self.label(unit, index)
+        plan = SegmentPlan(index=index, label=label, unit=unit, seqs=[f.still.seq for f in frames],
+                           carry=[f.still.seq for f in carried])
         self.results.spines.segments.append(plan)
-        self.start_segment(plan, SEGMENT_STAGES[0])
+        self.tails.append((plan, (carried + frames)[-self.tracks_cfg.anchor_lookback :]))
+        return plan
 
     def label(self, unit: int | None, index: int) -> str:
         if unit is None:
             return f"S{index + 1}"
-        return f"U{unit}-{1 + sum(plan.unit == unit for plan in self.results.spines.segments)}"
+        return f"U{unit}-{1 + len({plan.label for plan in self.results.spines.segments if plan.unit == unit})}"
 
     def start_segment(self, plan: SegmentPlan, start: str) -> None:
         self.segment_tasks.append(asyncio.create_task(self.process_segment(plan, start)))
 
+    def is_row(self, boxes: list[Box], still: Still) -> bool:
+        return is_row(boxes, still, self.cfg.row_min_spines, self.cfg.row_min_spine_height_frac)
+
     async def detect(self, still: Still) -> FrameSpines:
         image = await asyncio.to_thread(read_image, still.path)
         local = await asyncio.to_thread(self.services.local_boxes, image)
-        if local is not None and len(local) < self.cfg.row_min_spines:
+        if local is not None and not self.is_row(local, still):
             return FrameSpines(still=still, rows=False, local=local)
         frame = await self.detect_with(still, local, self.services.settings.vision_models)
         if frame.flagged:
@@ -389,13 +421,13 @@ class SweepRun:
         key = str(still.seq)
         result = reconcile({key: gemini}, {key: local})
         dets = result.rows[key]
-        return FrameSpines(still=still, rows=len(dets) >= self.cfg.row_min_spines, gemini=gemini, local=local,
-                           dets=dets, notes=result.review_entries, flagged=bool(result.requery_rows))
+        return FrameSpines(still=still, rows=self.is_row([d.box_px for d in dets], still), gemini=gemini,
+                           local=local, dets=dets, notes=result.review_entries, flagged=bool(result.requery_rows))
 
     def local_only(self, still: Still, local: list[Box] | None, failure: str) -> FrameSpines:
         cfg = load_vision_config().reconcile
         dets = [SpineDet(box_px=box, orientation=local_orientation(box, cfg), source=Source.rfdetr) for box in local or []]
-        return FrameSpines(still=still, rows=bool(dets), local=local, dets=dets, failure=failure)
+        return FrameSpines(still=still, rows=self.is_row(local or [], still), local=local, dets=dets, failure=failure)
 
     async def requery(self, frame: FrameSpines) -> FrameSpines:
         model = self.services.settings.tiebreak_model
@@ -426,23 +458,27 @@ class SweepRun:
             await self.progress(stage, self.done[stage], len(self.results.spines.segments))
         await self.prefetch(plan)
 
-    def frames_of(self, plan: SegmentPlan) -> list[FrameSpines]:
+    def frames_of(self, seqs: list[int]) -> list[FrameSpines]:
         by_seq = {frame.still.seq: frame for frame in self.results.spines.frames}
-        return [by_seq[seq] for seq in plan.seqs]
+        return [by_seq[seq] for seq in seqs]
 
     async def track_segment(self, plan: SegmentPlan) -> None:
-        segment = await asyncio.to_thread(build_segment, plan, self.frames_of(plan), self.tracks_cfg)
+        carried, frames = self.frames_of(plan.carry), self.frames_of(plan.seqs)
+        segment = await asyncio.to_thread(build_segment, plan, carried, frames, self.tracks_cfg)
         self.results.tracks.segments[plan.index] = segment
         await self.upsert_books(segment.books)
 
     async def scale_segment(self, plan: SegmentPlan) -> None:
         segment = self.results.tracks.segments[plan.index]
-        self.results.scale.dims.update(await asyncio.to_thread(self.measure_segment, plan, segment))
+        dims, planes = await asyncio.to_thread(self.measure_segment, plan, segment)
+        self.results.scale.dims.update(dims)
+        self.results.scale.planes.update(planes)
 
-    def measure_segment(self, plan: SegmentPlan, segment: SegmentTracks) -> dict[str, SpineDims]:
+    def measure_segment(self, plan: SegmentPlan, segment: SegmentTracks) -> tuple[dict[str, SpineDims], dict[str, Box]]:
         unit = None if plan.unit is None else unit_scale(plan.unit, segment.stills, self.measure_cfg)
         by_track = measure_rows(segment.tracks, segment.stills, segment.rows, segment.flat, self.measure_cfg, unit)
-        return {book.id: by_track[book.track] for book in segment.books}
+        planes = plane_boxes({book.id: (book.frame, book.box) for book in segment.books}, self.measure_cfg, unit)
+        return {book.id: by_track[book.track] for book in segment.books}, planes
 
     async def read_segment(self, plan: SegmentPlan) -> None:
         books = self.results.tracks.segments[plan.index].books
@@ -650,6 +686,8 @@ class SweepRun:
             self.queue.put_nowait(None)
             await self.until_deadline([self.consumer])
         self.cancel_detections()
+        if self.open:
+            self.plan_open(None)
         todo = POST_STAGES[POST_STAGES.index(post):]
         items = [self.run_stage("items", self.detect_room_items)] if "items" in todo else []
         await self.until_deadline([*self.segment_tasks, *items])
