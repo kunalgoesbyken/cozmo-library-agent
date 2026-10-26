@@ -171,3 +171,16 @@ def test_bug_inside_handler_is_not_masked_as_bad_arguments(tmp_path):
 def test_unexpected_argument_is_rejected(tmp_path):
     h = Harness(tmp_path)
     assert h.call("end_sweep", {"extra": 1}) == {"error": "end_sweep rejected: invalid arguments"}
+
+
+def test_set_locale_schema_asks_for_iso_codes_not_names():
+    spec = next(spec for spec in SPECS if spec.name == "set_locale")
+    for field in ("country", "currency"):
+        assert "ISO" in spec.parameters["properties"][field]["description"]
+
+
+def test_tool_calls_are_logged_with_arguments_and_result(tmp_path, caplog):
+    h = Harness(tmp_path)
+    with caplog.at_level("INFO", logger="libclaim.live.tools"):
+        h.call("set_locale", {"country": "India", "currency": "rupees"})
+    assert "set_locale" in caplog.text and "India" in caplog.text and "invalid values" in caplog.text

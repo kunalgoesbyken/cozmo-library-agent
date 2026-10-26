@@ -30,6 +30,12 @@ def test_prompt_carries_the_rules():
         assert phrase in prompt
 
 
+def test_prompt_directs_locale_and_statement_tool_use():
+    prompt = load_prompt()
+    for phrase in ("call set_locale", "Never guess", "call record_user_statement"):
+        assert phrase in prompt
+
+
 def test_message_is_normalised():
     message = types.LiveServerMessage(
         usage_metadata=types.UsageMetadata(

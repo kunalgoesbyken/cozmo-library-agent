@@ -1,4 +1,5 @@
 import inspect
+import logging
 from collections.abc import Callable
 from enum import StrEnum
 from typing import Any
@@ -15,6 +16,8 @@ STATEMENTS_STAGE = "statements"
 EXCLUSIONS_STAGE = "exclusions"
 LOCALE_STAGE = "locale"
 MONITOR_NAME = "start_capture_monitor"
+
+logger = logging.getLogger(__name__)
 
 
 class StatementKind(StrEnum):
@@ -85,7 +88,10 @@ SPECS = [
         description="Set the country and currency used for the valuation.",
         parameters={
             "type": "object",
-            "properties": {"country": {"type": "string"}, "currency": {"type": "string"}},
+            "properties": {
+                "country": {"type": "string", "description": "ISO 3166-1 alpha-2 country code such as IN or GB, not the country name."},
+                "currency": {"type": "string", "description": "ISO 4217 currency code such as INR or GBP, not the currency name."},
+            },
             "required": ["country", "currency"],
         },
     ),
@@ -125,6 +131,11 @@ class LiveTools:
         }
 
     async def call(self, name: str, args: dict[str, Any]) -> dict[str, Any]:
+        result = self.dispatch(name, args)
+        logger.info("live tool %s args=%s result=%s", name, args, result)
+        return result
+
+    def dispatch(self, name: str, args: dict[str, Any]) -> dict[str, Any]:
         handler = self.handlers.get(name)
         if handler is None:
             return {"error": f"unknown tool {name}"}
