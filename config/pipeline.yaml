@@ -15,6 +15,15 @@ packet_name: claim_packet.json
 llm_cache_dir: llm
 runs_url: /runs
 cm_decimals: 1
+dims:
+  fill_from_prior: false
+crops:
+  dir: crops
+  max_side_px: 256
+  jpeg_quality: 85
+  margin_frac: 0.05
+review_text:
+  scale_prior: "{count} books on {shelf} have no measured size ({why}); sizes are estimates from the book format"
 severity:
   failure: high
   unfinished: high

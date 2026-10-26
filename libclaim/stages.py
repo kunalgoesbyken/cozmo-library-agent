@@ -51,6 +51,21 @@ class Billing(BaseModel):
     unknown: str
 
 
+class DimsConfig(BaseModel):
+    fill_from_prior: bool
+
+
+class CropConfig(BaseModel):
+    dir: str
+    max_side_px: int
+    jpeg_quality: int
+    margin_frac: float
+
+
+class ReviewText(BaseModel):
+    scale_prior: str
+
+
 class PipelineConfig(BaseModel):
     deadline_s: float
     vision_cutoff_s: float
@@ -68,6 +83,9 @@ class PipelineConfig(BaseModel):
     llm_cache_dir: str
     runs_url: str
     cm_decimals: int
+    dims: DimsConfig
+    crops: CropConfig
+    review_text: ReviewText
     severity: dict[str, Severity]
     money_format: str
     area_format: str

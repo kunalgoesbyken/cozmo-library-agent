@@ -64,11 +64,26 @@ class UsedValue(BaseModel):
         return self
 
 
+class Locator(BaseModel):
+    crop_ref: str = ""
+    box: list[int] = Field(default_factory=list)
+    frame_size: list[int] = Field(default_factory=list)
+
+
+class DimsEstimate(BaseModel):
+    height_cm: float
+    thickness_cm: float
+    book_format: str
+
+
 class Book(BaseModel):
     id: str
     shelf: str = ""
     position: int | None = None
     frame_ref: str = ""
+    crop_ref: str = ""
+    box: list[int] = Field(default_factory=list)
+    frame_size: list[int] = Field(default_factory=list)
     status: Literal["identified", "unidentified", "needs_appraisal"]
     title: str = ""
     author: str = ""
@@ -77,6 +92,7 @@ class Book(BaseModel):
     spine_height_cm: float | None = None
     spine_thickness_cm: float | None = None
     scale_method: str = ""
+    dims_estimated_from_prior: DimsEstimate | None = None
     id_confidence: float | None = None
     replacement_cost: BookReplacementCost = Field(default_factory=BookReplacementCost)
     used_value: UsedValue = Field(default_factory=UsedValue)
@@ -104,6 +120,9 @@ class Item(BaseModel):
     description: str = ""
     brand_model: str = ""
     frame_ref: str = ""
+    crop_ref: str = ""
+    box: list[int] = Field(default_factory=list)
+    frame_size: list[int] = Field(default_factory=list)
     dimensions_cm: Dimensions = Field(default_factory=Dimensions)
     dimensions_method: str = ""
     status: Literal["priced", "range", "needs_appraisal"]
@@ -140,7 +159,8 @@ class Totals(BaseModel):
     books_identified: int = 0
     books_unidentified: int = 0
     books_needs_appraisal: int = 0
-    shelf_run_m: float = 0
+    shelf_run_m: float | None = None
+    shelf_run_estimated_m: float | None = None
     books_replacement_cost: Money = Decimal(0)
     books_used_value: Money = Decimal(0)
     books_used_value_observed: Money = Decimal(0)
@@ -159,6 +179,7 @@ class ReviewEntry(BaseModel):
     reason: str
     line_ref: str
     frame_ref: str = ""
+    crop_ref: str = ""
 
 
 class Costs(BaseModel):

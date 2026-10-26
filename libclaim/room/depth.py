@@ -128,7 +128,7 @@ def scaled_depths(stills: list[Still], depth_fn: Callable[[Still], np.ndarray] =
             if found:
                 observed[still.seq] = found
     if not observed:
-        why = "ARUCO_MARKER_SIZE_CM is not set" if size_cm is None else "no ArUco marker in the room frames"
+        why = "no scale marker was visible"
         return DepthSet(raw, cfg.prior.scale_method, cfg.prior.confidence, [f"{why}: depth scale is the model's own"])
     review = []
     per_frame = {seq: median(found) for seq, found in observed.items()}

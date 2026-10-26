@@ -108,6 +108,10 @@ async def first(sweep, tmp_path, online):
     return packet, web, recorder, client
 
 
+def has_dims(book):
+    return bool(book.spine_height_cm or book.dims_estimated_from_prior)
+
+
 def by_title(packet):
     return {book.title: book for book in packet.books if book.title}
 
@@ -139,7 +143,12 @@ async def test_book_lines_follow_the_evidence(first):
     assert all(book.replacement_cost.amount is None for book in packet.books if book.status == "needs_appraisal")
     assert titled["Sapiens"].scale_method == "aruco_homography"
     assert titled["Dune"].scale_method == "book_format_prior"
-    assert titled["Clean Code"].spine_height_cm > titled["Clean Code"].spine_thickness_cm
+    assert titled["Sapiens"].spine_height_cm > titled["Sapiens"].spine_thickness_cm > 0
+    dune = titled["Dune"]
+    assert dune.spine_height_cm is None and dune.spine_thickness_cm is None
+    estimate = dune.dims_estimated_from_prior
+    assert estimate.height_cm > estimate.thickness_cm > 0 and estimate.book_format
+    assert titled["Sapiens"].dims_estimated_from_prior is None
     assert {book.shelf for book in packet.books} == fx.SHELF_LABELS
 
 
@@ -147,7 +156,7 @@ async def test_unreadable_spines_are_unidentified_with_dims(first):
     packet = first[0]
     unread = [book for book in packet.books if book.status == "unidentified"]
     assert len(unread) == len(UNREADABLE)
-    assert all(not b.title and not b.isbn and b.spine_height_cm and b.spine_thickness_cm for b in unread)
+    assert all(not b.title and not b.isbn and has_dims(b) for b in unread)
 
 
 async def test_every_stage_records_latency_and_cost(first):
@@ -274,7 +283,7 @@ async def test_forced_stall_finalises_at_the_deadline_with_review(sweep, tmp_pat
     packet = await asyncio.wait_for(finishing, WAIT_S)
     assert packet.totals.book_count == BOOK_COUNT
     assert packet.totals == compute_totals(packet.books, packet.items)
-    assert all(book.status == "unidentified" and book.spine_height_cm for book in packet.books)
+    assert all(book.status == "unidentified" and has_dims(book) for book in packet.books)
     unfinished = [e for e in packet.review_queue if "did not finish" in e.reason]
     assert {e.ref_id for e in unfinished if e.reason.startswith("reading")} == {b.id for b in packet.books}
     assert any(e.ref_id == "room" and e.severity == "high" for e in unfinished)
@@ -394,7 +403,7 @@ async def test_vision_quota_storm_finalises_with_review_entries(sweep, tmp_path,
     packet = await run_pipeline(sweep, services=services(sweep, tmp_path, fx.Web(), storm, local=fx.fake_local))
     assert storm.calls == 1
     assert packet.totals.book_count == BOOK_COUNT
-    assert all(book.status == "unidentified" and book.spine_height_cm for book in packet.books)
+    assert all(book.status == "unidentified" and has_dims(book) for book in packet.books)
     reasons = [entry.reason for entry in packet.review_queue]
     assert any("spine detection failed (QuotaExhausted)" in reason for reason in reasons)
     assert any("item detection failed (QuotaExhausted)" in reason for reason in reasons)
@@ -493,3 +502,45 @@ def test_server_sweep_streams_stills_into_the_pipeline_and_produces_a_packet(tmp
     assert packet.totals.book_count == BOOK_COUNT
     assert all((runs / sweep_id / book.frame_ref).is_file() for book in packet.books)
     assert any("readback" in event for event in bridges[0].injected)
+
+
+async def test_every_line_has_an_existing_crop_and_a_box_inside_its_frame(first, sweep):
+    packet = first[0]
+    lines = [*packet.books, *packet.items]
+    assert lines
+    for line in lines:
+        width, height = line.frame_size
+        x1, y1, x2, y2 = line.box
+        assert 0 <= x1 < x2 <= width and 0 <= y1 < y2 <= height
+        assert line.crop_ref.startswith("frames/crops/") and (sweep.root / line.crop_ref).is_file()
+        assert (sweep.root / line.frame_ref).is_file()
+    crops = {line.id: line.crop_ref for line in lines}
+    assert all(entry.crop_ref == crops.get(entry.ref_id, "") for entry in packet.review_queue)
+
+
+async def test_books_without_a_marker_get_one_review_entry_per_shelf(first):
+    packet = first[0]
+    prior = [book for book in packet.books if book.scale_method == "book_format_prior"]
+    entries = [entry for entry in packet.review_queue if "no measured size" in entry.reason]
+    assert prior and {entry.ref_id for entry in entries} == {book.shelf for book in prior}
+    assert len(entries) == len({book.shelf for book in prior})
+    assert all("no scale marker was visible" in entry.reason for entry in entries)
+    assert not any("ARUCO" in entry.reason or "_CM" in entry.reason for entry in packet.review_queue)
+    assert not any(entry.reason.startswith("book_format_prior") for entry in packet.review_queue)
+
+
+async def test_totals_separate_measured_and_estimated_shelf_runs(first):
+    packet = first[0]
+    measured = sum(book.spine_thickness_cm for book in packet.books if book.spine_thickness_cm is not None)
+    estimated = sum(book.dims_estimated_from_prior.thickness_cm for book in packet.books if book.dims_estimated_from_prior)
+    assert packet.totals.shelf_run_m == pytest.approx(measured / 100, abs=1e-3)
+    assert packet.totals.shelf_run_estimated_m == pytest.approx(estimated / 100, abs=1e-3)
+
+
+async def test_owner_can_fill_the_contract_dims_from_the_prior(first, sweep, tmp_path, online):
+    config = fast_config(dims=load_pipeline_config().dims.model_copy(update={"fill_from_prior": True}))
+    packet = await run_pipeline(sweep, "packet", services=services(sweep, tmp_path, fx.Web()), config=config)
+    dune = by_title(packet)["Dune"]
+    assert dune.spine_height_cm == dune.dims_estimated_from_prior.height_cm
+    assert dune.spine_thickness_cm == dune.dims_estimated_from_prior.thickness_cm
+    assert packet.totals.shelf_run_estimated_m is None

@@ -5,13 +5,16 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import TypeVar
 
+from libclaim.packet.crops import Cropper
 from libclaim.packet.models import (
     Book,
     BookReplacementCost,
     ClaimPacket,
     Costs,
+    DimsEstimate,
     Item,
     ItemReplacementCost,
+    Locator,
     ReviewEntry,
     Room,
     SweepInfo,
@@ -89,9 +92,25 @@ def book_status(slot: BookSlot, results: Results, locale: Locale) -> str:
     return "needs_appraisal" if reasons else "identified"
 
 
+def is_measured(dims: SpineDims | None) -> bool:
+    return dims is not None and dims.scale_method == ScaleMethod.aruco_homography
+
+
+def estimate_of(dims: SpineDims | None, cfg: PipelineConfig) -> DimsEstimate | None:
+    if dims is None or is_measured(dims):
+        return None
+    return DimsEstimate(height_cm=round(dims.height_cm, cfg.cm_decimals),
+                        thickness_cm=round(dims.thickness_cm, cfg.cm_decimals), book_format=dims.book_format)
+
+
+def locate(cropper: Cropper | None, key: str, path: str, box: Box) -> Locator:
+    return cropper.locate(key, path, box) if cropper else Locator()
+
+
 def book_line(slot: BookSlot, position: int, results: Results, sweep: SweepDir, cfg: PipelineConfig,
-              locale: Locale) -> Book:
+              locale: Locale, cropper: Cropper | None = None) -> Book:
     dims = results.scale.dims.get(slot.id)
+    filled = dims is not None and (is_measured(dims) or cfg.dims.fill_from_prior)
     resolution = results.resolution.resolutions.get(slot.id)
     prices = results.pricing.books.get(slot.id)
     status = book_status(slot, results, locale)
@@ -102,14 +121,16 @@ def book_line(slot: BookSlot, position: int, results: Results, sweep: SweepDir, 
         shelf=slot.shelf,
         position=position,
         frame_ref=frame_ref(sweep, slot.frame.path),
+        **locate(cropper, slot.id, slot.frame.path, slot.box).model_dump(),
         status=status,
         title=named.title,
         author=named.author,
         edition=named.edition,
         isbn=named.isbn,
-        spine_height_cm=round(dims.height_cm, cfg.cm_decimals) if dims else None,
-        spine_thickness_cm=round(dims.thickness_cm, cfg.cm_decimals) if dims else None,
+        spine_height_cm=round(dims.height_cm, cfg.cm_decimals) if filled else None,
+        spine_thickness_cm=round(dims.thickness_cm, cfg.cm_decimals) if filled else None,
         scale_method=dims.scale_method.value if dims else "",
+        dims_estimated_from_prior=estimate_of(dims, cfg),
         id_confidence=named.id_confidence if named.status == "identified" else None,
         replacement_cost=prices.replacement_cost if prices else BookReplacementCost(),
         used_value=prices.used_value if prices else UsedValue(),
@@ -117,7 +138,7 @@ def book_line(slot: BookSlot, position: int, results: Results, sweep: SweepDir, 
     )
 
 
-def item_lines(results: Results, sweep: SweepDir) -> list[Item]:
+def item_lines(results: Results, sweep: SweepDir, cropper: Cropper | None = None) -> list[Item]:
     lines = []
     for index, det in enumerate(results.items.items if results.items else []):
         priced = results.pricing.items.get(item_key(index))
@@ -129,6 +150,7 @@ def item_lines(results: Results, sweep: SweepDir) -> list[Item]:
                 description=det.description,
                 brand_model=det.brand_model,
                 frame_ref=frame_ref(sweep, det.frame_path),
+                **locate(cropper, item_key(index), det.frame_path, det.box_px).model_dump(),
                 dimensions_cm=det.dimensions_cm,
                 dimensions_method=det.dimensions_method,
                 status=price.status if price else "needs_appraisal",
@@ -190,15 +212,22 @@ class Review:
 
 
 def scale_review(review: Review, book: Book, line: str, dims: SpineDims, resolution: Resolution | None) -> None:
-    kind = "scale_prior" if dims.scale_method == ScaleMethod.book_format_prior else "scale"
     for reason in dims.review:
-        review.add(kind, book.id, reason, line, book.frame_ref)
-    if resolution is not None and resolution.status == "identified" and resolution.physical_dimensions:
+        review.add("scale", book.id, reason, line, book.frame_ref)
+    identified = resolution is not None and resolution.status == "identified" and resolution.physical_dimensions
+    if is_measured(dims) and identified:
         for reason in cross_check(dims, resolution.physical_dimensions):
             review.add("cross_check", book.id, reason, line, book.frame_ref)
 
 
+def prior_review(review: Review, groups: dict[tuple[str, str], list[Book]]) -> None:
+    for (shelf, why), books in groups.items():
+        reason = review.cfg.review_text.scale_prior.format(count=len(books), shelf=shelf, why=why)
+        review.add("scale_prior", shelf, reason, "books", books[0].frame_ref)
+
+
 def book_review(review: Review, packet: ClaimPacket, results: Results) -> None:
+    priors: dict[tuple[str, str], list[Book]] = defaultdict(list)
     for index, (book, slot) in enumerate(zip(packet.books, slots(results))):
         line = f"books[{index}]"
         dims = results.scale.dims.get(slot.id)
@@ -209,6 +238,8 @@ def book_review(review: Review, packet: ClaimPacket, results: Results) -> None:
             review.unfinished(book.id, "scale", line, book.frame_ref)
         else:
             scale_review(review, book, line, dims, resolution)
+            if not is_measured(dims):
+                priors[(slot.shelf, dims.fallback_reason)].append(book)
         if slot.id not in results.reading.reads:
             review.unfinished(book.id, "reading", line, book.frame_ref)
         if resolution is None:
@@ -222,6 +253,7 @@ def book_review(review: Review, packet: ClaimPacket, results: Results) -> None:
         else:
             for reason in prices.review:
                 review.add("pricing", book.id, reason, line, book.frame_ref)
+    prior_review(review, priors)
 
 
 def frame_label(results: Results, seq: int) -> str:
@@ -305,9 +337,10 @@ def pipeline_review(packet: ClaimPacket, results: Results, sweep: SweepDir, cfg:
     return review.entries
 
 
-def book_lines(results: Results, sweep: SweepDir, cfg: PipelineConfig, locale: Locale) -> list[Book]:
+def book_lines(results: Results, sweep: SweepDir, cfg: PipelineConfig, locale: Locale,
+               cropper: Cropper | None = None) -> list[Book]:
     numbered = positions(results)
-    return [book_line(slot, numbered[slot.id], results, sweep, cfg, locale) for slot in slots(results)]
+    return [book_line(slot, numbered[slot.id], results, sweep, cfg, locale, cropper) for slot in slots(results)]
 
 
 class Sections:
@@ -329,19 +362,27 @@ class Sections:
 def build_packet(results: Results, sweep: SweepDir, locale: Locale, cfg: PipelineConfig,
                  latency_s: dict[str, float], free_tier: bool | None = None, device: str = "") -> ClaimPacket:
     sections = Sections(cfg)
+    cropper = Cropper(sweep, cfg.crops)
     packet = ClaimPacket(
         sweep=sweep_info(results, sweep, locale, device),
         second_country=results.pricing.second_country,
         room=sections.build("room", lambda: room_of(results, sweep), Room()),
-        books=sections.build("books", lambda: book_lines(results, sweep, cfg, locale), []),
-        items=sections.build("items", lambda: item_lines(results, sweep), []),
+        books=sections.build("books", lambda: book_lines(results, sweep, cfg, locale, cropper), []),
+        items=sections.build("items", lambda: item_lines(results, sweep, cropper), []),
         costs=costs_of(sweep.ledger, free_tier, cfg),
         latency_s=latency_s,
     )
     packet.totals = compute_totals(packet.books, packet.items)
     review = sections.build("review", lambda: pipeline_review(packet, results, sweep, cfg), [])
     packet.review_queue = sections.failed + build_review_queue(packet) + review
+    attach_crops(packet)
     return packet
+
+
+def attach_crops(packet: ClaimPacket) -> None:
+    crops = {line.id: line.crop_ref for line in [*packet.books, *packet.items] if line.crop_ref}
+    for entry in packet.review_queue:
+        entry.crop_ref = crops.get(entry.ref_id, "")
 
 
 def summary_text(packet: ClaimPacket, cfg: PipelineConfig) -> str:
