@@ -1,0 +1,12 @@
+compression_enabled: true
+compression_trigger_tokens: 12000
+compression_target_tokens: 6000
+frame_max_fps: 1.0
+frame_mime: image/jpeg
+audio_mime: audio/pcm;rate=16000
+media_resolution: MEDIA_RESOLUTION_LOW
+kickoff_text: Begin the sweep now.
+backoff_base_seconds: 1.0
+backoff_max_seconds: 30.0
+max_retries: 6
+ledger_stage: live

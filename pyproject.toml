@@ -37,6 +37,7 @@ include = ["libclaim*"]
 
 [tool.setuptools.package-data]
 "libclaim.packet" = ["templates/*.j2"]
+"libclaim.live" = ["prompt.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
