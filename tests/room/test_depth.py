@@ -288,3 +288,9 @@ def test_transformers_models_load_one_at_a_time(monkeypatch):
     depth.depth_model.cache_clear()
     masks.sam_model.cache_clear()
     assert not fake.overlapped
+
+
+def test_depth_beyond_ten_metres_is_kept_for_large_halls():
+    k = np.array([[100.0, 0, 50], [0, 100.0, 50], [0, 0, 1]])
+    assert len(depth.frame_points(np.full((100, 100), 15.0), k)) > 0
+    assert len(depth.frame_points(np.full((100, 100), 25.0), k)) == 0

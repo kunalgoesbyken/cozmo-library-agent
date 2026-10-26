@@ -399,10 +399,23 @@ async def test_itemlist_entries_off_origin_are_skipped_and_same_origin_relative_
     assert not any(bad in url for url in seen for bad in ("169.254", "localhost", "evil.example", "rebind.example", "downgraded"))
 
 
-@pytest.mark.parametrize("address", ["93.184.216.34", "2606:4700:4700::1111", "64:ff9b::808:808", "::8.8.8.8"])
+@pytest.mark.parametrize("address", ["93.184.216.34", "2606:4700:4700::1111"])
 def test_public_addresses_stay_allowed_including_embedded_public_ipv4(address):
     assert is_public(address)
 
 
 def test_price_client_ignores_proxy_environment_variables(tmp_path):
     assert PriceHttp(tmp_path / "cache").client.trust_env is False
+
+
+@pytest.mark.parametrize(
+    "address",
+    [
+        "64:ff9b::a00:1", "64:ff9b::808:808", "64:ff9b::7f00:1",
+        "64:ff9b:1::a00:1", "64:ff9b:1:0:0:0:808:808", "64:ff9b:1:ffff::7f00:1",
+        "::ffff:10.0.0.1", "::ffff:8.8.8.8", "::ffff:127.0.0.1",
+        "::10.0.0.1", "::8.8.8.8", "::127.0.0.1", "::a9fe:a9fe",
+    ],
+)
+def test_nat64_mapped_and_compatible_ipv6_ranges_are_never_public(address):
+    assert not is_public(address)

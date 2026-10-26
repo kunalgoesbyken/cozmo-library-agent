@@ -41,7 +41,7 @@ depth:
   model_id: depth-anything/Depth-Anything-V2-Metric-Indoor-Small-hf
   stride: 8
   min_m: 0.2
-  max_m: 10.0
+  max_m: 20.0
   camera_up: [0.0, -1.0, 0.0]
   min_right_spread: 0.1
   min_image_up_alignment: 0.5

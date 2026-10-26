@@ -119,3 +119,12 @@ Before and after (93 books):
 | replay `--from resolution`, after_sweep | not run (the recorded live run spent 160.7 s in resolution, 307 s after the sweep) | 0.43 s (all requests cached) |
 
 Projected for a live run of these photos, not measured: OCR 12 s, Gemini reading about 25 s for the longest segment, catalogue requests about 95 s at 1 request per second on the Open Library host, retailers about 25 s, so about 150 s after the sweep against 307 to 393 s before.
+
+## Fix wave F3
+
+- Catalogue: title and author search is Google Books only; Open Library is used for `/isbn/{isbn}.json`, `/works/{work}/editions.json` (robots.txt disallows `/search`). Search fixtures under `tests/fixtures/catalog` for Google Books and the isbn lookups were hand-built from earlier recorded data (no live HTTP in this wave); `tools/record_catalog.py` re-records them.
+- Live: exclusion `shelf_id` is validated against shelves the pipeline has reported (unknown id returns a recoverable tool error listing known shelves); `connecting` is sent once; inventory upserts are sent only when an item changed; coverage regions move from `sweep` to the shelf once the pipeline places a frame; injections before `start_capture_monitor` go out as a text turn (silent ones are dropped); a budget stop sends an `error` (code `budget`) and `closed` with reason `budget_exceeded`.
+- Abrupt disconnect: the code path is the same `finish()` as `end_sweep` with the normal deadline. The roughly 3 minutes seen is 20 stills sent in one burst with no local detector, bound by the Gemini per-model request limits and `vision_cutoff_s`; no code change.
+- Replay: `--from scale` reuses recorded (non-failed) reads, so changed crop images no longer discard them; `--from reading` still re-reads.
+- Packet book lines carry `edition_unverified`, `equivalent_edition`, `corroboration`.
+- Security: SSRF guard rejects 64:ff9b::/96, 64:ff9b:1::/48, ::ffff:0:0/96 and ::/96 outright and checks the embedded IPv4 of 6to4 and Teredo; the price client has `trust_env=False`; `requires-python` is `>=3.12.4`. Pre-auth identity uses only a valid `CF-Connecting-IP`.

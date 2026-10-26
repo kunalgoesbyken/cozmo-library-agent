@@ -11,3 +11,4 @@ runs/
 *.log
 _scratch/
 .venv-ml/
+libclaim.egg-info/
