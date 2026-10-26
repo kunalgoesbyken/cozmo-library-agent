@@ -19,7 +19,8 @@ from libclaim.packet.models import (
 )
 from libclaim.packet.review import build_review_queue
 from libclaim.packet.totals import compute_totals
-from libclaim.pricing.books import BookPrices
+from libclaim.pricing.appraisal import appraisal_reasons
+from libclaim.vision.reading import Reading
 from libclaim.settings import Locale
 from libclaim.stages import BookSlot, PipelineConfig, Results, item_key
 from libclaim.sweep import Ledger, SweepDir
@@ -74,17 +75,26 @@ def positions(results: Results) -> dict[str, int]:
     return numbered
 
 
-def book_status(resolution: Resolution | None, prices: BookPrices | None) -> str:
+def book_status(slot: BookSlot, results: Results, locale: Locale) -> str:
+    resolution = results.resolution.resolutions.get(slot.id)
+    prices = results.pricing.books.get(slot.id)
     if prices is not None:
         return prices.status
-    return "identified" if resolution is not None and resolution.status == "identified" else "unidentified"
+    if resolution is None or resolution.status != "identified":
+        return "unidentified"
+    read = results.reading.reads.get(slot.id)
+    appraisal = results.appraisal.books.get(slot.id)
+    reasons = appraisal_reasons(resolution, read.reading if read else Reading(track_id=slot.track),
+                                appraisal.statements if appraisal else [], [], locale)
+    return "needs_appraisal" if reasons else "identified"
 
 
-def book_line(slot: BookSlot, position: int, results: Results, sweep: SweepDir, cfg: PipelineConfig) -> Book:
+def book_line(slot: BookSlot, position: int, results: Results, sweep: SweepDir, cfg: PipelineConfig,
+              locale: Locale) -> Book:
     dims = results.scale.dims.get(slot.id)
     resolution = results.resolution.resolutions.get(slot.id)
     prices = results.pricing.books.get(slot.id)
-    status = book_status(resolution, prices)
+    status = book_status(slot, results, locale)
     named = resolution if status != "unidentified" and resolution is not None else Resolution(status="unidentified")
     evidence = (resolution.source_urls if resolution else []) + (prices.evidence if prices else [])
     return Book(
@@ -136,12 +146,13 @@ def room_of(results: Results, sweep: SweepDir) -> Room:
     return Room.model_validate(results.room.model_dump(exclude={"review", "frame_refs"}) | {"frame_refs": refs})
 
 
-def sweep_info(results: Results, sweep: SweepDir, locale: Locale) -> SweepInfo:
+def sweep_info(results: Results, sweep: SweepDir, locale: Locale, device: str) -> SweepInfo:
     times = sorted(still.t_ms for still in results.stills.stills)
     return SweepInfo(
         id=sweep.root.name,
         captured_at=datetime.fromtimestamp(times[0] / MS_PER_S, UTC).isoformat() if times else "",
         duration_s=(times[-1] - times[0]) / MS_PER_S if times else None,
+        device=device,
         country=locale.country,
         currency=locale.currency,
     )
@@ -294,9 +305,9 @@ def pipeline_review(packet: ClaimPacket, results: Results, sweep: SweepDir, cfg:
     return review.entries
 
 
-def book_lines(results: Results, sweep: SweepDir, cfg: PipelineConfig) -> list[Book]:
+def book_lines(results: Results, sweep: SweepDir, cfg: PipelineConfig, locale: Locale) -> list[Book]:
     numbered = positions(results)
-    return [book_line(slot, numbered[slot.id], results, sweep, cfg) for slot in slots(results)]
+    return [book_line(slot, numbered[slot.id], results, sweep, cfg, locale) for slot in slots(results)]
 
 
 class Sections:
@@ -316,13 +327,13 @@ class Sections:
 
 
 def build_packet(results: Results, sweep: SweepDir, locale: Locale, cfg: PipelineConfig,
-                 latency_s: dict[str, float], free_tier: bool | None = None) -> ClaimPacket:
+                 latency_s: dict[str, float], free_tier: bool | None = None, device: str = "") -> ClaimPacket:
     sections = Sections(cfg)
     packet = ClaimPacket(
-        sweep=sweep_info(results, sweep, locale),
+        sweep=sweep_info(results, sweep, locale, device),
         second_country=results.pricing.second_country,
         room=sections.build("room", lambda: room_of(results, sweep), Room()),
-        books=sections.build("books", lambda: book_lines(results, sweep, cfg), []),
+        books=sections.build("books", lambda: book_lines(results, sweep, cfg, locale), []),
         items=sections.build("items", lambda: item_lines(results, sweep), []),
         costs=costs_of(sweep.ledger, free_tier, cfg),
         latency_s=latency_s,

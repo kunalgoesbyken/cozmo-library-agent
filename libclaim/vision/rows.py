@@ -157,7 +157,7 @@ def plane_boxes(frames: dict[str, tuple[Still, Box]], cfg: MeasureConfig, unit: 
     return planes
 
 
-def shelf_units(rows_by_unit: dict[int, list[list[SpineDims]]]) -> list[ShelfUnit]:
+def shelf_units(rows_by_unit: dict[int, list[list[SpineDims]]], paths: dict[int, str]) -> list[ShelfUnit]:
     units = []
     for marker in sorted(rows_by_unit):
         metric = [[d for d in row if d.scale_method == ScaleMethod.aruco_homography] for row in rows_by_unit[marker]]
@@ -167,6 +167,7 @@ def shelf_units(rows_by_unit: dict[int, list[list[SpineDims]]]) -> list[ShelfUni
                 ShelfUnit(
                     width_m=max(sum(d.thickness_cm for d in row) for row in metric) / CM_PER_M,
                     height_m=sum(max(d.height_cm for d in row) for row in metric) / CM_PER_M,
+                    frame_ref=paths.get(metric[0][0].frame_seq, ""),
                 )
             )
     return units

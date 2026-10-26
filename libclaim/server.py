@@ -33,6 +33,7 @@ from libclaim.live.tools import SPECS, LiveTools
 from libclaim.models import Still
 from libclaim.pipeline import LiveHooks, sweep_pipeline
 from libclaim.settings import CONFIG_DIR, ROOT, Settings, load_settings
+from libclaim.stages import DEVICE, DeviceInfo
 from libclaim.sweep import SweepDir
 
 SERVER_CONFIG_PATH = CONFIG_DIR / "server.yaml"
@@ -49,6 +50,7 @@ WS_POLICY_VIOLATION = 1008
 SOF_MARKERS = frozenset(range(0xC0, 0xD0)) - {0xC4, 0xC8, 0xCC}
 STANDALONE_MARKERS = frozenset(range(0xD0, 0xD8)) | {0x01}
 TOKEN_BYTES = 32
+USER_AGENT_KEY = "ua"
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +95,7 @@ def load_server_config(path: Path = SERVER_CONFIG_PATH) -> ServerConfig:
 class Hello(BaseModel):
     token: str = ""
     t_ms: int | None = None
+    device: dict[str, Any] = {}
 
 
 class Control(BaseModel):
@@ -141,6 +144,8 @@ class SweepPipeline(Protocol):
 
     async def finish(self) -> Any: ...
 
+    async def close(self) -> None: ...
+
 
 PipelineFactory = Callable[[SweepDir, LiveHooks], SweepPipeline]
 
@@ -186,6 +191,9 @@ class NoPipeline:
         return None
 
     async def finish(self) -> None:
+        return None
+
+    async def close(self) -> None:
         return None
 
 
@@ -478,6 +486,7 @@ class Connection:
             raise Rejected("bridge_unavailable")
         self.bridge = bridge
         self.monitor = Monitor(bridge.inject, self.live)
+        self.sweep.write_stage(DEVICE, DeviceInfo(user_agent=str(hello.device.get(USER_AGENT_KEY, ""))))
         self.pipeline = self.pipeline_factory(
             self.sweep, LiveHooks(emit=self.send_json, inject=bridge.inject, recapture=self.recapture)
         )
@@ -608,12 +617,24 @@ class Connection:
     def release_preauth(self) -> None:
         self.on_authenticated()
 
+    async def end_unfinished(self) -> None:
+        if self.ending:
+            return
+        if self.stills:
+            self.finish()
+            return
+        try:
+            await self.pipeline.close()
+        except Exception:
+            logger.exception("pipeline could not be closed")
+
     async def shutdown(self) -> None:
         self.release_preauth()
         if self.slot_held:
             self.slots.release()
         if self.watcher_task:
             self.watcher_task.cancel()
+        await self.end_unfinished()
         if self.bridge is not None:
             with contextlib.suppress(Exception):
                 await self.bridge.close()

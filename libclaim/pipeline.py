@@ -56,6 +56,8 @@ from libclaim.stages import (
     SEGMENT_STAGES,
     STAGES,
     STILLS,
+    DEVICE,
+    DeviceInfo,
     FAILURES,
     FailureLog,
     StageFailure,
@@ -117,6 +119,7 @@ UNATTACHED = "user said '{subject}' is {kind} but no book was in view; not attac
 NO_LISTING = "no listing category in the item sources matches this item"
 OFFLINE_LISTING = "listing pages are not cached and the pipeline is offline"
 FRAME_SEPARATOR = "_"
+MS_PER_S = 1000
 PATH_KEYS = {"path", "frame_path", "frame_refs"}
 STAGE_TYPES: dict[str, type[BaseModel]] = {
     STILLS: StillLog,
@@ -438,6 +441,14 @@ class SweepRun:
     def start_segment(self, plan: SegmentPlan, start: str) -> None:
         self.segment_tasks.append(asyncio.create_task(self.process_segment(plan, start)))
 
+    def fresh(self, still: Still) -> bool:
+        latest = max((s.t_ms for s in self.results.stills.stills), default=still.t_ms)
+        return latest - still.t_ms <= self.cfg.recapture_max_age_ms
+
+    def region(self, still: Still) -> str:
+        first = min((s.t_ms for s in self.results.stills.stills), default=still.t_ms)
+        return self.cfg.recapture_region.format(seconds=(still.t_ms - first) // MS_PER_S)
+
     def is_row(self, boxes: list[Box], still: Still) -> bool:
         return is_row(boxes, still, self.cfg.row_min_spines, self.cfg.row_min_spine_height_frac)
 
@@ -458,7 +469,8 @@ class SweepRun:
                 raise
             return self.local_only(still, local, VISION_CUTOFF)
         if frame.flagged and not self.cut:
-            await self.notify(self.hooks.recapture, f"frame {still.seq}")
+            if self.fresh(still):
+                await self.notify(self.hooks.recapture, self.region(still))
             frame = await self.requery(frame)
         return frame
 
@@ -675,8 +687,14 @@ class SweepRun:
 
     async def measure_room(self) -> None:
         depths = await self.depths()
-        shelves = shelf_units(self.unit_rows())
-        self.results.room = await asyncio.to_thread(room_from_depth, self.all_stills(), shelves, depths)
+        stills = self.all_stills()
+        shelves = shelf_units(self.unit_rows(), {still.seq: still.path for still in self.results.stills.stills})
+        room = await asyncio.to_thread(room_from_depth, stills, shelves, depths)
+        refs = [shelf.frame_ref for shelf in shelves if shelf.frame_ref]
+        notes = [self.cfg.shelf_size_note] if shelves else []
+        self.results.room = room.model_copy(
+            update={"frame_refs": list(dict.fromkeys(room.frame_refs + refs)), "review": room.review + notes}
+        )
 
     async def appraise(self) -> None:
         books = list(slots(self.results))
@@ -727,7 +745,8 @@ class SweepRun:
         sources, listings = item_sources(locale.country), Listings(self.services.http)
         for index, det in enumerate(self.results.items.items if self.results.items else []):
             pricing.items[item_key(index)] = await self.price_det(index, det, locale, sources, listings)
-        provisional = ClaimPacket(sweep=SweepInfo(currency=locale.currency), books=book_lines(self.results, self.sweep, self.cfg))
+        lines = book_lines(self.results, self.sweep, self.cfg, locale)
+        provisional = ClaimPacket(sweep=SweepInfo(currency=locale.currency), books=lines)
         pricing.second_country = await second_country(provisional, market=other, other=market, fx=fx)
 
     async def run_stage(self, name: str, step: Callable[[], Coroutine]) -> None:
@@ -763,6 +782,14 @@ class SweepRun:
     def cancel_detections(self) -> None:
         for task in self.detections:
             task.cancel()
+
+    async def close(self) -> None:
+        tasks = [task for task in (self.consumer, *self.detections, *self.segment_tasks) if task is not None]
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        if self.close_services:
+            await self.services.aclose()
 
     async def finish(self, post: str = POST_STAGES[0]) -> ClaimPacket:
         started = time.perf_counter()
@@ -810,8 +837,9 @@ class SweepRun:
     async def publish(self, started: float) -> ClaimPacket:
         self.computed.add("packet")
         self.write_stages()
+        device = read_or(self.sweep, DEVICE, DeviceInfo, DeviceInfo())
         packet = build_packet(self.results, self.sweep, self.locale(), self.cfg, self.latency(started),
-                              self.services.settings.free_tier)
+                              self.services.settings.free_tier, device.platform)
         self.sweep.write_stage("packet", packet)
         (self.sweep.root / self.cfg.packet_name).write_text(packet.model_dump_json(indent=2), encoding="utf-8")
         render_report(packet, self.sweep)

@@ -5,6 +5,9 @@ row_min_spines: 1
 row_min_spine_height_frac: 0.2
 segment_max_frames: 12
 revisit_tails: 4
+recapture_region: "shelf at {seconds} s"
+recapture_max_age_ms: 5000
+shelf_size_note: "shelved wall area uses lower-bound shelf sizes: width is the longest measured run of spines, height is the sum of the tallest spine per row; shelf boards and headroom are not measured"
 statement_subject_match: 80
 stage_aliases:
   price: pricing

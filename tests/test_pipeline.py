@@ -18,7 +18,7 @@ from libclaim.packet.totals import compute_totals
 from libclaim.pipeline import LiveHooks, Services, SweepRun, attach_statements, excluded_by, load_stills, run_pipeline
 from libclaim.server import KIND_STILL, create_app, pack_binary
 from libclaim.settings import Settings
-from libclaim.stages import STAGES, BookSlot, load_pipeline_config
+from libclaim.stages import STAGES, BookSlot, DeviceInfo, load_pipeline_config
 from libclaim.sweep import SweepDir
 from libclaim.vision import masks
 from libclaim.vision import reading as reading_module
@@ -179,7 +179,7 @@ async def test_live_hooks_get_progress_inventory_recapture_and_readback(first):
     readback, scheduling = recorder.injected[-1]
     assert scheduling == Scheduling.WHEN_IDLE and readback["readback"] == ready["summary"]
     assert f"I counted {BOOK_COUNT} books" in ready["summary"]
-    assert recorder.recaptures == [f"frame {fx.REQUERY_FRAME}"]
+    assert recorder.recaptures == []
     assert (fx.TIEBREAK, "TileSpines") in client.calls
     assert any("count_mismatch" in entry.reason and "re-queried" in entry.reason for entry in packet.review_queue)
 
@@ -348,6 +348,36 @@ async def test_statements_that_match_nothing_go_to_review(sweep, tmp_path, onlin
     reasons = [entry.reason for entry in packet.review_queue]
     assert any("'the poster' is a print but no detected artwork" in reason for reason in reasons)
     assert any("'that one'" in reason and "no book was in view" in reason for reason in reasons)
+
+
+async def test_streaming_reports_segments_before_finish_and_alerts_while_fresh(sweep, tmp_path, online):
+    recorder = Recorder()
+    run = SweepRun(sweep, services(sweep, tmp_path, fx.Web()), recorder.hooks(), fast_config())
+    for still in load_stills(sweep):
+        run.add_still(still)
+        async with asyncio.timeout(WAIT_S):
+            while not all(task.done() for task in run.detections):
+                await asyncio.sleep(0.01)
+    async with asyncio.timeout(WAIT_S):
+        while not any(event["stage"] == "resolution" for event in recorder.of("pipeline.progress")):
+            await asyncio.sleep(0.01)
+    assert not recorder.of("packet_ready")
+    seconds = (fx.REQUERY_FRAME - 1) * fx.STEP_MS // 1000
+    assert recorder.recaptures == [load_pipeline_config().recapture_region.format(seconds=seconds)]
+    packet = await asyncio.wait_for(run.finish(), WAIT_S)
+    assert packet.totals.book_count == BOOK_COUNT and recorder.of("packet_ready")
+
+
+async def test_appraisal_status_survives_when_pricing_fails(sweep, tmp_path, online, monkeypatch):
+    monkeypatch.setattr(pipeline_module, "price_book", boom)
+    packet = await run_pipeline(sweep, services=services(sweep, tmp_path, fx.Web()))
+    assert {title for title, book in by_title(packet).items() if book.status == "needs_appraisal"} == APPRAISAL
+
+
+def test_device_platform_comes_from_the_user_agent():
+    agent = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Safari/604.1"
+    assert DeviceInfo(user_agent=agent).platform == "iPhone; CPU iPhone OS 18_0 like Mac OS X"
+    assert DeviceInfo(user_agent="curl/8").platform == "curl/8"
 
 
 class Storm:

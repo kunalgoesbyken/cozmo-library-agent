@@ -6,7 +6,7 @@ from libclaim.models import Still
 from libclaim.settings import Settings
 from libclaim.vision import masks
 from libclaim.vision.boxes import Box, load_vision_config
-from libclaim.vision.rows import continues, flat_dims, marker_unit, same_row, shelf_units, split_rows
+from libclaim.vision.rows import continues, flat_dims, is_row, marker_unit, same_row, shelf_units, split_rows
 from libclaim.vision.scale import ScaleMethod, SpineDims, load_measure_config
 from libclaim.vision.tracks import BookTrack, BoxRef
 
@@ -69,6 +69,15 @@ def test_split_rows_orders_rows_top_down_books_left_right_and_places_flat_books(
     assert flat == [3]
 
 
+def test_row_frames_need_tall_spines_so_wide_shots_are_room_frames():
+    still = Still(seq=0, t_ms=0, path="", w=960, h=540, blur=1.0, glare=0.0, motion_dps=0.0)
+    close = [box(0, 100, 30, 300)]
+    wide = [box(x, 200, x + 8, 240) for x in range(0, 400, 10)]
+    assert is_row(close, still, 1, 0.2)
+    assert not is_row(wide, still, 1, 0.2)
+    assert not is_row([], still, 1, 0.2)
+
+
 def test_marker_unit_is_the_most_frequent_marker(tmp_path):
     dictionary = cv2.aruco.getPredefinedDictionary(getattr(cv2.aruco, load_vision_config().scale.aruco_dictionary))
     stills = []
@@ -99,7 +108,7 @@ def test_shelf_units_are_lower_bounds_from_metric_rows_only():
         1: [[dims(20, 3), dims(24, 4)], [dims(30, 5)]],
         2: [[dims(21, 2, ScaleMethod.book_format_prior)]],
     }
-    units = shelf_units(rows)
-    assert len(units) == 1
+    units = shelf_units(rows, {0: "frames/00000_0.jpg"})
+    assert len(units) == 1 and units[0].frame_ref == "frames/00000_0.jpg"
     assert units[0].width_m == pytest.approx(0.07)
     assert units[0].height_m == pytest.approx(0.54)

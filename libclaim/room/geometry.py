@@ -96,6 +96,7 @@ class RoomConfig(BaseModel):
 class ShelfUnit(BaseModel):
     width_m: float
     height_m: float
+    frame_ref: str = ""
 
 
 class RoomGeometry(Room):

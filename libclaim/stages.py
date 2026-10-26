@@ -27,6 +27,7 @@ STREAM_STAGES = STAGES[:2]
 SEGMENT_STAGES = STAGES[2:6]
 POST_STAGES = STAGES[6:]
 STILLS = "stills"
+DEVICE = "device"
 FAILURES = "failures"
 VISION_CUTOFF = "vision_cutoff"
 
@@ -58,6 +59,9 @@ class PipelineConfig(BaseModel):
     row_min_spine_height_frac: float
     segment_max_frames: int
     revisit_tails: int
+    recapture_region: str
+    recapture_max_age_ms: int
+    shelf_size_note: str
     statement_subject_match: float
     stage_aliases: dict[str, str]
     packet_name: str
@@ -88,6 +92,15 @@ def book_key(segment: int, index: int) -> str:
 
 class StillLog(BaseModel):
     stills: list[Still] = Field(default_factory=list)
+
+
+class DeviceInfo(BaseModel):
+    user_agent: str = ""
+
+    @property
+    def platform(self) -> str:
+        inside = self.user_agent.partition("(")[2].partition(")")[0]
+        return inside.strip() or self.user_agent
 
 
 class KeyframesStage(BaseModel):

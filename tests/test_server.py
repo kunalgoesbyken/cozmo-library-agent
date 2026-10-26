@@ -1,5 +1,6 @@
 import asyncio
 import json
+import time
 
 import cv2
 import numpy as np
@@ -13,6 +14,8 @@ from libclaim.settings import Settings
 TOKEN = "secret-token-0123456789abcdef"
 MAX_MESSAGES = 30
 SECRET_SPEND = "secret spend"
+MAX_WAITS = 200
+WAIT_STEP_S = 0.02
 
 
 class FakeBridge:
@@ -77,7 +80,11 @@ class Harness:
                     {"type": "packet_ready", "json": "/runs/x/claim_packet.json", "report": "/runs/x/report.html"}
                 )
 
+            async def close(self):
+                harness.closed.append(self.sweep.root)
+
         self.stills = []
+        self.closed = []
 
         self.runs = tmp_path / "runs"
         dist = tmp_path / "dist"
@@ -160,6 +167,43 @@ def test_stored_stills_are_fed_to_the_pipeline(tmp_path):
         end_sweep(ws)
         read_until(ws, "packet_ready")
     assert [still.seq for still in h.stills] == [1, 2]
+
+
+def wait_for(condition):
+    for _ in range(MAX_WAITS):
+        if condition():
+            return True
+        time.sleep(WAIT_STEP_S)
+    return False
+
+
+def test_dropped_phone_with_stills_still_produces_a_packet(tmp_path):
+    h = Harness(tmp_path)
+    with TestClient(h.app) as client:
+        with client.websocket_connect("/ws/sweep") as ws:
+            sweep_id = hello(ws)["sweep_id"]
+            ws.send_bytes(still_frame(checkerboard(), seq=1))
+            read_until(ws, "coverage")
+        assert wait_for(lambda: h.end_calls)
+    assert h.end_calls == [h.runs / sweep_id] and h.closed == []
+
+
+def test_dropped_phone_without_stills_cancels_the_run(tmp_path):
+    h = Harness(tmp_path)
+    with TestClient(h.app) as client:
+        with client.websocket_connect("/ws/sweep") as ws:
+            sweep_id = hello(ws)["sweep_id"]
+        assert wait_for(lambda: h.closed)
+    assert h.closed == [h.runs / sweep_id] and h.end_calls == []
+
+
+def test_hello_device_user_agent_is_kept_for_the_packet(tmp_path):
+    h = Harness(tmp_path)
+    agent = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Safari/604.1"
+    with TestClient(h.app) as client, client.websocket_connect("/ws/sweep") as ws:
+        sweep_id = hello(ws, device={"ua": agent})["sweep_id"]
+    saved = json.loads((h.runs / sweep_id / "stages" / "device.json").read_text(encoding="utf-8"))
+    assert saved["user_agent"] == agent
 
 
 def test_sharp_still_marks_region_sharp_without_alert(tmp_path):

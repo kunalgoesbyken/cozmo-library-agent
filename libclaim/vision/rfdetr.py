@@ -1,4 +1,5 @@
 import os
+import threading
 from functools import cache
 from pathlib import Path
 
@@ -8,6 +9,8 @@ import onnxruntime as ort
 
 from libclaim.settings import ROOT
 from libclaim.vision.boxes import Box, VisionConfig, load_vision_config
+
+SESSION_LOCK = threading.Lock()
 
 
 def model_path(cfg: VisionConfig) -> Path:
@@ -62,7 +65,8 @@ def rfdetr_boxes(img: np.ndarray) -> list[Box] | None:
     path = model_path(cfg)
     if not path.is_file():
         return None
-    session = load_session(path, tuple(cfg.rfdetr.providers))
+    with SESSION_LOCK:
+        session = load_session(path, tuple(cfg.rfdetr.providers))
     boxes, logits = run_model(session, img, cfg)
     height, width = img.shape[:2]
     return decode(boxes[0], logits[0], width, height, cfg.rfdetr.threshold)
