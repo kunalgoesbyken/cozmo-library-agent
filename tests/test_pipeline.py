@@ -260,6 +260,25 @@ async def test_moved_run_replays_from_cache_without_any_network_or_model_call(fi
     assert stable(replay)["sweep"]["id"] == "moved"
 
 
+async def test_replay_from_scale_reuses_recorded_reads_even_when_the_crops_changed(first, sweep, tmp_path, monkeypatch):
+    packet = first[0]
+    real = pipeline_module.spine_crops
+
+    def altered(books):
+        crops = real(books)
+        for crop in crops:
+            crop.image = crop.image.copy()
+            crop.image[0, 0] = 255 - crop.image[0, 0]
+        return crops
+
+    monkeypatch.setattr(pipeline_module, "spine_crops", altered)
+    poisoned = Poisoned()
+    llm = fx.fake_llm(sweep, tmp_path, poisoned)
+    replay = await run_pipeline(sweep, "scale", services=services(sweep, tmp_path, fx.Web(fail=True), llm))
+    assert poisoned.calls == []
+    assert stable(replay) == stable(packet)
+
+
 def test_cli_replays_from_price_offline(first, sweep, monkeypatch, capsys):
     packet = first[0]
     monkeypatch.setattr(pipeline_module, "load_settings", lambda: fx.SETTINGS)

@@ -571,7 +571,10 @@ class SweepRun:
         return {book.id: by_track[book.track] for book in segment.books}, planes
 
     async def read_segment(self, plan: SegmentPlan) -> None:
-        books = self.results.tracks.segments[plan.index].books
+        recorded = self.results.reading.reads
+        books = [book for book in self.results.tracks.segments[plan.index].books if book.id not in recorded]
+        if not books:
+            return
         crops = await asyncio.to_thread(spine_crops, books)
 
         def store(readings: list[Reading]) -> None:
@@ -911,6 +914,11 @@ class SweepRun:
             default = None if name in OPTIONAL_STAGES else STAGE_TYPES[name]()
             setattr(self.results, name, read_relocated(self.sweep, name, STAGE_TYPES[name], default))
 
+    def reuse_reads(self) -> None:
+        self.load(["reading"])
+        reads = self.results.reading.reads
+        self.results.reading.reads = {key: read for key, read in reads.items() if not read.reading.failure}
+
     async def replay(self, from_stage: str | None = None) -> ClaimPacket:
         stage = self.cfg.stage_aliases.get(from_stage, from_stage) if from_stage else STAGES[0]
         if stage not in STAGES:
@@ -929,6 +937,8 @@ class SweepRun:
             for keyframe in self.results.keyframes.keyframes:
                 self.queue_detection(keyframe)
         elif stage in SEGMENT_STAGES:
+            if stage == SEGMENT_STAGES[1]:
+                self.reuse_reads()
             for plan in self.results.spines.segments:
                 self.start_segment(plan, stage)
         return await self.finish(stage if stage in POST_STAGES else POST_STAGES[0])
