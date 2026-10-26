@@ -27,17 +27,44 @@ def test_statement_of_kind_other_is_not_a_reason():
     assert reasons(statements=[statement(StatementKind.other)]) == []
 
 
-@pytest.mark.parametrize("title", ["Signed Copy", "THE FIRST EDITION", "first, edition"])
-def test_spine_wording_requires_appraisal(title):
+@pytest.mark.parametrize(
+    "title",
+    [
+        "Signed Copy",
+        "THE FIRST EDITION",
+        "first, edition",
+        "Author's Signature",
+        "AUTOGRAPHED!",
+        "Inscribed to Tom",
+        "An Inscription",
+        "1st Edition",
+        "First Printing",
+        "First Print",
+        "Numbered 12/500",
+        "Limited Edition",
+        "Uncorrected Proof",
+        "Advance Copy",
+        "Rare Find",
+        "Antiquarian Books",
+    ],
+)
+def test_wording_families_require_appraisal(title):
     assert reasons(read=reading(title_verbatim=title)) == ["spine_wording"]
 
 
-def test_spine_wording_found_in_ocr_text():
-    assert reasons(res=resolution(ocr_text="Limited Signed by the author")) == ["spine_wording"]
+@pytest.mark.parametrize("field", ["ocr_text", "vlm_text", "edition"])
+def test_wording_is_found_in_every_text_source(field):
+    assert reasons(res=resolution(**{field: "Limited Signed by the author"})) == ["spine_wording"]
 
 
-def test_words_that_only_contain_a_trigger_do_not_fire():
-    assert reasons(read=reading(title_verbatim="Designed Sign Language")) == []
+@pytest.mark.parametrize("field", ["author_verbatim", "publisher_verbatim"])
+def test_wording_is_found_in_author_and_publisher_reads(field):
+    assert reasons(read=reading(**{field: "First Edition Society"})) == ["spine_wording"]
+
+
+@pytest.mark.parametrize("title", ["Designed Sign Language", "Unsigned", "Rarely Numbering"])
+def test_words_that_only_contain_a_trigger_do_not_fire(title):
+    assert reasons(read=reading(title_verbatim=title)) == []
 
 
 def test_year_before_antiquarian_year():

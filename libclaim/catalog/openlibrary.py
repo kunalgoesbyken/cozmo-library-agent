@@ -1,4 +1,4 @@
-from libclaim.catalog.http import CatalogHttp, Candidate, Edition
+from libclaim.catalog.http import Candidate, CatalogHttp, Edition, year_of
 from libclaim.resolve_config import load_resolve_config
 
 SOURCE = "openlibrary"
@@ -35,7 +35,12 @@ class OpenLibrary:
         url = cfg.editions_url.format(work=work)
         body = await self.http.get_json(url, {"limit": self.config.editions_limit})
         return [
-            Edition(publisher=(entry.get("publishers") or [""])[0], isbn=entry[ISBN_13][0], url=cfg.site_url + entry["key"])
+            Edition(
+                publisher=(entry.get("publishers") or [""])[0],
+                isbn=entry[ISBN_13][0],
+                url=cfg.site_url + entry["key"],
+                year=year_of(str(entry.get("publish_date", ""))),
+            )
             for entry in body.get("entries", [])
             if entry.get(ISBN_13) and entry.get("key")
         ]

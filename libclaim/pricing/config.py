@@ -1,3 +1,4 @@
+import json
 from decimal import Decimal
 from functools import cache
 
@@ -96,6 +97,7 @@ class Flag(BaseModel):
 
 
 class BooksConfig(BaseModel):
+    factors_snapshot: str
     factor_version: str
     default_condition: str
     disagreement_ratio: Decimal
@@ -115,7 +117,7 @@ class CalibrationConfig(BaseModel):
 
 
 class PricingConfig(BaseModel):
-    condition_factors: dict[str, dict[str, Decimal]]
+    condition_factors: dict[str, Decimal]
     books: BooksConfig
     calibration: CalibrationConfig
     bookswagon: Flag
@@ -146,7 +148,12 @@ class ItemSources(BaseModel):
 
 @cache
 def load_pricing_config() -> PricingConfig:
-    return PricingConfig.model_validate(yaml.safe_load((CONFIG_DIR / "pricing.yaml").read_text(encoding="utf-8")))
+    raw = yaml.safe_load((CONFIG_DIR / "pricing.yaml").read_text(encoding="utf-8"))
+    path = CONFIG_DIR / raw["calibration"]["snapshot_dir"] / f"{raw['books']['factors_snapshot']}.json"
+    snapshot = json.loads(path.read_text(encoding="utf-8"))
+    raw["condition_factors"] = snapshot["condition_factors"]
+    raw["books"]["factor_version"] = snapshot["version"]
+    return PricingConfig.model_validate(raw)
 
 
 @cache

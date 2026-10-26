@@ -57,6 +57,15 @@ class Edition(BaseModel):
     publisher: str
     isbn: str
     url: str
+    year: int | None = None
+
+
+YEAR_DIGITS = 4
+
+
+def year_of(text: str) -> int | None:
+    words = "".join(char if char.isalnum() else " " for char in text).split()
+    return next((int(word) for word in words if len(word) == YEAR_DIGITS and word.isdigit()), None)
 
 
 class CatalogHttp:

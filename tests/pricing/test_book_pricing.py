@@ -6,6 +6,7 @@ import pytest
 from libclaim.live.tools import StatementKind
 from libclaim.pricing.books import Market, derive_used, price_book
 from libclaim.pricing.config import load_pricing_config
+from libclaim.pricing.http import PriceFetchError
 from libclaim.pricing.sources.fx import Fx
 from libclaim.settings import load_locale
 from tests.pricing.factories import ISBN, FakeSource, not_found, quote, reading, resolution, statement
@@ -47,7 +48,7 @@ async def test_local_new_price_and_observed_used(http):
 async def test_used_is_derived_from_new_and_labelled(http):
     chor = FakeSource(new=quote(1000))
     result = await price(market=india(bookchor=chor), fx=Fx(http))
-    factor = load_pricing_config().condition_factors["v1"]["good"]
+    factor = load_pricing_config().condition_factors["good"]
     assert result.used_value.source_type == "derived"
     assert result.used_value.amount == Decimal(1000) * factor
     assert result.used_value.method == "condition_factor:v1:good"
@@ -89,6 +90,7 @@ async def test_no_local_price_converts_from_the_other_market_at_the_ecb_rate(htt
     assert "api.frankfurter.dev" in result.fx.url and "providers=ECB" in result.fx.url
     assert result.fx.cache_ref in result.evidence and result.original.cache_ref in result.evidence
     assert result.used_value.source_type == "derived" and result.used_value.amount is not None
+    assert result.used_value.method == "condition_factor:v1:good:from_converted"
     assert any(reason.startswith("converted") for reason in result.review)
 
 
@@ -144,10 +146,68 @@ def test_derive_used_uses_the_versioned_factor_and_labels_it():
     cfg = load_pricing_config()
     derived = derive_used(quote(1571), "very_good", cfg)
     assert derived.kind == "derived_from_new" and derived.condition == "very_good"
-    assert derived.amount == (Decimal(1571) * cfg.condition_factors["v1"]["very_good"]).quantize(cfg.books.rounding)
+    assert derived.amount == (Decimal(1571) * cfg.condition_factors["very_good"]).quantize(cfg.books.rounding)
     assert derived.url.endswith("/new") and derived.cache_ref == "Bookchor-new" and derived.isbn_on_page == ISBN
 
 
 def test_derive_used_rejects_an_unknown_grade():
     with pytest.raises(KeyError):
         derive_used(quote(100), "mint", load_pricing_config())
+
+
+class BrokenFx:
+    async def rate(self, base, quote, on_or_before):
+        raise PriceFetchError("ecb down")
+
+
+class Exploding:
+    async def quote(self, isbn, condition):
+        raise RuntimeError("boom")
+
+
+async def test_fx_failure_keeps_the_foreign_price_as_evidence_and_says_why():
+    penguin = FakeSource(new=quote("10.00", currency="GBP", source="Penguin UK"))
+    result = await price(market=india(), other=britain(penguin_uk=penguin), fx=BrokenFx())
+    assert result.excluded is True and result.replacement_cost.amount is None
+    assert result.review == ["fx_unavailable", "no_price_source"]
+    assert result.original.amount == Decimal("10.00") and result.evidence == ["Penguin UK-new"]
+
+
+async def test_old_edition_year_needs_appraisal_and_unknown_year_is_only_a_review_reason():
+    chor = FakeSource(new=quote(500))
+    old = await price(res=resolution(year=1920), market=india(bookchor=chor))
+    assert old.status == "needs_appraisal" and old.review == ["antiquarian_year"]
+    assert old.replacement_cost.amount is None
+    unknown = await price(res=resolution(year=None), market=india(bookchor=chor))
+    assert unknown.status == "identified" and unknown.replacement_cost.amount == Decimal(500)
+    assert unknown.review == ["year_unknown"]
+
+
+async def test_source_errors_and_missing_sources_become_review_reasons_not_crashes():
+    market = Market(IN, {"bookchor": Exploding(), "pustakkosh": FakeSource(new=quote(300, source="Pustakkosh"))})
+    result = await price(market=market)
+    assert result.replacement_cost.source == "Pustakkosh"
+    assert result.review == ["source_unavailable: bookchor"]
+
+
+async def test_observed_used_without_new_is_priced_for_used_only_and_not_excluded():
+    chor = FakeSource(used=quote(251, condition="used"))
+    result = await price(market=india(bookchor=chor))
+    assert result.status == "identified" and not result.excluded
+    assert result.replacement_cost.amount is None and result.used_value.amount == Decimal(251)
+    assert result.review == ["no_new_price"]
+
+
+async def test_disagreement_is_relative_to_the_lower_price_and_skips_a_zero_price():
+    def pair(high, low):
+        return india(bookchor=FakeSource(new=quote(high)), pustakkosh=FakeSource(new=quote(low, source="Pustakkosh")))
+
+    just_over, exactly, zero = [await price(market=pair(h, low)) for h, low in (("125.1", 100), (125, 100), (125, 0))]
+    assert [bool(r.review) for r in (just_over, exactly, zero)] == [True, False, False]
+
+
+async def test_evidence_lists_every_retailer_consulted():
+    chor = FakeSource(new=quote(500, source="Bookchor"))
+    kosh = FakeSource(new=quote(510, source="Pustakkosh"))
+    result = await price(market=india(bookchor=chor, pustakkosh=kosh))
+    assert {"Bookchor-new", "Pustakkosh-new"} <= set(result.evidence)

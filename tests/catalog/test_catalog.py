@@ -5,7 +5,7 @@ import httpx
 import pytest
 
 from libclaim.catalog.googlebooks import GoogleBooks
-from libclaim.catalog.http import CatalogBadResponse, CatalogHttp, CatalogOffline, guarded
+from libclaim.catalog.http import CatalogBadResponse, CatalogHttp, CatalogOffline, guarded, year_of
 from libclaim.catalog.openlibrary import OpenLibrary
 
 FIXTURES = Path(__file__).resolve().parent.parent / "fixtures" / "catalog"
@@ -108,3 +108,17 @@ async def test_edition_with_empty_publishers_keeps_its_isbn(tmp_path, online):
     http = http_with(tmp_path, lambda request: httpx.Response(200, content=body))
     editions = await OpenLibrary(http).editions("OL1W")
     assert [(e.publisher, e.isbn) for e in editions] == [("", "9780000000002")]
+
+
+@pytest.mark.parametrize(
+    ("text", "year"), [("2022", 2022), ("March 5, 2010", 2010), ("1998-03", 1998), ("c. 1850", 1850), ("", None), ("n.d.", None)]
+)
+def test_year_of_publish_date_text(text, year):
+    assert year_of(text) == year
+
+
+async def test_edition_year_comes_from_its_own_publish_date(tmp_path, online):
+    body = b'{"entries": [{"key": "/books/OL1M", "publish_date": "May 2, 1931", "isbn_13": ["9780000000002"]}]}'
+    http = http_with(tmp_path, lambda request: httpx.Response(200, content=body))
+    editions = await OpenLibrary(http).editions("OL1W")
+    assert [e.year for e in editions] == [1931]

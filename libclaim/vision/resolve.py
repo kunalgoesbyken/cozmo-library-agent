@@ -6,9 +6,9 @@ from pydantic import BaseModel
 from rapidfuzz import fuzz, process
 from rapidfuzz.utils import default_process
 
+from libclaim.catalog.googlebooks import SOURCE as GOOGLE_BOOKS
 from libclaim.catalog.googlebooks import GoogleBooks
 from libclaim.catalog.http import Candidate, CatalogHttp, Edition, guarded
-from libclaim.catalog.googlebooks import SOURCE as GOOGLE_BOOKS
 from libclaim.catalog.openlibrary import SOURCE as OPEN_LIBRARY
 from libclaim.catalog.openlibrary import OpenLibrary
 from libclaim.resolve_config import load_resolve_config
@@ -210,7 +210,11 @@ def pick_edition(reading: Reading, editions: list[Edition]) -> tuple[Edition | N
 
 
 async def edition_options(reading: Reading, top: Scored, catalogs: Catalogs) -> tuple[list[Edition], bool]:
-    options = [Edition(publisher=m.publisher, isbn=m.isbn, url=m.url) for m in top.members if m.publisher and m.isbn]
+    options = [
+        Edition(publisher=m.publisher, isbn=m.isbn, url=m.url, year=m.year if m.source == GOOGLE_BOOKS else None)
+        for m in top.members
+        if m.publisher and m.isbn
+    ]
     library = next((m for m in top.members if m.source == OPEN_LIBRARY), None)
     if library is None or not tokens(reading.publisher_verbatim):
         return options, False
@@ -262,7 +266,7 @@ async def resolve(
             "author": top.best.author,
             "edition": edition.publisher if edition else "",
             "isbn": edition.isbn if edition else "",
-            "year": next((m.year for m in top.members if m.source == GOOGLE_BOOKS and m.year), None),
+            "year": edition.year if edition else None,
             "edition_unverified": unverified or editions_down,
             "id_confidence": round(top.score / 100 * ocr_overlap(reading, ocr[0]), 3),
             "match_score": top.score,

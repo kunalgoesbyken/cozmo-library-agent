@@ -1,11 +1,4 @@
 used_value_policy: derived_from_new
-condition_factors:
-  v1:
-    new: 1.0
-    like_new: 0.8
-    very_good: 0.65
-    good: 0.5
-    acceptable: 0.35
 bookswagon:
   enabled: false
 http:
@@ -78,16 +71,34 @@ listings:
     label_separator: "product comparison, "
   product_url_marker: /product/
 books:
-  factor_version: v1
+  factors_snapshot: condition_factors.v1
   default_condition: good
   disagreement_ratio: 0.25
   used_new_ratio: 1.5
   rounding: "0.01"
-  appraisal_triggers: [signed, autographed, inscribed, first edition, first printing]
+  appraisal_triggers:
+    - signed
+    - signature
+    - autograph
+    - autographed
+    - inscribed
+    - inscription
+    - 1st
+    - first edition
+    - first print
+    - first printing
+    - first impression
+    - numbered
+    - limited edition
+    - proof
+    - advance copy
+    - uncorrected
+    - rare
+    - antiquarian
 calibration:
   grade: good
   max_requests: 15
-  min_pairs: 10
+  min_pairs: 5
   sources: [bookchor, pustakkosh]
   snapshot_dir: calibration
   ground_truth_csv: ground_truth/prices15.csv

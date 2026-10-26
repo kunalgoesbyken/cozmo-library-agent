@@ -32,6 +32,7 @@ async def test_sapiens_resolves_to_vintage_edition(catalogs):
     assert "Harari" in result.author
     assert "Vintage" in result.edition
     assert len(result.isbn) == 13
+    assert result.year is not None and result.year >= 1900
     assert result.match_score >= 95
     assert result.margin >= 8
     assert 0.9 <= result.id_confidence <= 1.0
