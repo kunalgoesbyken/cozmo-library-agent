@@ -267,3 +267,36 @@ async def test_picked_edition_carries_open_library_dimensions(catalogs):
     )
     assert result.isbn == "9780099590088"
     assert result.physical_dimensions == "19.8 x 12.9 x 3 cm"
+
+
+class StubLibrary:
+    def __init__(self, known):
+        self.known = known
+
+    async def search(self, title, author):
+        return [
+            Candidate(source="openlibrary", title=known, author="Sven Hedin", work="OL1W", url="https://openlibrary.org/works/OL1W")
+            for known in self.known
+            if title == known.casefold()
+        ]
+
+    async def editions(self, work):
+        return []
+
+
+class StubBooks:
+    async def search(self, title, author):
+        return []
+
+
+async def test_volume_number_on_spine_falls_back_to_the_bare_title():
+    stub = Catalogs(StubLibrary(["Transhimalaja"]), StubBooks())
+    result = await resolve(reading("Transhimalaja 2", "Sven Hedin"), ("Transhimalaja 2 Sven Hedin", 0.9), None, stub)
+    assert result.status == "identified"
+    assert result.title == "Transhimalaja"
+
+
+async def test_all_digit_title_is_not_stripped():
+    stub = Catalogs(StubLibrary(["Transhimalaja"]), StubBooks())
+    result = await resolve(reading("1984", "Sven Hedin"), ("1984 Sven Hedin", 0.9), None, stub)
+    assert result.reason == "no_catalogue_match"

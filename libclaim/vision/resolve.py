@@ -228,6 +228,30 @@ def unidentified(base: Resolution, reason: str, candidates: list[Scored]) -> Res
     return base.model_copy(update={"reason": reason, "match_score": score, "margin": margin_of(candidates)})
 
 
+async def search_catalogs(
+    reading: Reading, ocr: tuple[str, float], catalogs: Catalogs
+) -> tuple[list[Scored], bool]:
+    title = query_text(reading.title_verbatim)
+    author = query_text(reading.author_verbatim)
+    found, unavailable = await guarded(catalogs.open_library.search(title, author), "open library search")
+    ranked = rank(reading, found)
+    if not accept_identification(reading, ocr, ranked):
+        more, down = await guarded(catalogs.google_books.search(title, author), "google books search")
+        found, unavailable = found + more, unavailable or down
+        ranked = rank(reading, found)
+    return ranked, unavailable
+
+
+def without_trailing_numbers(reading: Reading) -> Reading | None:
+    words = reading.title_verbatim.split()
+    kept = list(words)
+    while len(kept) > 1 and kept[-1].isdigit():
+        kept.pop()
+    if kept == words:
+        return None
+    return reading.model_copy(update={"title_verbatim": WORD_SEPARATOR.join(kept)})
+
+
 async def resolve(
     reading: Reading,
     ocr: tuple[str, float],
@@ -242,14 +266,11 @@ async def resolve(
         return unidentified(base, "illegible", [])
     if ocr_overlap(reading, ocr[0]) < gates.ocr_overlap_min:
         return unidentified(base, "ocr_disagrees", [])
-    title = query_text(reading.title_verbatim)
-    author = query_text(reading.author_verbatim)
-    found, unavailable = await guarded(catalogs.open_library.search(title, author), "open library search")
-    ranked = rank(reading, found)
-    if not accept_identification(reading, ocr, ranked):
-        more, down = await guarded(catalogs.google_books.search(title, author), "google books search")
-        found, unavailable = found + more, unavailable or down
-        ranked = rank(reading, found)
+    ranked, unavailable = await search_catalogs(reading, ocr, catalogs)
+    unnumbered = without_trailing_numbers(reading)
+    if not ranked and unnumbered is not None:
+        reading = unnumbered
+        ranked, unavailable = await search_catalogs(reading, ocr, catalogs)
     if not accept_identification(reading, ocr, ranked):
         if unavailable:
             return unidentified(base, "catalogue_unavailable", ranked)
