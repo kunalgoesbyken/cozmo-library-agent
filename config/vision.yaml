@@ -1,0 +1,33 @@
+tiles:
+  cols: 2
+  rows: 1
+  overlap: 0.1
+jpeg_quality: 90
+jpeg_mime: image/jpeg
+box_scale: 1000
+nms_iou: 0.6
+prompt: >-
+  The images are tiles of one photo of books on a shelf, numbered by image_index starting at 0.
+  For every visible book spine, including partially visible and horizontally stacked books,
+  return its 2D bounding box box_2d as [ymin, xmin, ymax, xmax] normalised to 0-1000 within
+  its own image, the image_index it appears in, and its orientation (vertical for standing
+  books, horizontal for lying or stacked books).
+rfdetr:
+  model_path: _scratch/models/rfdetr-nano-bookshelf.onnx
+  path_env: LIBCLAIM_RFDETR_PATH
+  input_size: 384
+  threshold: 0.5
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+  providers: [DmlExecutionProvider, CPUExecutionProvider]
+reconcile:
+  match_iou: 0.5
+  count_diff_fraction: 0.10
+  gap_thickness_factor: 1.5
+  max_requery_rows: 5
+tracks:
+  orb_features: 2000
+  match_ratio: 0.75
+  ransac_reproj_px: 4.0
+  min_inliers: 15
+  track_iou: 0.5
