@@ -498,6 +498,50 @@ def test_per_client_preauth_limit(tmp_path):
                     pass
 
 
+def proxied(app, host="127.0.0.1"):
+    return TestClient(app, client=(host, 50000))
+
+
+def test_proxied_clients_with_distinct_identities_do_not_block_each_other(tmp_path):
+    h = Harness(tmp_path, max_unauthenticated=10, max_unauthenticated_per_client=1)
+    with proxied(h.app) as client:
+        with client.websocket_connect("/ws/sweep", headers={"cf-connecting-ip": "198.51.100.1"}):
+            with client.websocket_connect("/ws/sweep", headers={"cf-connecting-ip": "198.51.100.2"}):
+                with client.websocket_connect("/ws/sweep", headers={"x-forwarded-for": "198.51.100.3, 10.0.0.1"}):
+                    with pytest.raises(WebSocketDisconnect):
+                        with client.websocket_connect("/ws/sweep", headers={"cf-connecting-ip": "198.51.100.1"}):
+                            pass
+
+
+def test_without_proxy_trust_loopback_cap_equals_global_cap(tmp_path):
+    h = Harness(tmp_path, max_unauthenticated=3, max_unauthenticated_per_client=1, trust_proxy_headers=False)
+    headers = {"cf-connecting-ip": "198.51.100.1"}
+    with proxied(h.app) as client:
+        with client.websocket_connect("/ws/sweep", headers=headers):
+            with client.websocket_connect("/ws/sweep", headers=headers):
+                with client.websocket_connect("/ws/sweep", headers=headers):
+                    with pytest.raises(WebSocketDisconnect):
+                        with client.websocket_connect("/ws/sweep", headers=headers):
+                            pass
+
+
+def test_loopback_peer_without_identity_header_is_not_limited_per_client(tmp_path):
+    h = Harness(tmp_path, max_unauthenticated=3, max_unauthenticated_per_client=1)
+    with proxied(h.app) as client:
+        with client.websocket_connect("/ws/sweep"), client.websocket_connect("/ws/sweep"):
+            with client.websocket_connect("/ws/sweep") as ws:
+                assert hello(ws)["state"] == "connecting"
+
+
+def test_spoofed_identity_header_from_non_loopback_peer_is_ignored(tmp_path):
+    h = Harness(tmp_path, max_unauthenticated=10, max_unauthenticated_per_client=1)
+    with proxied(h.app, "203.0.113.5") as client:
+        with client.websocket_connect("/ws/sweep", headers={"cf-connecting-ip": "198.51.100.1"}):
+            with pytest.raises(WebSocketDisconnect):
+                with client.websocket_connect("/ws/sweep", headers={"cf-connecting-ip": "198.51.100.2"}):
+                    pass
+
+
 def test_repeated_failed_connects_do_not_exhaust_pool(tmp_path):
     h = Harness(tmp_path, max_unauthenticated=1, max_unauthenticated_per_client=1)
     with TestClient(h.app) as client:

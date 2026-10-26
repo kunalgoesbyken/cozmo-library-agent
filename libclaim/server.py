@@ -1,5 +1,6 @@
 import asyncio
 import contextlib
+import ipaddress
 import json
 import logging
 import secrets
@@ -67,6 +68,7 @@ class ServerConfig(BaseModel):
     max_unauthenticated_per_client: int
     allowed_origin_suffixes: list[str]
     trust_forwarded_host: bool
+    trust_proxy_headers: bool
     max_header_bytes: int
     max_mic_bytes: int
     max_frame_bytes: int
@@ -140,8 +142,9 @@ class Preauth:
         self.per_client = per_client
         self.clients: dict[str, int] = {}
 
-    def acquire(self, client: str) -> bool:
-        if sum(self.clients.values()) >= self.total or self.clients.get(client, 0) >= self.per_client:
+    def acquire(self, client: str, distinct: bool = True) -> bool:
+        limit = self.per_client if distinct else self.total
+        if sum(self.clients.values()) >= self.total or self.clients.get(client, 0) >= limit:
             return False
         self.clients[client] = self.clients.get(client, 0) + 1
         return True
@@ -242,6 +245,22 @@ def check_image(data: bytes, max_pixels: int, expected: tuple[int, int] | None =
         raise ValueError("image dimensions out of range")
     if expected is not None and expected != (width, height):
         raise ValueError("header dimensions do not match image")
+
+
+def client_identity(websocket: WebSocket, config: ServerConfig) -> tuple[str, bool]:
+    peer = websocket.client.host if websocket.client else ""
+    try:
+        loopback = ipaddress.ip_address(peer).is_loopback
+    except ValueError:
+        loopback = False
+    if not loopback:
+        return peer, True
+    if config.trust_proxy_headers:
+        headers = websocket.headers
+        forwarded = headers.get("cf-connecting-ip") or headers.get("x-forwarded-for", "").split(",")[0]
+        if forwarded.strip():
+            return forwarded.strip(), True
+    return peer, False
 
 
 def token_matches(given: str | None, expected: str) -> bool:
@@ -612,10 +631,10 @@ def create_app(
     @app.websocket("/ws/sweep")
     async def sweep_socket(websocket: WebSocket) -> None:
         headers = websocket.headers
-        client = websocket.client.host if websocket.client else ""
+        client, distinct = client_identity(websocket, config)
         if not allowed_origin(
             headers.get("origin"), headers.get("host"), headers.get("x-forwarded-host"), settings, config
-        ) or not preauth.acquire(client):
+        ) or not preauth.acquire(client, distinct):
             await websocket.close(code=WS_POLICY_VIOLATION)
             return
         released = False

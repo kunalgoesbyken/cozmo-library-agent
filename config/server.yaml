@@ -4,6 +4,7 @@ max_preauth_bytes: 2048
 max_unauthenticated: 4
 max_unauthenticated_per_client: 2
 trust_forwarded_host: false
+trust_proxy_headers: true
 allowed_origin_suffixes:
   - .trycloudflare.com
 max_sessions: 1
