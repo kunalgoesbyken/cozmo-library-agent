@@ -67,6 +67,6 @@ def rfdetr_boxes(img: np.ndarray) -> list[Box] | None:
         return None
     with SESSION_LOCK:
         session = load_session(path, tuple(cfg.rfdetr.providers))
-    boxes, logits = run_model(session, img, cfg)
+        boxes, logits = run_model(session, img, cfg)
     height, width = img.shape[:2]
     return decode(boxes[0], logits[0], width, height, cfg.rfdetr.threshold)

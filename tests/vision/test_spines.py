@@ -1,5 +1,9 @@
 import json
+import threading
+import time
 import warnings
+from concurrent.futures import ThreadPoolExecutor
+from types import SimpleNamespace
 
 import cv2
 import numpy as np
@@ -11,6 +15,7 @@ from libclaim.llm import Llm, LlmResponse
 from libclaim.models import Still
 from libclaim.vision.boxes import Box, ImageUnreadable, nms
 from libclaim.vision.spines import Orientation, Source, SpineDet, detect_spines, reconcile
+from libclaim.vision import rfdetr
 from libclaim.vision.rfdetr import decode, rfdetr_boxes
 
 WIDTH = 1000
@@ -161,6 +166,40 @@ def test_reconcile_local_only_box_orientation_from_aspect():
 def test_rfdetr_returns_none_when_model_absent(monkeypatch, tmp_path):
     monkeypatch.setenv("LIBCLAIM_RFDETR_PATH", str(tmp_path / "missing.onnx"))
     assert rfdetr_boxes(np.zeros((10, 10, 3), np.uint8)) is None
+
+
+class OverlapSession:
+    def __init__(self):
+        self.running = 0
+        self.overlapped = False
+        self.guard = threading.Lock()
+
+    def get_outputs(self):
+        return [SimpleNamespace(name="dets"), SimpleNamespace(name="labels")]
+
+    def get_inputs(self):
+        return [SimpleNamespace(name="input")]
+
+    def run(self, names, feed):
+        with self.guard:
+            self.running += 1
+            self.overlapped = self.overlapped or self.running > 1
+        time.sleep(0.05)
+        with self.guard:
+            self.running -= 1
+        return [np.zeros((1, 1, 4), np.float32), np.full((1, 1, 2), -9.0, np.float32)]
+
+
+def test_rfdetr_session_runs_are_serialised(monkeypatch, tmp_path):
+    model = tmp_path / "model.onnx"
+    model.write_bytes(b"")
+    session = OverlapSession()
+    monkeypatch.setenv("LIBCLAIM_RFDETR_PATH", str(model))
+    monkeypatch.setattr(rfdetr, "load_session", lambda path, providers: session)
+    image = np.zeros((10, 10, 3), np.uint8)
+    with ThreadPoolExecutor(4) as pool:
+        list(pool.map(rfdetr.rfdetr_boxes, [image] * 4))
+    assert not session.overlapped
 
 
 def test_rfdetr_decode_extreme_logits_do_not_warn():
