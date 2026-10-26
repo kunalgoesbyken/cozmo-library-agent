@@ -15,15 +15,14 @@ class Case(BaseModel):
     title: str
     author: str = ""
     editions: bool = False
-    google: bool = False
 
 
 CASES = [
     Case(title="sapiens", author="harari", editions=True),
     Case(title="pride and prejudice", author="austen", editions=True),
-    Case(title="emma", google=True),
-    Case(title="xqzvk plorbwen", google=True),
-    Case(title="the psychology of mony", author="housel", google=True),
+    Case(title="the secret of the lost necklace", author="enid blyton", editions=True),
+    Case(title="xqzvk plorbwen"),
+    Case(title="the psychology of mony", author="housel"),
 ]
 
 
@@ -33,11 +32,12 @@ async def record(cache_dir: Path) -> None:
         open_library = OpenLibrary(http)
         google_books = GoogleBooks(http)
         for case in CASES:
-            found = await open_library.search(case.title, case.author)
-            if case.editions and found:
-                await open_library.editions(found[0].work)
-            if case.google:
-                await google_books.search(case.title, case.author)
+            found = await google_books.search(case.title, case.author)
+            isbn = next((candidate.isbn for candidate in found if candidate.isbn), "")
+            if case.editions and isbn:
+                work = await open_library.work_of(isbn)
+                if work:
+                    await open_library.editions(work)
     finally:
         await http.aclose()
 

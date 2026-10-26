@@ -66,7 +66,7 @@ async def test_failures_never_leak_the_key(tmp_path, online, caplog, failure):
     http = http_with(tmp_path, handler)
     with caplog.at_level(logging.DEBUG):
         google, google_down = await guarded(GoogleBooks(http, api_key=KEY).search("sapiens", "harari"), "google books search")
-        library, library_down = await guarded(OpenLibrary(http).search("sapiens", "harari"), "open library search")
+        library, library_down = await guarded(OpenLibrary(http).editions("OL1W"), "open library editions")
     assert google == [] and library == []
     assert google_down and library_down
     assert KEY not in caplog.text
@@ -83,10 +83,11 @@ async def test_status_error_message_has_no_key(tmp_path, online):
 
 async def test_offline_miss_raises_and_fixtures_replay(tmp_path):
     http = CatalogHttp(FIXTURES)
-    found = await OpenLibrary(http).search("sapiens", "harari")
+    found = await GoogleBooks(http, api_key="").search("sapiens", "harari")
     assert found[0].title == "Sapiens"
+    assert await OpenLibrary(http).work_of(found[0].isbn) == "OL17075811W"
     with pytest.raises(CatalogOffline):
-        await OpenLibrary(http).search("never recorded", "")
+        await GoogleBooks(http, api_key="").search("never recorded", "")
 
 
 def test_fixtures_hold_no_credentials():
@@ -96,11 +97,11 @@ def test_fixtures_hold_no_credentials():
 
 async def test_html_reply_is_not_cached_and_is_reported(tmp_path, online):
     http = http_with(tmp_path, lambda request: httpx.Response(200, content=b"<html>verify you are human</html>"))
-    found, down = await guarded(OpenLibrary(http).search("sapiens", "harari"), "open library search")
+    found, down = await guarded(GoogleBooks(http, api_key="").search("sapiens", "harari"), "google books search")
     assert found == [] and down
     assert not list((tmp_path / "cache").glob("*"))
     with pytest.raises(CatalogBadResponse):
-        await http.get_json("https://openlibrary.org/search.json", {"title": "x"})
+        await http.get_json("https://openlibrary.org/works/OL1W/editions.json", {"limit": 1})
 
 
 async def test_edition_with_empty_publishers_keeps_its_isbn(tmp_path, online):
@@ -132,3 +133,23 @@ async def test_edition_keeps_its_physical_dimensions_text(tmp_path, online):
     http = http_with(tmp_path, lambda request: httpx.Response(200, content=body))
     editions = await OpenLibrary(http).editions("OL1W")
     assert [e.physical_dimensions for e in editions] == ["20 x 13 x 2 cm", ""]
+
+
+async def test_work_of_isbn_reads_the_work_key_from_the_isbn_endpoint(tmp_path, online):
+    seen = []
+
+    def handler(request):
+        seen.append(str(request.url))
+        return httpx.Response(200, content=b'{"works": [{"key": "/works/OL1W"}], "isbn_13": ["9780000000002"]}')
+
+    assert await OpenLibrary(http_with(tmp_path, handler)).work_of("9780000000002") == "OL1W"
+    assert seen == ["https://openlibrary.org/isbn/9780000000002.json"]
+
+
+async def test_work_of_isbn_without_works_is_empty(tmp_path, online):
+    http = http_with(tmp_path, lambda request: httpx.Response(200, content=b'{"isbn_13": ["9780000000002"]}'))
+    assert await OpenLibrary(http).work_of("9780000000002") == ""
+
+
+def test_open_library_has_no_search_because_robots_disallows_it():
+    assert not hasattr(OpenLibrary, "search")

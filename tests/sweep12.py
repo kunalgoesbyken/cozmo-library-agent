@@ -389,13 +389,29 @@ def fake_llm(sweep: SweepDir, tmp_path: Path, client=None) -> Llm:
                quota_path=tmp_path / "quota.json", config=fast_llm_config(), sleep=no_sleep)
 
 
-def catalog_docs(title: str) -> list[dict]:
+def catalog_volumes(query: str) -> list[dict]:
+    title = query.removeprefix("intitle:").partition(" inauthor:")[0]
     wanted = " ".join(title.casefold().split())
     return [
-        {"key": f"/works/OL{index}W", "title": book.title, "author_name": [book.author], "first_publish_year": book.year}
+        {
+            "id": f"vol{index}",
+            "volumeInfo": {
+                "title": book.title,
+                "authors": [book.author],
+                "publisher": book.publisher,
+                "publishedDate": str(book.year),
+                "industryIdentifiers": [{"type": "ISBN_13", "identifier": book.isbn}],
+                "infoLink": f"https://books.google.com/books?id=vol{index}",
+            },
+        }
         for index, book in enumerate(BOOKS)
         if book.title and " ".join(book.title.casefold().split()) == wanted
     ]
+
+
+def catalog_work(isbn: str) -> dict:
+    index = next(i for i, book in enumerate(BOOKS) if book.isbn == isbn)
+    return {"works": [{"key": f"/works/OL{index}W"}]}
 
 
 def catalog_editions(work: str) -> list[dict]:
@@ -419,12 +435,12 @@ class Web:
         parts = urlsplit(url)
         query = parse_qs(parts.query)
         catalog = load_resolve_config().catalog
-        if url.startswith(catalog.openlibrary.search_url):
-            return {"docs": catalog_docs(query["title"][0])}
+        if parts.path.startswith("/isbn/"):
+            return catalog_work(parts.path.removeprefix("/isbn/").removesuffix(".json"))
         if parts.path.endswith("/editions.json"):
             return {"entries": catalog_editions(parts.path.split("/")[2])}
         if url.startswith(catalog.googlebooks.volumes_url):
-            return {"items": []}
+            return {"items": catalog_volumes(query["q"][0])}
         if url.startswith(fast_config().sources.fx.url):
             return fx_rows(query)
         return None

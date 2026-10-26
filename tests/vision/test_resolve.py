@@ -37,7 +37,8 @@ async def test_sapiens_resolves_to_vintage_edition(catalogs):
     assert result.match_score >= 95
     assert result.margin >= 8
     assert 0.9 <= result.id_confidence <= 1.0
-    assert any("openlibrary.org" in url for url in result.source_urls)
+    assert any("books.google.com" in url for url in result.source_urls)
+    assert not any("search" in url for url in result.source_urls)
 
 
 async def test_common_title_resolves(catalogs):
@@ -47,13 +48,6 @@ async def test_common_title_resolves(catalogs):
     assert result.status == "identified"
     assert result.title == "Pride and Prejudice"
     assert result.edition == ""
-
-
-async def test_ambiguous_short_title_alone_is_unidentified(catalogs):
-    result = await resolve(reading("EMMA"), ("EMMA", 0.95), None, catalogs)
-    assert result.status == "unidentified"
-    assert result.reason == "not_confident"
-    assert result.vlm_text == "EMMA"
 
 
 async def test_vlm_read_ocr_does_not_support_keeps_both_texts(catalogs):
@@ -76,7 +70,7 @@ async def test_garbage_title_is_a_miss_everywhere(catalogs):
     assert result.reason == "no_catalogue_match"
 
 
-async def test_google_books_fallback_on_open_library_miss(catalogs):
+async def test_misspelled_title_resolves_through_google_books(catalogs):
     result = await resolve(
         reading("THE PSYCHOLOGY OF MONY", "HOUSEL"), ("THE PSYCHOLOGY OF MONEY HOUSEL", 0.9), None, catalogs
     )
@@ -93,36 +87,27 @@ async def test_replay_is_identical_and_needs_no_network(catalogs):
     assert first.dims == SpineDims(height_cm=19.7)
 
 
-async def test_open_library_hit_does_not_query_google_books(catalogs):
-    class Failing:
-        async def search(self, title, author):
-            raise AssertionError("google books must not be queried")
-
-    catalogs.google_books = Failing()
-    result = await resolve(reading("SAPIENS", "HARARI"), ("SAPIENS HARARI", 0.9), None, catalogs)
-    assert result.status == "identified"
-
-
 async def test_accept_gates_are_individually_enforced(catalogs):
     sapiens = reading("SAPIENS", "HARARI")
-    ranked = rank(sapiens, await catalogs.open_library.search("sapiens", "harari"))
+    ranked = rank(sapiens, await catalogs.google_books.search("sapiens", "harari"))
     assert accept_identification(sapiens, ("SAPIENS HARARI", 0.9), ranked)
     assert not accept_identification(sapiens, ("OTHER WORDS", 0.9), ranked)
     assert not accept_identification(sapiens, ("SAPIENS HARARI", 0.9), [])
     assert not accept_identification(sapiens, ("SAPIENS HARARI", 0.9), ranked[:1] + [ranked[0]])
 
 
-def cand(title, author="Yuval Noah Harari", source="openlibrary", **fields):
-    return Candidate(source=source, title=title, author=author, url=f"https://x/{title}", work=title, **fields)
+def cand(title, author="Yuval Noah Harari", source="googlebooks", isbn="9780000000000", **fields):
+    return Candidate(source=source, title=title, author=author, isbn=isbn, url=f"https://x/{title}", work=title, **fields)
 
 
 class FakeLibrary:
-    def __init__(self, found=(), editions=()):
-        self.found = list(found)
+    def __init__(self, editions=()):
         self.edition_list = list(editions)
+        self.isbns = []
 
-    async def search(self, title, author):
-        return self.found
+    async def work_of(self, isbn):
+        self.isbns.append(isbn)
+        return "OL1W"
 
     async def editions(self, work):
         return self.edition_list
@@ -138,8 +123,8 @@ class FakeGoogle:
         return self.found
 
 
-def fakes(library=(), google=(), editions=()):
-    return Catalogs(FakeLibrary(library, editions), FakeGoogle(google))
+def fakes(found=(), editions=()):
+    return Catalogs(FakeLibrary(editions), FakeGoogle(found))
 
 
 def gates_with(monkeypatch, **changes):
@@ -158,19 +143,19 @@ async def test_sibling_title_does_not_inflate_the_score():
 
 async def test_only_a_longer_sibling_in_the_catalogue_is_unidentified():
     library = [cand("Sapiens: A Graphic History")]
-    result = await resolve(reading("SAPIENS", "HARARI"), ("SAPIENS HARARI", 0.9), None, fakes(library, library))
+    result = await resolve(reading("SAPIENS", "HARARI"), ("SAPIENS HARARI", 0.9), None, fakes(library))
     assert result.status == "unidentified"
 
 
 async def test_partial_read_does_not_match_a_longer_title():
     library = [cand("Homo Deus")]
-    result = await resolve(reading("HOMO", "HARARI"), ("HOMO HARARI", 0.9), None, fakes(library, library))
+    result = await resolve(reading("HOMO", "HARARI"), ("HOMO HARARI", 0.9), None, fakes(library))
     assert result.status == "unidentified"
 
 
 async def test_short_generic_title_is_unidentified():
     library = [cand("It", "Stephen King"), cand("It", "Someone Else")]
-    result = await resolve(reading("IT"), ("IT", 0.9), None, fakes(library, library))
+    result = await resolve(reading("IT"), ("IT", 0.9), None, fakes(library))
     assert result.status == "unidentified"
 
 
@@ -180,14 +165,12 @@ async def test_author_only_read_is_unidentified():
     assert result.reason == "illegible"
 
 
-async def test_lone_catalogue_hit_needs_a_stricter_score_or_corroboration(monkeypatch):
+async def test_lone_catalogue_hit_needs_a_stricter_score(monkeypatch):
     sapiens = reading("SAPIENS", "HARARI")
     lone = rank(sapiens, [cand("Sapiens")])
     assert accept_identification(sapiens, ("SAPIENS HARARI", 0.9), lone)
     gates_with(monkeypatch, lone_score_min=101)
     assert not accept_identification(sapiens, ("SAPIENS HARARI", 0.9), lone)
-    corroborated = rank(sapiens, [cand("Sapiens"), cand("Sapiens", source="googlebooks")])
-    assert accept_identification(sapiens, ("SAPIENS HARARI", 0.9), corroborated)
 
 
 @pytest.mark.parametrize(
@@ -202,7 +185,7 @@ async def test_lone_catalogue_hit_needs_a_stricter_score_or_corroboration(monkey
 )
 async def test_each_gate_can_reject_on_its_own(monkeypatch, catalogs, changes):
     spine = reading("SAPIENS", "HARARI")
-    ranked = rank(spine, await catalogs.open_library.search("sapiens", "harari"))[:2]
+    ranked = rank(spine, await catalogs.google_books.search("sapiens", "harari"))[:2]
     assert accept_identification(spine, ("SAPIENS HARARI", 0.9), ranked)
     gates_with(monkeypatch, **changes)
     assert not accept_identification(spine, ("SAPIENS HARARI", 0.9), ranked)
@@ -210,7 +193,7 @@ async def test_each_gate_can_reject_on_its_own(monkeypatch, catalogs, changes):
 
 async def test_one_distinctive_token_without_author_needs_the_gate_relaxed(monkeypatch, catalogs):
     spine = reading("SAPIENS")
-    ranked = rank(spine, await catalogs.open_library.search("sapiens", "harari"))[:2]
+    ranked = rank(spine, await catalogs.google_books.search("sapiens", "harari"))[:2]
     assert not accept_identification(spine, ("SAPIENS", 0.9), ranked)
     gates_with(monkeypatch, distinctive_min_tokens=1)
     assert accept_identification(spine, ("SAPIENS", 0.9), ranked)
@@ -244,7 +227,7 @@ async def test_failed_reading_is_reported():
 
 
 async def test_ambiguous_publisher_prices_an_equivalent_edition_of_that_publisher(catalogs):
-    found = await catalogs.open_library.search("sapiens", "harari")
+    found = await catalogs.google_books.search("sapiens", "harari")
     editions = [
         Edition(publisher="Penguin", isbn="9780000000111", url="u1", year=2014),
         Edition(publisher="Penguin", isbn="9780000000222", url="u2", year=2019),
@@ -262,18 +245,18 @@ async def test_ambiguous_publisher_prices_an_equivalent_edition_of_that_publishe
 async def test_query_keeps_punctuation(tmp_path, monkeypatch):
     seen = []
 
-    class Spy(FakeLibrary):
+    class Spy(FakeGoogle):
         async def search(self, title, author):
             seen.append(title)
             return []
 
-    catalogs = Catalogs(Spy(), FakeGoogle())
+    catalogs = Catalogs(FakeLibrary(), Spy())
     await resolve(reading("C++ PRIMER", "LIPPMAN"), ("C++ PRIMER LIPPMAN", 0.9), None, catalogs)
     assert seen == ["c++ primer"]
 
 
 async def test_picked_edition_carries_open_library_dimensions(catalogs):
-    found = await catalogs.open_library.search("sapiens", "harari")
+    found = await catalogs.google_books.search("sapiens", "harari")
     editions = [Edition(publisher="Vintage", isbn="9780099590088", url="u1", physical_dimensions="19.8 x 12.9 x 3 cm")]
     result = await resolve(
         reading("SAPIENS", "HARARI", "VINTAGE"), ("SAPIENS HARARI VINTAGE", 0.9), None, fakes(found, editions=editions)
@@ -282,35 +265,27 @@ async def test_picked_edition_carries_open_library_dimensions(catalogs):
     assert result.physical_dimensions == "19.8 x 12.9 x 3 cm"
 
 
-class StubLibrary:
+class StubBooks:
     def __init__(self, known):
         self.known = known
 
     async def search(self, title, author):
         return [
-            Candidate(source="openlibrary", title=known, author="Sven Hedin", work="OL1W", url="https://openlibrary.org/works/OL1W")
+            Candidate(source="googlebooks", title=known, author="Sven Hedin", work="g1", url="https://books.google.com/g1")
             for known in self.known
             if title == known.casefold()
         ]
 
-    async def editions(self, work):
-        return []
-
-
-class StubBooks:
-    async def search(self, title, author):
-        return []
-
 
 async def test_volume_number_on_spine_falls_back_to_the_bare_title():
-    stub = Catalogs(StubLibrary(["Transhimalaja"]), StubBooks())
+    stub = Catalogs(FakeLibrary(), StubBooks(["Transhimalaja"]))
     result = await resolve(reading("Transhimalaja 2", "Sven Hedin"), ("Transhimalaja 2 Sven Hedin", 0.9), None, stub)
     assert result.status == "identified"
     assert result.title == "Transhimalaja"
 
 
 async def test_all_digit_title_is_not_stripped():
-    stub = Catalogs(StubLibrary(["Transhimalaja"]), StubBooks())
+    stub = Catalogs(FakeLibrary(), StubBooks(["Transhimalaja"]))
     result = await resolve(reading("1984", "Sven Hedin"), ("1984 Sven Hedin", 0.9), None, stub)
     assert result.reason == "no_catalogue_match"
 
@@ -341,7 +316,7 @@ async def test_ocr_corroborated_read_records_ocr_and_keeps_the_full_confidence()
 
 async def test_hallucinated_title_that_matches_nothing_is_unidentified():
     spine = reading("The Moonlit Lighthouse of Kerrigan Bay", "Enid Blyton")
-    result = await resolve(spine, ("", 0.0), None, fakes(SKYTOP, SKYTOP))
+    result = await resolve(spine, ("", 0.0), None, fakes(SKYTOP))
     assert result.status == "unidentified"
     assert result.corroboration == ""
 
@@ -350,14 +325,14 @@ async def test_real_title_by_a_different_author_is_unidentified():
     spine = reading("The Secret of Skytop Hill and other stories", "Enid Blyton")
     other = [cand("The Secret of Skytop Hill and Other Stories", "Margaret Jennings"),
              cand("The Secret of Skytop Hill and Other Stories", "Margaret Jennings")]
-    result = await resolve(spine, ("", 0.0), None, fakes(other, other))
+    result = await resolve(spine, ("", 0.0), None, fakes(other))
     assert result.status == "unidentified"
 
 
 @pytest.mark.parametrize("title", ["IT", "EMMA"])
 async def test_short_generic_title_without_author_and_without_ocr_is_unidentified(title):
     library = [cand(title.title(), "Stephen King"), cand(title.title(), "Jane Austen")]
-    result = await resolve(reading(title), ("", 0.0), None, fakes(library, library))
+    result = await resolve(reading(title), ("", 0.0), None, fakes(library))
     assert result.status == "unidentified"
     assert result.reason == "not_corroborated"
 
@@ -372,7 +347,7 @@ async def test_ocr_that_reads_other_words_blocks_the_catalogue_only_path():
 async def test_catalogue_only_needs_a_clear_margin():
     spine = reading("The Secret Seven", "Enid Blyton")
     library = [blyton("The Secret Seven"), blyton("The Secret Seven Win Through")]
-    result = await resolve(spine, ("", 0.0), None, fakes(library, library))
+    result = await resolve(spine, ("", 0.0), None, fakes(library))
     assert result.status == "unidentified"
 
 
@@ -457,5 +432,29 @@ async def test_recorded_google_books_reply_identifies_well_done_secret_seven_wit
 async def test_recorded_runner_up_one_word_longer_keeps_amelia_jane_unidentified_without_ocr(catalogs):
     result = await resolve(reading("Naughty Amelia Jane", "Enid Blyton"), ("", 0.0), None, catalogs)
     assert result.status == "unidentified"
-    assert result.reason == "catalogue_unavailable"
+    assert result.reason == "not_corroborated"
     assert result.margin < load_resolve_config().gates.catalogue_only_margin
+
+
+async def test_no_request_goes_to_a_disallowed_open_library_search_path(tmp_path, monkeypatch):
+    monkeypatch.delenv("LIBCLAIM_OFFLINE")
+    seen = []
+
+    def handler(request):
+        seen.append(request.url)
+        if request.url.host == "www.googleapis.com":
+            body = {"items": [{"id": "a", "volumeInfo": {"title": "Sapiens", "authors": ["Yuval Noah Harari"],
+                                                         "industryIdentifiers": [{"type": "ISBN_13", "identifier": "9780000000002"}]}}]}
+        elif request.url.path.startswith("/isbn/"):
+            body = {"works": [{"key": "/works/OL1W"}]}
+        else:
+            body = {"entries": []}
+        return httpx.Response(200, json=body)
+
+    client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    http = CatalogHttp(tmp_path / "cache", client=client)
+    catalogs = Catalogs(OpenLibrary(http), GoogleBooks(http, api_key=""))
+    result = await resolve(reading("SAPIENS", "HARARI"), ("SAPIENS HARARI", 0.9), None, catalogs)
+    assert result.status == "identified"
+    assert any(url.host == "openlibrary.org" for url in seen)
+    assert not any(url.host == "openlibrary.org" and url.path.startswith("/search") for url in seen)

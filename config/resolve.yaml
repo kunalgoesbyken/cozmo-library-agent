@@ -48,10 +48,9 @@ catalog:
   search_limit: 5
   editions_limit: 100
   openlibrary:
-    search_url: https://openlibrary.org/search.json
+    isbn_url: https://openlibrary.org/isbn/{isbn}.json
     editions_url: https://openlibrary.org/works/{work}/editions.json
     site_url: https://openlibrary.org
-    search_fields: key,title,author_name,first_publish_year
   googlebooks:
     volumes_url: https://www.googleapis.com/books/v1/volumes
     key_header: X-goog-api-key

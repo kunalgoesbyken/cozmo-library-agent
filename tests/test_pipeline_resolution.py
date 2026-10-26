@@ -79,8 +79,7 @@ class Library:
 
     async def search(self, title, author):
         found = [t for t in self.titles if t.casefold() == title]
-        return [Candidate(source=source, title=t, author="Enid Blyton", work=f"{source}{t}", url=f"https://x/{source}/{t}")
-                for t in found for source in ("openlibrary", "googlebooks")]
+        return [Candidate(source="googlebooks", title=t, author="Enid Blyton", work=t, url=f"https://x/{t}") for t in found]
 
     async def editions(self, work):
         return []

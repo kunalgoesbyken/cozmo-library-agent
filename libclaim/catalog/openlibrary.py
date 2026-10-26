@@ -1,7 +1,6 @@
-from libclaim.catalog.http import Candidate, CatalogHttp, Edition, year_of
+from libclaim.catalog.http import CatalogHttp, Edition, year_of
 from libclaim.resolve_config import load_resolve_config
 
-SOURCE = "openlibrary"
 WORKS_PREFIX = "/works/"
 ISBN_13 = "isbn_13"
 
@@ -11,24 +10,11 @@ class OpenLibrary:
         self.http = http
         self.config = load_resolve_config().catalog
 
-    async def search(self, title: str, author: str) -> list[Candidate]:
+    async def work_of(self, isbn: str) -> str:
         cfg = self.config.openlibrary
-        params = {"title": title, "limit": self.config.search_limit, "fields": cfg.search_fields}
-        if author:
-            params["author"] = author
-        body = await self.http.get_json(cfg.search_url, params)
-        return [
-            Candidate(
-                source=SOURCE,
-                title=doc.get("title", ""),
-                author=", ".join(doc.get("author_name", [])),
-                year=doc.get("first_publish_year"),
-                url=cfg.site_url + doc["key"],
-                work=doc["key"].removeprefix(WORKS_PREFIX),
-            )
-            for doc in body.get("docs", [])
-            if doc.get("key")
-        ]
+        body = await self.http.get_json(cfg.isbn_url.format(isbn=isbn), {})
+        works = body.get("works") or [{}]
+        return works[0].get("key", "").removeprefix(WORKS_PREFIX)
 
     async def editions(self, work: str) -> list[Edition]:
         cfg = self.config.openlibrary

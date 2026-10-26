@@ -54,10 +54,9 @@ class EditionConfig(BaseModel):
 
 
 class OpenLibraryConfig(BaseModel):
-    search_url: str
+    isbn_url: str
     editions_url: str
     site_url: str
-    search_fields: str
 
 
 class GoogleBooksConfig(BaseModel):

@@ -1,0 +1,64 @@
+{
+  "kind": "books#volumes",
+  "totalItems": 3,
+  "items": [
+    {
+      "kind": "books#volume",
+      "id": "sapVintage1",
+      "volumeInfo": {
+        "title": "Sapiens",
+        "authors": [
+          "Yuval Noah Harari"
+        ],
+        "publisher": "Vintage",
+        "publishedDate": "2015-04-30",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_13",
+            "identifier": "9780099590088"
+          }
+        ],
+        "infoLink": "https://books.google.com/books?id=sapVintage1"
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "sapHarper01",
+      "volumeInfo": {
+        "title": "Sapiens: A Brief History of Humankind",
+        "authors": [
+          "Yuval Noah Harari"
+        ],
+        "publisher": "Harper",
+        "publishedDate": "2015-02-10",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_13",
+            "identifier": "9780062316097"
+          }
+        ],
+        "infoLink": "https://books.google.com/books?id=sapHarper01"
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "sapGraphic1",
+      "volumeInfo": {
+        "title": "Sapiens: A Graphic History",
+        "authors": [
+          "Yuval Noah Harari",
+          "David Vandermeulen"
+        ],
+        "publisher": "Jonathan Cape",
+        "publishedDate": "2020-10-13",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_13",
+            "identifier": "9781787332874"
+          }
+        ],
+        "infoLink": "https://books.google.com/books?id=sapGraphic1"
+      }
+    }
+  ]
+}

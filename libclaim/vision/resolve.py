@@ -7,10 +7,8 @@ from pydantic import BaseModel
 from rapidfuzz import fuzz, process
 from rapidfuzz.utils import default_process
 
-from libclaim.catalog.googlebooks import SOURCE as GOOGLE_BOOKS
 from libclaim.catalog.googlebooks import GoogleBooks
 from libclaim.catalog.http import Candidate, CatalogHttp, Edition, guarded
-from libclaim.catalog.openlibrary import SOURCE as OPEN_LIBRARY
 from libclaim.catalog.openlibrary import OpenLibrary
 from libclaim.resolve_config import load_resolve_config
 from libclaim.vision.reading import Reading, ocr_yield
@@ -35,10 +33,6 @@ class Scored(BaseModel):
     score: float
     author_matched: bool
     distinctive: int
-
-    @property
-    def sources(self) -> set[str]:
-        return {member.source for member in self.members}
 
 
 class EditionChoice(BaseModel):
@@ -206,9 +200,9 @@ def catalogue_agrees(candidates: list[Scored]) -> bool:
         return False
     if top.distinctive < gates.distinctive_min_tokens and not top.author_matched:
         return False
-    if len(candidates) == 1 and len(top.sources) == 1 and top.score < gates.lone_score_min:
+    if len(candidates) == 1 and top.score < gates.lone_score_min:
         return False
-    return len(top.sources) > 1 or top.score >= gates.confident_score
+    return top.score >= gates.confident_score
 
 
 def ocr_contradicts(reading: Reading, ocr: tuple[str, float]) -> bool:
@@ -285,16 +279,20 @@ def choose_edition(reading: Reading, title: str, editions: list[Edition]) -> Edi
 
 async def edition_options(top: Scored, catalogs: Catalogs) -> tuple[list[Edition], bool]:
     options = [
-        Edition(publisher=m.publisher, isbn=m.isbn, url=m.url, year=m.year if m.source == GOOGLE_BOOKS else None,
-                title=m.title)
+        Edition(publisher=m.publisher, isbn=m.isbn, url=m.url, year=m.year, title=m.title)
         for m in top.members
         if m.publisher and m.isbn
     ]
-    library = next((m for m in top.members if m.source == OPEN_LIBRARY), None)
-    if library is None:
+    isbn = next((m.isbn for m in top.members if m.isbn), "")
+    if not isbn:
         return options, False
-    fetched, down = await guarded(catalogs.open_library.editions(library.work), "open library editions")
-    return options + fetched, down
+    fetched, down = await guarded(library_editions(isbn, catalogs.open_library), "open library editions")
+    return fetched + options, down
+
+
+async def library_editions(isbn: str, library: OpenLibrary) -> list[Edition]:
+    work = await library.work_of(isbn)
+    return await library.editions(work) if work else []
 
 
 def unidentified(base: Resolution, reason: str, candidates: list[Scored]) -> Resolution:
@@ -302,18 +300,11 @@ def unidentified(base: Resolution, reason: str, candidates: list[Scored]) -> Res
     return base.model_copy(update={"reason": reason, "match_score": score, "margin": margin_of(candidates)})
 
 
-async def search_catalogs(
-    reading: Reading, ocr: tuple[str, float], catalogs: Catalogs
-) -> tuple[list[Scored], bool]:
+async def search_catalogs(reading: Reading, catalogs: Catalogs) -> tuple[list[Scored], bool]:
     title = query_text(reading.title_verbatim)
     author = query_text(reading.author_verbatim)
-    found, unavailable = await guarded(catalogs.open_library.search(title, author), "open library search")
-    ranked = rank(reading, found)
-    if not accept_identification(reading, ocr, ranked):
-        more, down = await guarded(catalogs.google_books.search(title, author), "google books search")
-        found, unavailable = found + more, unavailable or down
-        ranked = rank(reading, found)
-    return ranked, unavailable
+    found, unavailable = await guarded(catalogs.google_books.search(title, author), "google books search")
+    return rank(reading, found), unavailable
 
 
 def without_trailing_numbers(reading: Reading) -> Reading | None:
@@ -343,11 +334,11 @@ async def resolve(
         return unidentified(base, "ocr_disagrees", [])
     if not supported and not tokens(reading.author_verbatim):
         return unidentified(base, "not_corroborated", [])
-    ranked, unavailable = await search_catalogs(reading, ocr, catalogs)
+    ranked, unavailable = await search_catalogs(reading, catalogs)
     unnumbered = without_trailing_numbers(reading)
     if not ranked and unnumbered is not None:
         reading = unnumbered
-        ranked, unavailable = await search_catalogs(reading, ocr, catalogs)
+        ranked, unavailable = await search_catalogs(reading, catalogs)
     corroboration = accept_identification(reading, ocr, ranked)
     if not corroboration:
         if unavailable:

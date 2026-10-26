@@ -1,0 +1,44 @@
+{
+  "kind": "books#volumes",
+  "totalItems": 2,
+  "items": [
+    {
+      "kind": "books#volume",
+      "id": "necklace001",
+      "volumeInfo": {
+        "title": "The Secret of the Lost Necklace",
+        "authors": [
+          "Enid Blyton"
+        ],
+        "publisher": "Bounty Books",
+        "publishedDate": "2014",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_13",
+            "identifier": "9780753727041"
+          }
+        ],
+        "infoLink": "https://books.google.com/books?id=necklace001"
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "necklace002",
+      "volumeInfo": {
+        "title": "The Secret of the Lost Necklace and Other Stories",
+        "authors": [
+          "Enid Blyton"
+        ],
+        "publisher": "Award Publications",
+        "publishedDate": "2003",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_13",
+            "identifier": "9781841351988"
+          }
+        ],
+        "infoLink": "https://books.google.com/books?id=necklace002"
+      }
+    }
+  ]
+}
