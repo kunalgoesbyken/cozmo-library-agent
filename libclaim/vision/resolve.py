@@ -41,6 +41,7 @@ class Resolution(BaseModel):
     edition: str = ""
     isbn: str = ""
     year: int | None = None
+    physical_dimensions: str = ""
     edition_unverified: bool = False
     id_confidence: float = 0.0
     match_score: float = 0.0
@@ -267,6 +268,7 @@ async def resolve(
             "edition": edition.publisher if edition else "",
             "isbn": edition.isbn if edition else "",
             "year": edition.year if edition else None,
+            "physical_dimensions": edition.physical_dimensions if edition else "",
             "edition_unverified": unverified or editions_down,
             "id_confidence": round(top.score / 100 * ocr_overlap(reading, ocr[0]), 3),
             "match_score": top.score,

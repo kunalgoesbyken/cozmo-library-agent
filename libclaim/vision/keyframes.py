@@ -53,22 +53,40 @@ def phase_at(t_ms: int, markers: list[PhaseMarker]) -> Phase | None:
     return phase
 
 
+class KeyframeStream:
+    def __init__(self, cfg: KeyframeConfig):
+        self.cfg = cfg
+        self.window: int | None = None
+        self.best: Still | None = None
+        self.digests: list[np.ndarray] = []
+
+    def add(self, still: Still) -> list[Still]:
+        window = still.t_ms // self.cfg.window_ms
+        out = self.flush() if self.window is not None and window != self.window else []
+        if self.best is None or still.blur > self.best.blur:
+            self.best = still
+        self.window = window
+        return out
+
+    def flush(self) -> list[Still]:
+        best, self.best, self.window = self.best, None, None
+        if best is None:
+            return []
+        digest = phash(best.path, self.cfg)
+        if any(np.count_nonzero(digest != other) <= self.cfg.max_hamming for other in self.digests):
+            return []
+        self.digests.append(digest)
+        return [best]
+
+
 def select_keyframes(stills: list[Still], events: list[PhaseMarker]) -> Keyframes:
     cfg = load_keyframe_config()
-    sharpest: dict[tuple[Phase, int], Still] = {}
+    streams = {phase: KeyframeStream(cfg) for phase in Phase}
+    kept: dict[Phase, list[Still]] = {phase: [] for phase in Phase}
     for still in sorted(stills, key=lambda s: s.t_ms):
         phase = phase_at(still.t_ms, events)
-        if phase is None:
-            continue
-        key = (phase, still.t_ms // cfg.window_ms)
-        if key not in sharpest or still.blur > sharpest[key].blur:
-            sharpest[key] = still
-    kept: dict[Phase, list[tuple[Still, np.ndarray]]] = {phase: [] for phase in Phase}
-    for (phase, _), still in sorted(sharpest.items(), key=lambda item: item[1].t_ms):
-        digest = phash(still.path, cfg)
-        if all(np.count_nonzero(digest != other) > cfg.max_hamming for _, other in kept[phase]):
-            kept[phase].append((still, digest))
-    return Keyframes(
-        rows=[still for still, _ in kept[Phase.rows]],
-        room=[still for still, _ in kept[Phase.room]],
-    )
+        if phase is not None:
+            kept[phase] += streams[phase].add(still)
+    for phase, stream in streams.items():
+        kept[phase] += stream.flush()
+    return Keyframes(rows=kept[Phase.rows], room=kept[Phase.room])

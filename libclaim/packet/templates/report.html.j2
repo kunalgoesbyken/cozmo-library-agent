@@ -147,6 +147,7 @@
 <h2>Costs and latency</h2>
 <dl>
   <dt>Cost at paid rates</dt><dd>USD {{ "%.4f"|format(packet.costs.usd_at_paid_rates) }} ({{ packet.costs.tokens }} tokens)</dd>
+  <dt>Billed</dt><dd>USD {{ "%.2f"|format(packet.costs.billed_usd) }}</dd>
   {% for stage, usd in packet.costs.by_stage_usd.items() %}
   <dt>Cost: {{ stage }}</dt><dd>USD {{ "%.4f"|format(usd) }}</dd>
   {% endfor %}

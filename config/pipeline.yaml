@@ -1,0 +1,33 @@
+deadline_s: 240
+deadline_poll_s: 0.5
+row_min_spines: 3
+segment_max_frames: 12
+statement_subject_match: 80
+stage_aliases:
+  price: pricing
+packet_name: claim_packet.json
+runs_url: /runs
+cm_decimals: 1
+severity:
+  failure: high
+  unfinished: high
+  reconcile: medium
+  scale_prior: medium
+  scale: low
+  cross_check: low
+  identification: low
+  pricing: medium
+  room: medium
+  items: low
+  excluded: medium
+money_format: ",.0f"
+area_format: ".1f"
+summary:
+  books: "I counted {book_count} books: {books_identified} identified, {books_unidentified} I could not read, and {books_needs_appraisal} set aside for an appraiser."
+  book_value: "Replacing the priced books would cost about {books_replacement_cost} {currency}, and their used value is about {books_used_value} {currency}."
+  items: "I logged {item_count} other items; the priced ones come to between {items_low} and {items_high} {currency} to replace."
+  room: "The floor is {floor_area_m2} square metres and the walls are {wall_area_m2} square metres."
+  no_room: "I could not measure the size of the room from this sweep."
+  review: "{review_count} lines need a check by a person."
+readback:
+  instruction: Read this summary to the user word for word. Do not add, round or change any number.

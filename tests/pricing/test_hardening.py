@@ -112,6 +112,20 @@ async def test_cross_host_redirect_is_checked_against_the_target_host(tmp_path):
         await http.cached_get(start)
 
 
+async def test_robots_block_is_cached_evidence_and_replays_without_network(tmp_path):
+    start = "https://one.test/a"
+    routes = {
+        start: (302, b"", {"location": "https://one.test/private/x"}),
+        "https://one.test/robots.txt": (200, b"User-agent: *\nDisallow: /private/\n", {}),
+    }
+    with pytest.raises(RobotsDisallowed):
+        await serve(tmp_path, routes).cached_get(start)
+    replay = serve(tmp_path, {})
+    replay.client = httpx.AsyncClient(transport=httpx.MockTransport(lambda request: pytest.fail(str(request.url))))
+    with pytest.raises(RobotsDisallowed):
+        await replay.cached_get(start)
+
+
 async def test_cross_host_redirect_uses_the_target_hosts_robots_and_records_final_url(tmp_path):
     routes = {
         "https://one.test/a": (302, b"", {"location": "https://two.test/ok"}),

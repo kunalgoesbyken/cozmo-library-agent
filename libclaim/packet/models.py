@@ -163,6 +163,7 @@ class ReviewEntry(BaseModel):
 
 class Costs(BaseModel):
     usd_at_paid_rates: float = 0
+    billed_usd: float = 0
     tokens: int = 0
     by_stage_usd: dict[str, float] = Field(default_factory=dict)
 

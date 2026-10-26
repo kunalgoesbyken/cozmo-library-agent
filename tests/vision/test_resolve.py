@@ -257,3 +257,13 @@ async def test_query_keeps_punctuation(tmp_path, monkeypatch):
     catalogs = Catalogs(Spy(), FakeGoogle())
     await resolve(reading("C++ PRIMER", "LIPPMAN"), ("C++ PRIMER LIPPMAN", 0.9), None, catalogs)
     assert seen == ["c++ primer"]
+
+
+async def test_picked_edition_carries_open_library_dimensions(catalogs):
+    found = await catalogs.open_library.search("sapiens", "harari")
+    editions = [Edition(publisher="Vintage", isbn="9780099590088", url="u1", physical_dimensions="19.8 x 12.9 x 3 cm")]
+    result = await resolve(
+        reading("SAPIENS", "HARARI", "VINTAGE"), ("SAPIENS HARARI VINTAGE", 0.9), None, fakes(found, editions=editions)
+    )
+    assert result.isbn == "9780099590088"
+    assert result.physical_dimensions == "19.8 x 12.9 x 3 cm"

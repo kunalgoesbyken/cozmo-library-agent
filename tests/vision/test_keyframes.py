@@ -3,7 +3,14 @@ import numpy as np
 import pytest
 
 from libclaim.models import Still
-from libclaim.vision.keyframes import Keyframes, Phase, PhaseMarker, select_keyframes
+from libclaim.vision.keyframes import (
+    Keyframes,
+    KeyframeStream,
+    Phase,
+    PhaseMarker,
+    load_keyframe_config,
+    select_keyframes,
+)
 
 
 def noise(seed, size=64):
@@ -80,6 +87,23 @@ def test_structured_distinct_images_both_survive(tmp_path):
     ]
     result = select_keyframes(stills, [PhaseMarker(t_ms=0, phase=Phase.rows)])
     assert [s.seq for s in result.rows] == [0, 1]
+
+
+def test_stream_emits_each_window_when_it_closes_and_matches_batch(tmp_path):
+    stills = [
+        make_still(tmp_path, seq, seq * 160, noise(seq // 3), blur=float(seq % 3))
+        for seq in range(30)
+    ]
+    stream = KeyframeStream(load_keyframe_config())
+    emitted = []
+    for still in stills:
+        out = stream.add(still)
+        assert all(kept.t_ms // 500 < still.t_ms // 500 for kept in out)
+        emitted += out
+    emitted += stream.flush()
+    assert stream.flush() == []
+    batch = select_keyframes(stills, [PhaseMarker(t_ms=0, phase=Phase.rows)])
+    assert [s.seq for s in emitted] == [s.seq for s in batch.rows]
 
 
 def test_unreadable_still_raises(tmp_path):

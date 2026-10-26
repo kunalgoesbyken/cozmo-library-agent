@@ -99,6 +99,10 @@ class CachedResponse:
         return self.meta["key"]
 
     @property
+    def blocked(self) -> str:
+        return self.meta.get("blocked", "")
+
+    @property
     def retrieved_at(self) -> datetime:
         return datetime.fromisoformat(self.meta["retrieved_at"])
 
@@ -193,7 +197,7 @@ class PriceHttp(CatalogHttp):
         cfg = self.pricing.cache
         ttl = (
             timedelta(hours=cfg.not_found_ttl_hours)
-            if response.status == NOT_FOUND
+            if response.blocked or response.status == NOT_FOUND
             else timedelta(days=cfg.price_ttl_days)
         )
         return datetime.now(UTC) - response.retrieved_at <= ttl
@@ -249,8 +253,13 @@ class PriceHttp(CatalogHttp):
     async def store(self, url: str, headers: dict[str, str] | None, enforce: bool) -> CachedResponse:
         if is_offline():
             raise CatalogOffline(f"price request not cached while offline: {urlsplit(url).netloc}")
-        response, final = await self.follow(url, headers, enforce)
         key = digest(url)
+        try:
+            response, final = await self.follow(url, headers, enforce)
+        except RobotsDisallowed as error:
+            self.write_meta(key, {"key": key, "url": url, "final_url": url, "blocked": str(error),
+                                  "retrieved_at": datetime.now(UTC).isoformat()}, b"")
+            raise
         content_type = response.headers.get("content-type", "")
         blocks, repairs = [], []
         if content_type.startswith(HTML_TYPES):
@@ -269,10 +278,13 @@ class PriceHttp(CatalogHttp):
             "jsonld_repairs": repairs,
         }
         if cacheable:
-            self.cache_dir.mkdir(parents=True, exist_ok=True)
-            self.body_path(key).write_bytes(response.content)
-            self.meta_path(key).write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
+            self.write_meta(key, meta, response.content)
         return CachedResponse(meta, response.content, self.pricing)
+
+    def write_meta(self, key: str, meta: dict[str, Any], body: bytes) -> None:
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.body_path(key).write_bytes(body)
+        self.meta_path(key).write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
 
     def once(self, key: str, factory: Callable[[], Awaitable[Any]]) -> asyncio.Future:
         if key not in self.inflight:
@@ -310,6 +322,8 @@ class PriceHttp(CatalogHttp):
     async def get(self, url: str, headers: dict[str, str] | None, enforce: bool) -> CachedResponse:
         hit = self.read(url)
         if hit and self.fresh(hit):
+            if hit.blocked:
+                raise RobotsDisallowed(hit.blocked)
             return hit
         return await self.once(f"{enforce} {url}", lambda: self.store(url, headers, enforce))
 

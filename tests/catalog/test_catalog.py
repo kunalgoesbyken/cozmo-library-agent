@@ -122,3 +122,13 @@ async def test_edition_year_comes_from_its_own_publish_date(tmp_path, online):
     http = http_with(tmp_path, lambda request: httpx.Response(200, content=body))
     editions = await OpenLibrary(http).editions("OL1W")
     assert [e.year for e in editions] == [1931]
+
+
+async def test_edition_keeps_its_physical_dimensions_text(tmp_path, online):
+    body = (
+        b'{"entries": [{"key": "/books/OL1M", "isbn_13": ["9780000000002"], "physical_dimensions": "20 x 13 x 2 cm"},'
+        b' {"key": "/books/OL2M", "isbn_13": ["9780000000019"]}]}'
+    )
+    http = http_with(tmp_path, lambda request: httpx.Response(200, content=body))
+    editions = await OpenLibrary(http).editions("OL1W")
+    assert [e.physical_dimensions for e in editions] == ["20 x 13 x 2 cm", ""]

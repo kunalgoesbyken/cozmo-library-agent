@@ -58,6 +58,7 @@ class Edition(BaseModel):
     isbn: str
     url: str
     year: int | None = None
+    physical_dimensions: str = ""
 
 
 YEAR_DIGITS = 4
