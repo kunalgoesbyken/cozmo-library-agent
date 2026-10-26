@@ -1,6 +1,7 @@
 import asyncio
 import json
 import time
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -8,6 +9,7 @@ import pytest
 from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 
+from libclaim.budget import BudgetExceeded
 from libclaim.server import KIND_LIVE_FRAME, KIND_MIC, KIND_STILL, create_app, load_server_config, pack_binary
 from libclaim.settings import Settings
 
@@ -19,10 +21,11 @@ WAIT_STEP_S = 0.02
 
 
 class FakeBridge:
-    def __init__(self, hooks, script):
+    def __init__(self, hooks, script, session=True):
         self.hooks = hooks
         self.script = script
-        self.session = object()
+        self.session = object() if session else None
+        self.audio_error = None
         self.audio = []
         self.frames = []
         self.injected = []
@@ -35,6 +38,8 @@ class FakeBridge:
         await self.closed.wait()
 
     async def send_audio(self, data):
+        if self.audio_error:
+            raise self.audio_error
         self.audio.append(data)
 
     async def send_frame(self, data):
@@ -51,7 +56,7 @@ class FakeBridge:
 
 
 class Harness:
-    def __init__(self, tmp_path, script=(), end_delay=0.0, public_origin="", **limits):
+    def __init__(self, tmp_path, script=(), end_delay=0.0, public_origin="", session=True, finish_events=None, **limits):
         self.bridges = []
         self.end_calls = []
         self.fail_factory = False
@@ -59,7 +64,7 @@ class Harness:
         def factory(hooks):
             if self.fail_factory:
                 raise RuntimeError("no bridge")
-            bridge = FakeBridge(hooks, script)
+            bridge = FakeBridge(hooks, script, session)
             self.bridges.append(bridge)
             return bridge
 
@@ -76,6 +81,8 @@ class Harness:
             async def finish(self):
                 await asyncio.sleep(end_delay)
                 harness.end_calls.append(self.sweep.root)
+                for event in (finish_events or (lambda stills: []))(harness.stills):
+                    await self.hooks.emit(event)
                 await self.hooks.emit(
                     {"type": "packet_ready", "json": "/runs/x/claim_packet.json", "report": "/runs/x/report.html"}
                 )
@@ -733,3 +740,67 @@ def test_storage_failure_sends_error_and_keeps_socket(tmp_path, monkeypatch):
         end_sweep(ws)
         read_until(ws, "packet_ready")
     assert h.bridges[0].audio == [b"still-alive"]
+
+
+def test_connecting_is_announced_once_while_the_bridge_has_no_session(tmp_path):
+    h = Harness(tmp_path, session=False)
+    with TestClient(h.app) as client, client.websocket_connect("/ws/sweep") as ws:
+        assert hello(ws)["state"] == "connecting"
+        time.sleep(0.6)
+        h.bridges[0].session = object()
+        assert read_until(ws, "session")["state"] == "live"
+
+
+def test_budget_exhausted_while_streaming_audio_tells_the_phone_why(tmp_path):
+    h = Harness(tmp_path)
+    with TestClient(h.app) as client, client.websocket_connect("/ws/sweep") as ws:
+        hello(ws)
+        h.bridges[0].audio_error = BudgetExceeded("cap")
+        ws.send_bytes(pack_binary(KIND_MIC, {"seq": 1, "t_ms": 1}, b"x"))
+        error = read_until(ws, "error")
+        closed = read_until(ws, "session")
+    assert error["code"] == "budget" and error["say"]
+    assert closed["state"] == "closed" and closed["reason"] == "budget_exceeded"
+
+
+def test_budget_exhausted_inside_the_bridge_tells_the_phone_why(tmp_path):
+    async def spend(hooks):
+        raise BudgetExceeded("cap")
+
+    h = Harness(tmp_path, script=[spend])
+    with TestClient(h.app) as client, client.websocket_connect("/ws/sweep") as ws:
+        hello(ws)
+        error = read_until(ws, "error")
+        closed = read_until(ws, "session")
+    assert error["code"] == "budget"
+    assert closed["state"] == "closed" and closed["reason"] == "budget_exceeded"
+
+
+def upsert_on(shelf):
+    def events(stills):
+        return [
+            {"type": "inventory.upsert", "item": {"id": "b01", "shelf": shelf, "frame_ref": f"frames/{Path(stills[0].path).name}"}}
+        ]
+
+    return events
+
+
+def test_coverage_is_reported_per_shelf_once_the_pipeline_places_a_frame(tmp_path):
+    h = Harness(tmp_path, finish_events=upsert_on("S1.1"))
+    with TestClient(h.app) as client, client.websocket_connect("/ws/sweep") as ws:
+        hello(ws)
+        ws.send_bytes(still_frame(checkerboard(), seq=1))
+        assert [r["id"] for r in read_until(ws, "coverage")["regions"]] == ["sweep"]
+        end_sweep(ws)
+        assert read_until(ws, "coverage")["regions"] == [{"id": "S1.1", "state": "sharp"}]
+
+
+def test_shelves_reported_by_the_pipeline_are_known_to_the_tools(tmp_path):
+    h = Harness(tmp_path, finish_events=upsert_on("S1.1"))
+    with TestClient(h.app) as client, client.websocket_connect("/ws/sweep") as ws:
+        hello(ws)
+        ws.send_bytes(still_frame(checkerboard(), seq=1))
+        assert h.bridges[0].hooks.shelves() == set()
+        end_sweep(ws)
+        read_until(ws, "packet_ready")
+        assert h.bridges[0].hooks.shelves() == {"S1.1"}

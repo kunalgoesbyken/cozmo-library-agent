@@ -21,7 +21,7 @@ from google import genai
 from pydantic import BaseModel, ValidationError
 from starlette.websockets import WebSocketDisconnect
 
-from libclaim.budget import Budget
+from libclaim.budget import Budget, BudgetExceeded
 from libclaim.capture.coverage import CoverageMap
 from libclaim.capture.frame_store import FrameHeader, FrameStore
 from libclaim.capture.quality import AlertCode, CaptureConfig, Quality, gate, load_capture_config
@@ -51,6 +51,9 @@ SOF_MARKERS = frozenset(range(0xC0, 0xD0)) - {0xC4, 0xC8, 0xCC}
 STANDALONE_MARKERS = frozenset(range(0xD0, 0xD8)) | {0x01}
 TOKEN_BYTES = 32
 USER_AGENT_KEY = "ua"
+INVENTORY_UPSERT = "inventory.upsert"
+BUDGET_ERROR = "budget"
+BUDGET_REASON = "budget_exceeded"
 
 logger = logging.getLogger(__name__)
 
@@ -133,6 +136,7 @@ class Hooks:
     on_end_sweep: Callable[[], None]
     now_ms: Callable[[], int]
     stills: Callable[[], list[Still]]
+    shelves: Callable[[], set[str]]
     emit: Emit
 
 
@@ -209,7 +213,7 @@ def live_bridge_factory(settings: Settings, budget: Budget | None = None) -> Bri
     )
 
     def make(hooks: Hooks) -> Bridge:
-        tools = LiveTools(hooks.sweep, config, hooks.stills, hooks.now_ms, hooks.on_end_sweep)
+        tools = LiveTools(hooks.sweep, config, hooks.stills, hooks.now_ms, hooks.on_end_sweep, hooks.shelves)
         return LiveBridge(
             hooks.sweep,
             tools,
@@ -343,6 +347,8 @@ class Connection:
         self.monitor: Monitor | None = None
         self.coverage = CoverageMap(capture)
         self.stills: list[Still] = []
+        self.stills_by_name: dict[str, Still] = {}
+        self.shelves: set[str] = set()
         self.still_bytes = 0
         self.coverage_sent: dict[str, str] = {}
         self.clock_offset_ms = 0
@@ -362,6 +368,19 @@ class Connection:
         async with self.send_lock:
             with contextlib.suppress(WebSocketDisconnect, RuntimeError):
                 await self.websocket.send_text(json.dumps(message))
+
+    async def forward(self, message: dict[str, Any]) -> None:
+        await self.send_json(message)
+        item = message.get("item") if message.get("type") == INVENTORY_UPSERT else None
+        if item and item.get("shelf"):
+            self.shelves.add(item["shelf"])
+            await self.place(item["shelf"], item.get("frame_ref", ""))
+
+    async def place(self, shelf: str, frame_ref: str) -> None:
+        still = self.stills_by_name.get(Path(frame_ref).name)
+        if still is not None:
+            self.coverage.assign(still.seq, shelf)
+            await self.send_coverage()
 
     async def send_audio_to_phone(self, data: bytes) -> None:
         self.audio_seq += 1
@@ -442,6 +461,13 @@ class Connection:
         except Rejected as rejected:
             self.close_code = WS_POLICY_VIOLATION
             await self.send_session("closed", rejected.reason)
+        except BudgetExceeded:
+            await self.report_budget()
+
+    async def report_budget(self) -> None:
+        if not self.closed_sent:
+            await self.send_error(BUDGET_ERROR)
+            await self.send_session("closed", BUDGET_REASON)
 
     async def handle_text(self, text: str) -> None:
         try:
@@ -477,6 +503,7 @@ class Connection:
             on_end_sweep=self.finish,
             now_ms=self.now_ms,
             stills=lambda: self.stills,
+            shelves=lambda: self.shelves,
             emit=self.send_json,
         )
         try:
@@ -488,7 +515,7 @@ class Connection:
         self.monitor = Monitor(bridge.inject, self.live)
         self.sweep.write_stage(DEVICE, DeviceInfo(user_agent=str(hello.device.get(USER_AGENT_KEY, ""))))
         self.pipeline = self.pipeline_factory(
-            self.sweep, LiveHooks(emit=self.send_json, inject=bridge.inject, recapture=self.recapture)
+            self.sweep, LiveHooks(emit=self.forward, inject=bridge.inject, recapture=self.recapture)
         )
         await self.send_session("connecting")
         self.bridge_task = asyncio.create_task(bridge.run())
@@ -500,7 +527,7 @@ class Connection:
             self.receive_task.cancel()
 
     async def watch_state(self) -> None:
-        last = ""
+        last = "connecting"
         was_live = False
         while True:
             if self.bridge.session is not None:
@@ -583,6 +610,7 @@ class Connection:
             await self.send_error("storage")
             return
         self.stills.append(still)
+        self.stills_by_name[Path(still.path).name] = still
         self.still_bytes += len(payload)
         self.pipeline.add_still(still)
         region = self.config.unassigned_region
@@ -639,7 +667,9 @@ class Connection:
             with contextlib.suppress(Exception):
                 await self.bridge.close()
         pending = [task for task in (self.watcher_task, self.bridge_task) if task]
-        await asyncio.gather(*pending, return_exceptions=True)
+        outcomes = await asyncio.gather(*pending, return_exceptions=True)
+        if any(isinstance(outcome, BudgetExceeded) for outcome in outcomes):
+            await self.report_budget()
         if not self.closed_sent:
             await self.send_session("closed")
         with contextlib.suppress(RuntimeError):

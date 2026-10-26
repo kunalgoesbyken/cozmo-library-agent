@@ -79,7 +79,10 @@ SPECS = [
         description="Exclude a shelf or region the user says is not theirs or should be skipped.",
         parameters={
             "type": "object",
-            "properties": {"description": {"type": "string"}, "shelf_id": {"type": "string"}},
+            "properties": {
+                "description": {"type": "string"},
+                "shelf_id": {"type": "string", "description": "A shelf id reported by the tools. Leave it out when you do not have one."},
+            },
             "required": ["description"],
         },
     ),
@@ -115,12 +118,14 @@ class LiveTools:
         stills: Callable[[], list[Still]],
         now_ms: Callable[[], int],
         on_end_sweep: Callable[[], None],
+        shelves: Callable[[], set[str]],
     ):
         self.sweep = sweep
         self.config = config
         self.stills = stills
         self.now_ms = now_ms
         self.on_end_sweep = on_end_sweep
+        self.shelves = shelves
         self.handlers: dict[str, Callable[..., dict[str, Any]]] = {
             "record_user_statement": self.record_user_statement,
             "exclude_region": self.exclude_region,
@@ -175,6 +180,12 @@ class LiveTools:
         return {"recorded": True, "needs_appraisal": statement.needs_appraisal}
 
     def exclude_region(self, description: str, shelf_id: str | None = None) -> dict[str, Any]:
+        known = self.shelves()
+        if shelf_id is not None:
+            label = next((shelf for shelf in known if shelf.casefold() == shelf_id.casefold()), None)
+            if label is None:
+                return {"error": f"exclude_region rejected: unknown shelf_id {shelf_id}", "known_shelves": sorted(known)}
+            shelf_id = label
         log = self.read_log(EXCLUSIONS_STAGE, ExclusionLog)
         log.items.append(Exclusion(description=description, shelf_id=shelf_id, t_ms=self.now_ms()))
         self.sweep.write_stage(EXCLUSIONS_STAGE, log)

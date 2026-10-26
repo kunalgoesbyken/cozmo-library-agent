@@ -21,6 +21,7 @@ public_dirs:
 errors:
   limit: This sweep has reached its storage limit.
   storage: Could not save a frame, check free disk space.
+  budget: The spending limit for this session was reached, so the voice guide has stopped.
 max_header_bytes: 4096
 max_mic_bytes: 8192
 max_frame_bytes: 8388608

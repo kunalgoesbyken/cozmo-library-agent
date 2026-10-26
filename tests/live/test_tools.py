@@ -31,8 +31,10 @@ class Harness:
         self.stills = [still(1, 5_000), still(2, 6_000), still(3, 7_500), still(4, 10_000), still(5, 11_000)]
         self.now_ms = now_ms
         self.ended = 0
+        self.shelves = {"B2", "S1.1"}
         self.tools = LiveTools(
-            self.sweep, CONFIG, lambda: self.stills, lambda: self.now_ms, lambda: setattr(self, "ended", self.ended + 1)
+            self.sweep, CONFIG, lambda: self.stills, lambda: self.now_ms, lambda: setattr(self, "ended", self.ended + 1),
+            lambda: self.shelves,
         )
 
     def call(self, name, args):
@@ -84,6 +86,22 @@ def test_exclude_region_is_persisted(tmp_path):
     h.call("exclude_region", {"description": "top shelf"})
     items = h.sweep.read_stage(EXCLUSIONS_STAGE, ExclusionLog).items
     assert [(i.description, i.shelf_id) for i in items] == [("bottom shelf", "B2"), ("top shelf", None)]
+
+
+def test_exclusion_with_an_invented_shelf_is_an_error_the_model_can_recover_from(tmp_path):
+    h = Harness(tmp_path)
+    result = h.call("exclude_region", {"description": "left shelf", "shelf_id": "current_shelf"})
+    assert "error" in result and "current_shelf" in result["error"]
+    assert result["known_shelves"] == ["B2", "S1.1"]
+    assert not (h.sweep.stages / f"{EXCLUSIONS_STAGE}.json").is_file()
+    assert h.call("exclude_region", {"description": "left shelf"}) == {"excluded": True}
+
+
+def test_exclusion_shelf_is_matched_ignoring_case_and_stored_as_the_known_label(tmp_path):
+    h = Harness(tmp_path)
+    assert h.call("exclude_region", {"description": "bottom", "shelf_id": "s1.1"}) == {"excluded": True}
+    [exclusion] = h.sweep.read_stage(EXCLUSIONS_STAGE, ExclusionLog).items
+    assert exclusion.shelf_id == "S1.1"
 
 
 def test_set_locale_persists_and_rejects_unknown_country(tmp_path):
