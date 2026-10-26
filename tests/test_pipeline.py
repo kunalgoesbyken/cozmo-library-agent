@@ -7,8 +7,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 from libclaim import pipeline as pipeline_module
+from libclaim.packet import assemble as assemble_module
 from libclaim.live.session import Scheduling
-from libclaim.live.tools import Exclusion, ExclusionLog, Statement, StatementKind
+from libclaim.live.tools import Exclusion, ExclusionLog, Statement, StatementKind, StatementLog
 from libclaim.llm import QuotaExhausted
 from libclaim.models import Still
 from libclaim.packet.models import ClaimPacket
@@ -274,6 +275,46 @@ async def test_spine_stall_hits_the_vision_cutoff_and_still_counts_books(sweep, 
     assert any("spine detection failed (vision_cutoff)" in entry.reason for entry in packet.review_queue)
 
 
+def boom(*args, **kwargs):
+    raise RuntimeError("injected")
+
+
+@pytest.mark.parametrize(
+    ("module", "target", "stage"),
+    [
+        (pipeline_module, "measure_rows", "scale"),
+        (pipeline_module, "spine_crops", "reading"),
+        (pipeline_module, "room_from_depth", "room"),
+        (pipeline_module, "attach_statements", "appraisal"),
+        (pipeline_module, "price_book", "pricing"),
+        (assemble_module, "item_lines", "items"),
+        (assemble_module, "room_of", "room"),
+    ],
+)
+async def test_a_failing_stage_still_yields_a_valid_packet(sweep, tmp_path, online, monkeypatch, module, target, stage):
+    monkeypatch.setattr(module, target, boom)
+    packet = await run_pipeline(sweep, services=services(sweep, tmp_path, fx.Web()))
+    assert packet.totals.book_count == BOOK_COUNT
+    assert packet.totals == compute_totals(packet.books, packet.items)
+    failed = [e for e in packet.review_queue if e.severity == "high" and "RuntimeError" in e.reason]
+    assert failed and all(e.reason.startswith(stage) for e in failed)
+    assert (sweep.root / "claim_packet.json").is_file()
+
+
+async def test_statements_that_match_nothing_go_to_review(sweep, tmp_path, online):
+    lonely = [
+        Statement(subject="the poster", kind=StatementKind.art_print, value="print", t_ms=0, still_seq_from=1,
+                  still_seq_to=2),
+        Statement(subject="that one", kind=StatementKind.signed, value="signed", t_ms=0, still_seq_from=9,
+                  still_seq_to=10),
+    ]
+    sweep.write_stage("statements", StatementLog(items=[*fx.STATEMENTS, *lonely]))
+    packet = await run_pipeline(sweep, services=services(sweep, tmp_path, fx.Web()))
+    reasons = [entry.reason for entry in packet.review_queue]
+    assert any("'the poster' is a print but no detected artwork" in reason for reason in reasons)
+    assert any("'that one'" in reason and "no book was in view" in reason for reason in reasons)
+
+
 class Storm:
     def __init__(self):
         self.calls = 0
@@ -308,8 +349,11 @@ def test_statement_attaches_to_the_named_book_or_else_the_whole_view():
     vague = Statement(subject="this one", kind=StatementKind.first_edition, value="", t_ms=0, still_seq_from=1,
                       still_seq_to=2)
     art = Statement(subject="dune", kind=StatementKind.original_art, value="", t_ms=0, still_seq_from=1, still_seq_to=9)
-    attached = attach_statements(books, titles, [named, vague, art], 80)
+    nowhere = Statement(subject="the red one", kind=StatementKind.signed, value="", t_ms=0, still_seq_from=5,
+                        still_seq_to=6)
+    attached, unattached = attach_statements(books, titles, [named, vague, art, nowhere], 80)
     assert attached == {"a": [named, vague], "b": [vague], "c": []}
+    assert len(unattached) == 1 and "'the red one'" in unattached[0]
 
 
 def test_exclusion_by_shelf_id_or_by_time_window():

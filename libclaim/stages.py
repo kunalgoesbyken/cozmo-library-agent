@@ -27,6 +27,7 @@ STREAM_STAGES = STAGES[:2]
 SEGMENT_STAGES = STAGES[2:6]
 POST_STAGES = STAGES[6:]
 STILLS = "stills"
+FAILURES = "failures"
 VISION_CUTOFF = "vision_cutoff"
 
 
@@ -157,6 +158,7 @@ class ResolutionStage(BaseModel):
 class ItemsStage(BaseModel):
     items: list[ItemDet] = Field(default_factory=list)
     failure: str = ""
+    review: list[str] = Field(default_factory=list)
 
 
 class BookAppraisal(BaseModel):
@@ -166,6 +168,17 @@ class BookAppraisal(BaseModel):
 
 class AppraisalStage(BaseModel):
     books: dict[str, BookAppraisal] = Field(default_factory=dict)
+    review: list[str] = Field(default_factory=list)
+
+
+class StageFailure(BaseModel):
+    stage: str
+    ref: str
+    error: str
+
+
+class FailureLog(BaseModel):
+    items: list[StageFailure] = Field(default_factory=list)
 
 
 class PricedItem(BaseModel):
@@ -191,3 +204,4 @@ class Results(BaseModel):
     items: ItemsStage | None = None
     appraisal: AppraisalStage = Field(default_factory=AppraisalStage)
     pricing: PricingStage = Field(default_factory=PricingStage)
+    failures: FailureLog = Field(default_factory=FailureLog)

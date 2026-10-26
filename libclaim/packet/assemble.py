@@ -1,7 +1,9 @@
+import logging
 from collections import defaultdict
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import TypeVar
 
 from libclaim.packet.models import (
     Book,
@@ -27,6 +29,8 @@ from libclaim.vision.scale import ScaleMethod, SpineDims, cross_check
 from libclaim.vision.spines import ReviewEntry as ReconcileNote
 
 MS_PER_S = 1000
+T = TypeVar("T")
+logger = logging.getLogger(__name__)
 UNFINISHED = "{stage} did not finish before the packet was finalised"
 
 
@@ -263,12 +267,26 @@ def item_review(review: Review, packet: ClaimPacket, results: Results) -> None:
             review.unfinished(item.id, "pricing", line, item.frame_ref)
 
 
+def statement_review(review: Review, results: Results) -> None:
+    for reason in results.appraisal.review:
+        review.add("statements", "books", reason, "books")
+    for reason in results.items.review if results.items else []:
+        review.add("statements", "items", reason, "items")
+
+
+def failure_review(review: Review, results: Results) -> None:
+    for failure in results.failures.items:
+        review.add("failure", failure.ref, f"{failure.stage} failed ({failure.error})", failure.stage)
+
+
 def pipeline_review(packet: ClaimPacket, results: Results, sweep: SweepDir, cfg: PipelineConfig) -> list[ReviewEntry]:
     review = Review(cfg)
+    failure_review(review, results)
     book_review(review, packet, results)
     frame_review(review, results, sweep)
     room_review(review, results)
     item_review(review, packet, results)
+    statement_review(review, results)
     return review.entries
 
 
@@ -277,19 +295,37 @@ def book_lines(results: Results, sweep: SweepDir, cfg: PipelineConfig) -> list[B
     return [book_line(slot, numbered[slot.id], results, sweep, cfg) for slot in slots(results)]
 
 
+class Sections:
+    def __init__(self, cfg: PipelineConfig):
+        self.cfg = cfg
+        self.failed: list[ReviewEntry] = []
+
+    def build(self, name: str, make: Callable[[], T], empty: T) -> T:
+        try:
+            return make()
+        except Exception as error:
+            logger.error("packet section %s failed: %s", name, type(error).__name__, exc_info=error)
+            reason = f"{name} failed while building the packet ({type(error).__name__})"
+            self.failed.append(ReviewEntry(ref_id=name, severity=self.cfg.severity["failure"], reason=reason,
+                                           line_ref=name))
+            return empty
+
+
 def build_packet(results: Results, sweep: SweepDir, locale: Locale, cfg: PipelineConfig,
                  latency_s: dict[str, float]) -> ClaimPacket:
+    sections = Sections(cfg)
     packet = ClaimPacket(
         sweep=sweep_info(results, sweep, locale),
         second_country=results.pricing.second_country,
-        room=room_of(results, sweep),
-        books=book_lines(results, sweep, cfg),
-        items=item_lines(results, sweep),
+        room=sections.build("room", lambda: room_of(results, sweep), Room()),
+        books=sections.build("books", lambda: book_lines(results, sweep, cfg), []),
+        items=sections.build("items", lambda: item_lines(results, sweep), []),
         costs=costs_of(sweep.ledger),
         latency_s=latency_s,
     )
     packet.totals = compute_totals(packet.books, packet.items)
-    packet.review_queue = build_review_queue(packet) + pipeline_review(packet, results, sweep, cfg)
+    review = sections.build("review", lambda: pipeline_review(packet, results, sweep, cfg), [])
+    packet.review_queue = sections.failed + build_review_queue(packet) + review
     return packet
 
 

@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import logging
 import time
+from statistics import median
 from collections import defaultdict
 from collections.abc import Awaitable, Callable, Coroutine
 from dataclasses import dataclass
@@ -53,6 +54,9 @@ from libclaim.stages import (
     SEGMENT_STAGES,
     STAGES,
     STILLS,
+    FAILURES,
+    FailureLog,
+    StageFailure,
     VISION_CUTOFF,
     AppraisalStage,
     BookAppraisal,
@@ -81,7 +85,7 @@ from libclaim.room.geometry import RoomGeometry
 from libclaim.sweep import SweepDir
 from libclaim.vision.boxes import Box, TrackConfig, load_vision_config, read_image
 from libclaim.vision.gate import VisionGate
-from libclaim.vision.items import ItemDet, detect_items
+from libclaim.vision.items import ItemDet, detect_items, unmatched_statements
 from libclaim.vision.keyframes import KeyframeStream, load_keyframe_config
 from libclaim.vision.reading import Reading, SpineCrop, crop_spine, read_spines
 from libclaim.vision.resolve import Catalogs, Resolution, read_text, resolve
@@ -107,11 +111,13 @@ logger = logging.getLogger(__name__)
 VISION_FAILURES = (QuotaExhausted, LlmReplyInvalid, errors.APIError, BudgetExceeded, LiveCallBlocked)
 SOURCES = {"bookchor": Bookchor, "pustakkosh": Pustakkosh, "bookswagon": Bookswagon, "penguin_uk": PenguinUk}
 ART_KINDS = {StatementKind.original_art, StatementKind.art_print}
+UNATTACHED = "user said '{subject}' is {kind} but no book was in view; not attached to any line"
 NO_LISTING = "no listing category in the item sources matches this item"
 OFFLINE_LISTING = "listing pages are not cached and the pipeline is offline"
 FRAME_SEPARATOR = "_"
 STAGE_TYPES: dict[str, type[BaseModel]] = {
     STILLS: StillLog,
+    FAILURES: FailureLog,
     "keyframes": KeyframesStage,
     "spines": SpinesStage,
     "tracks": TracksStage,
@@ -241,16 +247,24 @@ def subject_matches(statement: Statement, resolution: Resolution | None, thresho
 
 
 def attach_statements(books: list[BookSlot], resolutions: dict[str, Resolution], statements: list[Statement],
-                      threshold: float) -> dict[str, list[Statement]]:
+                      threshold: float) -> tuple[dict[str, list[Statement]], list[str]]:
     attached: dict[str, list[Statement]] = {book.id: [] for book in books}
+    unattached = []
     for statement in statements:
-        if statement.kind in ART_KINDS or statement.still_seq_from is None or statement.still_seq_to is None:
+        if statement.kind in ART_KINDS or not statement.needs_appraisal:
             continue
-        window = [b for b in books if any(statement.still_seq_from <= seq <= statement.still_seq_to for seq in b.seen)]
+        low, high = statement.still_seq_from, statement.still_seq_to
+        window = [b for b in books if low is not None and any(low <= seq <= high for seq in b.seen)]
         named = [b for b in window if subject_matches(statement, resolutions.get(b.id), threshold)]
         for book in named or window:
             attached[book.id].append(statement)
-    return attached
+        if not window:
+            unattached.append(UNATTACHED.format(subject=statement.subject, kind=statement.kind.value))
+    return attached, unattached
+
+
+def spine_height(frame: FrameSpines) -> float:
+    return median(det.box_px.height for det in frame.dets) if frame.dets else 0.0
 
 
 def excluded_by(labels: set[str], stills: list[Still], exclusions: list[Exclusion], window_ms: int) -> str:
@@ -300,7 +314,7 @@ class SweepRun:
         self.calls: set[asyncio.Future] = set()
         self.timings: dict[str, float] = defaultdict(float)
         self.done: dict[str, int] = defaultdict(int)
-        self.computed: set[str] = set()
+        self.computed: set[str] = {FAILURES}
         self.deadline_at = float("inf")
         self.depth_task: asyncio.Future | None = None
 
@@ -337,7 +351,7 @@ class SweepRun:
             try:
                 await self.place(await task)
             except Exception as error:
-                logger.error("frame placement failed: %s", type(error).__name__, exc_info=error)
+                self.fail("spines", "segments", error)
         await self.close_segment()
 
     async def follows(self, frames: list[FrameSpines], frame: FrameSpines) -> bool:
@@ -363,7 +377,11 @@ class SweepRun:
     async def close_segment(self) -> None:
         if not self.open:
             return
-        unit = await asyncio.to_thread(marker_unit, [f.still for f in self.open], self.measure_cfg.scale)
+        try:
+            unit = await asyncio.to_thread(marker_unit, [f.still for f in self.open], self.measure_cfg.scale)
+        except Exception as error:
+            self.fail("spines", "marker", error)
+            unit = None
         self.start_segment(self.plan_open(unit), SEGMENT_STAGES[0])
 
     def plan_open(self, unit: int | None) -> SegmentPlan:
@@ -451,10 +469,23 @@ class SweepRun:
                  "resolution": self.resolve_segment}
         for stage in SEGMENT_STAGES[SEGMENT_STAGES.index(start):]:
             self.computed.add(stage)
-            await self.timed(stage, steps[stage](plan))
+            try:
+                await self.timed(stage, steps[stage](plan))
+            except Exception as error:
+                self.fail(stage, plan.label, error)
+                if stage == SEGMENT_STAGES[0]:
+                    return
+                continue
             self.done[stage] += 1
             await self.progress(stage, self.done[stage], len(self.results.spines.segments))
-        await self.prefetch(plan)
+        try:
+            await self.prefetch(plan)
+        except Exception as error:
+            logger.warning("price prefetch failed: %s", type(error).__name__)
+
+    def fail(self, stage: str, ref: str, error: Exception) -> None:
+        logger.error("%s failed for %s: %s", stage, ref, type(error).__name__, exc_info=error)
+        self.results.failures.items.append(StageFailure(stage=stage, ref=ref, error=type(error).__name__))
 
     def frames_of(self, seqs: list[int]) -> list[FrameSpines]:
         by_seq = {frame.still.seq: frame for frame in self.results.spines.frames}
@@ -565,25 +596,37 @@ class SweepRun:
         names = dict.fromkeys(locale.new_sources + locale.used_sources)
         return Market(locale, {name: SOURCES[name](self.services.http) for name in names if name in SOURCES})
 
-    def room_stills(self) -> list[Still]:
-        return [frame.still for frame in self.results.spines.frames if not frame.rows]
+    def all_stills(self) -> list[Still]:
+        return [frame.still for frame in self.results.spines.frames]
+
+    def item_stills(self) -> list[Still]:
+        frames = self.results.spines.frames
+        labels = {seq: plan.label for plan in self.results.spines.segments for seq in plan.seqs}
+        widest: dict[str, FrameSpines] = {}
+        for frame in frames:
+            label = labels.get(frame.still.seq)
+            if frame.rows and label and (label not in widest or spine_height(frame) < spine_height(widest[label])):
+                widest[label] = frame
+        chosen = [frame for frame in frames if not frame.rows] + list(widest.values())
+        return [frame.still for frame in sorted(chosen, key=lambda frame: frame.still.t_ms)]
 
     async def depths(self) -> DepthSet:
         if self.depth_task is None:
             self.depth_task = asyncio.ensure_future(asyncio.to_thread(
-                scaled_depths, self.room_stills(), self.services.depth_fn, self.services.settings.aruco_marker_size_cm
+                scaled_depths, self.all_stills(), self.services.depth_fn, self.services.settings.aruco_marker_size_cm
             ))
         return await self.depth_task
 
     async def detect_room_items(self) -> None:
         depths = await self.depths()
+        statements = self.statements()
         try:
-            dets = await detect_items(self.room_stills(), self.llm, self.services.settings.vision_models,
-                                      self.statements(), depths)
+            dets = await detect_items(self.item_stills(), self.llm, self.services.settings.vision_models,
+                                      statements, depths)
         except VISION_FAILURES as error:
             self.results.items = ItemsStage(failure=type(error).__name__)
             return
-        self.results.items = ItemsStage(items=dets)
+        self.results.items = ItemsStage(items=dets, review=unmatched_statements(dets, statements))
 
     def unit_rows(self) -> dict[int, list[list[SpineDims]]]:
         rows: dict[int, list[list[SpineDims]]] = defaultdict(list)
@@ -600,12 +643,12 @@ class SweepRun:
     async def measure_room(self) -> None:
         depths = await self.depths()
         shelves = shelf_units(self.unit_rows())
-        self.results.room = await asyncio.to_thread(room_from_depth, self.room_stills(), shelves, depths)
+        self.results.room = await asyncio.to_thread(room_from_depth, self.all_stills(), shelves, depths)
 
     async def appraise(self) -> None:
         books = list(slots(self.results))
-        attached = attach_statements(books, self.results.resolution.resolutions, self.statements(),
-                                     self.cfg.statement_subject_match)
+        attached, unattached = attach_statements(books, self.results.resolution.resolutions, self.statements(),
+                                                 self.cfg.statement_subject_match)
         window = load_live_config().statement_window_ms
         plans = {plan.index: plan for plan in self.results.spines.segments}
         exclusions = self.exclusions()
@@ -615,7 +658,7 @@ class SweepRun:
             labels = {book.shelf.casefold(), plans[book.segment].label.casefold()}
             appraisals[book.id] = BookAppraisal(statements=attached[book.id],
                                                 excluded=excluded_by(labels, segment.stills, exclusions, window))
-        self.results.appraisal = AppraisalStage(books=appraisals)
+        self.results.appraisal = AppraisalStage(books=appraisals, review=unattached)
 
     async def price_slot(self, book: BookSlot, market: Market, other: Market, fx: Fx) -> BookPrices | None:
         resolution = self.results.resolution.resolutions.get(book.id)
@@ -656,7 +699,11 @@ class SweepRun:
 
     async def run_stage(self, name: str, step: Callable[[], Coroutine]) -> None:
         self.computed.add(name)
-        await self.timed(name, step())
+        try:
+            await self.timed(name, step())
+        except Exception as error:
+            self.fail(name, name, error)
+            return
         await self.progress(name, 1, 1)
 
     async def wait_until(self, limit: float, tasks: list[asyncio.Future]) -> set[asyncio.Future]:
@@ -704,7 +751,7 @@ class SweepRun:
         if "room" in todo:
             await self.until_deadline([self.run_stage("room", self.measure_room)])
         if "appraisal" in todo:
-            await self.run_stage("appraisal", self.appraise)
+            await self.until_deadline([self.run_stage("appraisal", self.appraise)])
         if "pricing" in todo:
             await self.until_deadline([self.run_stage("pricing", self.price_all)])
         packet = await self.publish(started)
@@ -765,7 +812,10 @@ class SweepRun:
         if stage not in STAGES:
             raise ValueError(f"unknown stage {from_stage}; choose one of {STAGES}")
         stills = load_stills(self.sweep)
-        self.load(STAGES[: STAGES.index(stage)])
+        earlier = STAGES[: STAGES.index(stage)]
+        self.load(earlier)
+        logged = read_or(self.sweep, FAILURES, FailureLog, FailureLog())
+        self.results.failures = FailureLog(items=[item for item in logged.items if item.stage in earlier])
         if stage == STAGES[0]:
             for still in stills:
                 self.add_still(still)
@@ -778,7 +828,6 @@ class SweepRun:
             for plan in self.results.spines.segments:
                 self.start_segment(plan, stage)
         return await self.finish(stage if stage in POST_STAGES else POST_STAGES[0])
-
 
 
 def sweep_pipeline(settings: Settings, budget: Budget) -> Callable[[SweepDir, LiveHooks], SweepRun]:
