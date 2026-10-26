@@ -24,7 +24,7 @@ def load_session(path: Path, providers: tuple[str, ...]) -> ort.InferenceSession
 def preprocess(img: np.ndarray, cfg: VisionConfig) -> np.ndarray:
     size = cfg.rfdetr.input_size
     rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    resized = cv2.resize(rgb, (size, size), interpolation=cv2.INTER_LINEAR)
+    resized = cv2.resize(rgb, (size, size), interpolation=cv2.INTER_AREA)
     pixels = (resized.astype(np.float32) / 255.0 - np.array(cfg.rfdetr.mean, np.float32)) / np.array(
         cfg.rfdetr.std, np.float32
     )
