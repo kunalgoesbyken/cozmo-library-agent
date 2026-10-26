@@ -1,6 +1,5 @@
-shelf_label: "{unit}-{row}"
+shelf_label: "{unit}.{row}"
 truthy: ["y", "yes", "true", "1"]
-live_stages: [capture, live]
 closure_tolerance_m: 0.05
 default_interior_angle_deg: 90.0
 alignment:
@@ -15,8 +14,12 @@ count:
   tolerance: 0.05
 dims:
   tolerance: 0.15
+  min_share_within: 0.80
+  min_sample: 20
 price:
   tolerance: 0.25
+  min_share_within: 0.80
+  min_comparable: 10
   new_conditions: [new]
   observed_source_type: observed
   source_scorer: token_sort_ratio
@@ -25,8 +28,12 @@ items:
   scorer: token_set_ratio
   threshold: 70
   min_found: 0.80
+  min_truth: 8
 room:
   floor_tolerance: 0.10
   wall_tolerance: 0.15
 time:
   max_seconds: 300
+  elapsed_key: after_sweep
+  streaming_stages: [keyframes, spines]
+  expected_stages: [tracks, scale, reading, resolution, room, items, appraisal, pricing, packet]

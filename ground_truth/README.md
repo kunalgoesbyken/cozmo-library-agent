@@ -4,7 +4,7 @@ Fill these files in by hand, then run:
 
     python tools/eval.py runs/<id> ground_truth/ > docs/results.md
 
-Copy each `*.template.csv` to the same name without `.template` (for example `books.template.csv` to `books.csv`) and add rows. Nothing here is generated or guessed; every value is something you counted, measured with a ruler or tape, or looked up yourself. Any file you leave out is skipped, and `docs/results.md` lists the pass bars that could not be evaluated. All files are UTF-8.
+Copy each `*.template.csv` to the same name without `.template` (for example `books.template.csv` to `books.csv`) and add rows. Nothing here is generated or guessed; every value is something you counted, measured with a ruler or tape, or looked up yourself. Any file you leave out is skipped, and `docs/results.md` lists the pass bars that could not be evaluated. A file that is present but half filled in (blank numbers, a missing column, an empty file) makes only its own bars not evaluated, with the reason shown. All files are UTF-8.
 
 Thresholds, tolerances and the shelf label format live in `config/eval.yaml`.
 
@@ -22,9 +22,11 @@ One row per physical book on the shelves, legible or not.
 | legible | `y` if a person can read the title from the spine, otherwise `n` |
 | orientation | `upright` or `flat`, optional |
 
-The packet's `books[].shelf` must equal the shelf label built from `unit` and `row` with `shelf_label` in `config/eval.yaml` (default `{unit}-{row}`, so unit 2 row 3 is `2-3`). Packet books on shelves that match no ground-truth row are counted as insertions.
+The packet's `books[].shelf` must equal the shelf label built from `unit` and `row` with `shelf_label` in `config/eval.yaml` (default `{unit}.{row}`, so unit 2 row 3 is `2.3`). The pipeline labels a shelf with its segment label, followed by `.N` when the segment has several rows, so name your units to match those labels or change `shelf_label`. Packet books on shelves that match no ground-truth row are counted as insertions, and the results say when no packet shelf label matches at all.
 
 How books are matched: per row, ground-truth books and packet books (ordered by position) are aligned with an edit-distance alignment. A miss and an insertion each cost `gap_cost`; pairing two books costs one minus their normalised title similarity (rapidfuzz, `title.scorer`), or `unknown_cost` when either title is empty. A paired book is correct when the packet status is `identified` and the similarity is at least `title.threshold`.
+
+Title threshold behaviour: `token_sort_ratio` is word-order independent but not subset-tolerant. A subtitle added or dropped (`Dune` against `Dune: Messiah`, about 50) is not a match, which is deliberate: it is a different title. Titles that differ only by a volume or edition number (`Collected Works Volume 1` against `Volume 2`, about 96) do score above the default 85 and would count as correct, so check multi-volume sets by hand and raise `title.threshold` if you have many.
 
 Definitions:
 
@@ -42,7 +44,9 @@ Twenty spines measured with a ruler, mixing formats.
 | height_cm | Spine height |
 | thickness_cm | Spine thickness |
 
-Each spine is looked up through the book alignment (or by shelf label and position when `books.csv` is absent). Reported per dimension: mean, median and p90 of `abs(packet - ruler) / ruler`, and the share within 15%. The bar passes when the mean error of both dimensions is within 15%.
+Each spine is looked up through the book alignment, and only counts when the aligned packet title matches the ground-truth title (`title.threshold`), so a mis-aligned neighbour is never measured. Only when `books.csv` is absent (or unusable) is the packet looked up directly by shelf label and position. A slot key that occurs twice (in `spines20.csv`, in `books.csv` or in the packet) is reported and left unmatched, never overwritten.
+
+Reported per dimension: mean, median and p90 of `abs(packet - ruler) / ruler` over compared spines, and the share of all measured spines within 15%. Spines with no usable packet book, and spines whose dimension the packet did not produce, count as failures against the full sample. This project's reading of the bar: the share within 15% must be at least `dims.min_share_within` (80%) and the mean error at most 15%, for both height and thickness. With fewer than `dims.min_sample` (20) rows the bar is reported as not evaluated.
 
 ## prices15.csv
 
@@ -60,7 +64,7 @@ Fifteen books checked by hand on the retailer the packet cites, on the same day.
 | condition | `new` compares with the packet's `replacement_cost`; anything else (`good`, `used`) compares with `used_value` |
 | screenshot | Path or file name of your screenshot |
 
-A row has the same source type when the packet source matches `source` (rapidfuzz, `price.source_threshold`), the currency matches, and a used price is `observed` rather than `derived`. Rows that differ are listed separately and excluded from the bar; rows with no packet price are listed as not compared. The bar passes when the mean error over same-source rows is within 25%; the table also shows how many of the 15 were comparable.
+A row has the same source type when the packet source matches `source` (rapidfuzz, `price.source_threshold`), the currency matches, and a used price is `observed` rather than `derived`. Rows that differ are listed separately and excluded from the bar; rows with no packet price are listed as not compared. An empty packet currency also counts as a mismatch. This project's reading of the bar: over the comparable (same-source) rows, the share within 25% must be at least `price.min_share_within` (80%) and the mean error at most 25%. At least `price.min_comparable` (10) rows must be comparable, otherwise the bar is reported as not evaluated; the summary shows `comparable X of 15`.
 
 ## items.csv
 
@@ -73,7 +77,7 @@ At least 8 non-book items.
 | w_cm, h_cm, d_cm | Dimensions, optional |
 | brand | Brand or model, optional |
 
-An item is found when a packet item's `brand_model` and `description` fuzzily match `brand` and `name` (`items.threshold`, one packet item per ground-truth item). It counts only when the category also matches. The bar is at least 80% found with the correct category.
+An item is found when a packet item's `brand_model` and `description` fuzzily match `brand` and `name` (`items.threshold`, one packet item per ground-truth item). Matching prefers candidates whose category is equal, then falls back to name similarity alone; an item matched with the wrong category is counted as found but wrong, and shown separately. It counts only when the category matches. The bar is at least 80% found with the correct category, and needs at least `items.min_truth` (8) items, otherwise it is not evaluated.
 
 ## room.json
 
@@ -99,8 +103,8 @@ Formulas, computed in code and not typed in:
 - Gross wall area: `sum(wall lengths) * ceiling_height_m`, compared with the packet's `room.wall_area_m2` (gross).
 - Net wall area: gross minus the sum of `width_m * height_m` over openings. Shelved wall area: the sum of `width_m * height_m` over `shelving_fronts`. Both are shown without a bar.
 
-Bars: floor within 10%, wall within 15%.
+Bars: floor within 10%, wall within 15%. Both are reported as not evaluated when the walls do not close, when numbers are left blank or `null` (as in `room.template.json`), or when `walls` has fewer than 3 entries.
 
 ## Time and cost
 
-No ground truth is needed. Time to packet is the sum of the packet's `latency_s` (or `stages/_ledger.json` when the packet has none) over every stage not listed in `live_stages` in `config/eval.yaml`; the bar is under 300 seconds. Cost and latency per stage come from the same sources.
+No ground truth is needed. Time to packet is the packet's `latency_s.after_sweep` (`time.elapsed_key`), or the sum of the post-sweep stages when that key is absent; stages in `time.streaming_stages` run during the sweep and are excluded from that sum. At least one post-sweep stage timing must exist (from `latency_s` or `stages/_ledger.json`), otherwise the bar is not evaluated. Expected stages with no timing are listed. The bar is under 300 seconds. Cost and latency per stage come from the same sources.

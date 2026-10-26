@@ -46,6 +46,13 @@ ev = tool()
 CFG = ev.load_eval_config()
 
 
+def cfg_with(**changes):
+    data = CFG.model_dump()
+    for key, value in changes.items():
+        data[key].update(value)
+    return ev.EvalConfig.model_validate(data)
+
+
 def gt_books(legible_except=(5,)):
     return [
         ev.GtBook(unit="1", row="1", position=i + 1, title=t, legible=(i + 1) not in legible_except)
@@ -53,7 +60,7 @@ def gt_books(legible_except=(5,)):
     ]
 
 
-def book(position, title, status="identified", shelf="1-1", **kw):
+def book(position, title, status="identified", shelf="1.1", **kw):
     return Book(id=f"b{shelf}{position}", shelf=shelf, position=position, status=status, title=title,
                 frame_ref=f"frames/{position}.jpg", **kw)
 
@@ -71,9 +78,10 @@ def test_toy_truth_count_accuracy_and_confidently_wrong():
     packet = toy_packet()
     truth = gt_books()
     matches = ev.match_books(truth, packet, CFG)
-    count = ev.count_section(truth, packet, CFG)
+    count = ev.count_section(truth, matches, packet, CFG)
     main, listing = ev.title_sections(truth, matches, packet, CFG)
     assert count.metrics["error"] == pytest.approx(0.10)
+    assert (count.metrics["misses"], count.metrics["insertions"]) == (1, 0)
     assert count.status == ev.FAIL
     assert (main.metrics["correct"], main.metrics["legible"]) == (8, 9)
     assert (main.metrics["confidently_wrong"], main.metrics["identified"]) == (1, 9)
@@ -114,33 +122,108 @@ def test_identified_book_on_illegible_spine_is_not_counted_wrong():
     assert main.status == ev.PASS
 
 
-def test_dims_within_and_out_of_tolerance():
+def three_spines():
+    return [
+        ev.GtSpine(unit="1", row="1", position=1, height_cm=20.0, thickness_cm=3.0),
+        ev.GtSpine(unit="1", row="1", position=2, height_cm=20.0, thickness_cm=4.0),
+        ev.GtSpine(unit="1", row="1", position=3, height_cm=20.0, thickness_cm=4.0),
+    ]
+
+
+def test_dims_within_and_out_of_tolerance_count_unmatched_as_failures():
     packet = ClaimPacket(
         books=[
             book(1, "A", spine_height_cm=22.0, spine_thickness_cm=3.0),
             book(2, "B", spine_height_cm=30.0, spine_thickness_cm=3.0),
         ]
     )
-    truth = [
-        ev.GtSpine(unit="1", row="1", position=1, height_cm=20.0, thickness_cm=3.0),
-        ev.GtSpine(unit="1", row="1", position=2, height_cm=20.0, thickness_cm=4.0),
-        ev.GtSpine(unit="1", row="1", position=3, height_cm=20.0, thickness_cm=4.0),
-    ]
-    section = ev.spines_section(truth, [], packet, CFG)
+    section = ev.spines_section(three_spines(), None, [], packet, cfg_with(dims={"min_sample": 3}))
     height, thickness = section.metrics["height"], section.metrics["thickness"]
     assert height["n"] == 2
     assert height["mean"] == pytest.approx(0.3)
-    assert height["share_within"] == pytest.approx(0.5)
+    assert height["share_within"] == pytest.approx(1 / 3)
     assert thickness["mean"] == pytest.approx(0.125)
-    assert thickness["share_within"] == pytest.approx(0.5)
+    assert thickness["share_within"] == pytest.approx(1 / 3)
     assert section.metrics["unmatched"] == 1
     assert section.status == ev.FAIL
 
 
-def test_dims_pass_when_mean_error_within_tolerance():
-    packet = ClaimPacket(books=[book(1, "A", spine_height_cm=21.0, spine_thickness_cm=3.3)])
-    truth = [ev.GtSpine(unit="1", row="1", position=1, height_cm=20.0, thickness_cm=3.0)]
-    assert ev.spines_section(truth, [], packet, CFG).status == ev.PASS
+def test_dims_not_evaluated_below_min_sample():
+    section = ev.spines_section(three_spines(), None, [], ClaimPacket(), CFG)
+    assert section.status == ev.NOT_EVALUATED
+    assert "needs 20" in section.reason
+
+
+def twenty_spines(count=20):
+    return [ev.GtSpine(unit="1", row="1", position=i, height_cm=20.0, thickness_cm=3.0) for i in range(1, count + 1)]
+
+
+def test_dims_pass_with_full_sample_within_tolerance():
+    packet = ClaimPacket(
+        books=[book(i, f"T{i}", spine_height_cm=21.0, spine_thickness_cm=3.3) for i in range(1, 21)]
+    )
+    assert ev.spines_section(twenty_spines(), None, [], packet, CFG).status == ev.PASS
+
+
+def test_dims_fail_when_mean_is_fine_but_share_is_low():
+    books = [book(i, f"T{i}", spine_height_cm=20.0, spine_thickness_cm=3.0) for i in range(1, 21)]
+    for index in range(5):
+        books[index] = book(index + 1, f"T{index + 1}", spine_height_cm=22.0, spine_thickness_cm=3.0)
+    for index in range(5, 11):
+        books[index] = book(index + 1, f"T{index + 1}", spine_height_cm=24.0, spine_thickness_cm=3.0)
+    section = ev.spines_section(twenty_spines(), None, [], ClaimPacket(books=books), CFG)
+    assert section.metrics["height"]["mean"] < 0.15
+    assert section.metrics["height"]["share_within"] == pytest.approx(0.7)
+    assert section.status == ev.FAIL
+
+
+def test_dims_missing_predictions_count_as_failures():
+    books = [book(i, f"T{i}", spine_height_cm=20.0, spine_thickness_cm=3.0) for i in range(1, 21)]
+    books[0] = book(1, "T1")
+    books[1] = book(2, "T2")
+    books[2] = book(3, "T3")
+    section = ev.spines_section(twenty_spines(), None, [], ClaimPacket(books=books), CFG)
+    assert section.metrics["height"]["share_within"] == pytest.approx(17 / 20)
+    assert section.status == ev.PASS
+    books[3] = book(4, "T4")
+    section = ev.spines_section(twenty_spines(), None, [], ClaimPacket(books=books), CFG)
+    assert section.metrics["height"]["share_within"] == pytest.approx(16 / 20)
+    books[4] = book(5, "T5")
+    section = ev.spines_section(twenty_spines(), None, [], ClaimPacket(books=books), CFG)
+    assert section.status == ev.FAIL
+
+
+def test_dims_with_books_truth_do_not_fall_back_to_direct_lookup():
+    truth_books = [ev.GtBook(unit="1", row="1", position=1, title="Dune", legible=True)]
+    packet = ClaimPacket(books=[book(1, "Something Else Entirely", spine_height_cm=20.0, spine_thickness_cm=3.0)])
+    spines = [ev.GtSpine(unit="1", row="1", position=1, height_cm=20.0, thickness_cm=3.0)]
+    matches = ev.match_books(truth_books, packet, CFG)
+    section = ev.spines_section(spines, truth_books, matches, packet, cfg_with(dims={"min_sample": 1}))
+    assert section.metrics["unmatched"] == 1
+    assert section.status == ev.FAIL
+    packet = ClaimPacket(books=[book(1, "Dune", spine_height_cm=20.0, spine_thickness_cm=3.0)])
+    matches = ev.match_books(truth_books, packet, CFG)
+    section = ev.spines_section(spines, truth_books, matches, packet, cfg_with(dims={"min_sample": 1}))
+    assert section.metrics["unmatched"] == 0
+    assert section.status == ev.PASS
+
+
+def test_dims_report_duplicate_slots_instead_of_overwriting():
+    packet = ClaimPacket(
+        books=[
+            book(1, "A", spine_height_cm=20.0, spine_thickness_cm=3.0),
+            book(1, "B", spine_height_cm=40.0, spine_thickness_cm=3.0),
+        ]
+    )
+    spines = [ev.GtSpine(unit="1", row="1", position=1, height_cm=20.0, thickness_cm=3.0)]
+    section = ev.spines_section(spines, None, [], packet, cfg_with(dims={"min_sample": 1}))
+    assert section.metrics["duplicates"] == 1
+    assert section.metrics["unmatched"] == 1
+    assert "Duplicate slot keys" in "\n".join(section.lines)
+    twice = spines * 2
+    section = ev.spines_section(twice, None, [], ClaimPacket(books=[book(1, "A", spine_height_cm=20.0)]),
+                                cfg_with(dims={"min_sample": 2}))
+    assert section.metrics["duplicates"] == 1
 
 
 def priced_book(isbn, amount, source, condition="new", source_type="observed"):
@@ -171,19 +254,45 @@ def test_prices_report_source_mismatch_separately():
         gt_price("4", 100.0, "bookchor"),
         gt_price("5", 100.0, "bookchor"),
     ]
-    section = ev.prices_section(truth, packet, CFG)
+    section = ev.prices_section(truth, packet, cfg_with(price={"min_comparable": 1}))
     assert section.metrics["n"] == 1
     assert section.metrics["mean"] == pytest.approx(0.10)
     assert section.metrics["mismatched"] == 2
     assert section.metrics["not_priced"] == 2
     assert section.status == ev.PASS
+    assert "1 of 5" in "\n".join(section.lines)
     assert "Mismatched source rows" in "\n".join(section.lines)
 
 
 def test_prices_fail_when_error_exceeds_tolerance():
-    packet = ClaimPacket(books=[priced_book("1", "200", "bookchor")])
-    section = ev.prices_section([gt_price("1", 100.0, "bookchor")], packet, CFG)
+    packet = ClaimPacket(sweep=SweepInfo(currency="INR"), books=[priced_book("1", "200", "bookchor")])
+    section = ev.prices_section([gt_price("1", 100.0, "bookchor")], packet, cfg_with(price={"min_comparable": 1}))
     assert section.status == ev.FAIL
+
+
+def test_prices_not_evaluated_below_min_comparable():
+    packet = ClaimPacket(sweep=SweepInfo(currency="INR"), books=[priced_book("1", "100", "bookchor")])
+    section = ev.prices_section([gt_price("1", 100.0, "bookchor")], packet, CFG)
+    assert section.status == ev.NOT_EVALUATED
+    assert "comparable 1 of 1" in section.reason
+
+
+def test_prices_fail_on_low_share_with_good_mean():
+    books = [priced_book(str(i), "100", "bookchor") for i in range(1, 11)]
+    for index in range(3):
+        books[index] = priced_book(str(index + 1), "130", "bookchor")
+    truth = [gt_price(str(i), 100.0, "bookchor") for i in range(1, 11)]
+    section = ev.prices_section(truth, ClaimPacket(sweep=SweepInfo(currency="INR"), books=books), CFG)
+    assert section.metrics["mean"] < 0.25
+    assert section.metrics["share_within"] == pytest.approx(0.7)
+    assert section.status == ev.FAIL
+
+
+def test_prices_unknown_packet_currency_is_a_mismatch():
+    packet = ClaimPacket(books=[priced_book("1", "100", "bookchor")])
+    section = ev.prices_section([gt_price("1", 100.0, "bookchor")], packet, cfg_with(price={"min_comparable": 1}))
+    assert section.metrics["mismatched"] == 1
+    assert section.metrics["n"] == 0
 
 
 def test_items_found_with_correct_category():
@@ -198,9 +307,13 @@ def test_items_found_with_correct_category():
         ev.GtItem(name="table lamp", category="lighting", brand="Philips"),
         ev.GtItem(name="globe", category="decor"),
     ]
-    section = ev.items_section(truth, packet, CFG)
+    section = ev.items_section(truth, packet, cfg_with(items={"min_truth": 3}))
     assert (section.metrics["found"], section.metrics["correct"]) == (2, 1)
+    assert section.metrics["wrong_category"] == 1
     assert section.status == ev.FAIL
+    short = ev.items_section(truth, packet, CFG)
+    assert short.status == ev.NOT_EVALUATED
+    assert "needs at least 8" in short.reason
 
 
 ROOM = ev.RoomTruth(
@@ -209,6 +322,19 @@ ROOM = ev.RoomTruth(
     openings=[ev.RoomOpening(width_m=1.0, height_m=2.0)],
     shelving_fronts=[ev.ShelvingFront(width_m=2.0, height_m=2.0)],
 )
+
+
+def test_items_prefer_category_match_over_name_score():
+    packet = ClaimPacket(
+        items=[
+            Item(id="i1", category="decor", description="wooden chair", status="range"),
+            Item(id="i2", category="furniture", description="wooden chair stool", status="range"),
+        ]
+    )
+    truth = [ev.GtItem(name="wooden chair", category="furniture")]
+    section = ev.items_section(truth, packet, cfg_with(items={"min_truth": 1}))
+    assert section.metrics["correct"] == 1
+    assert section.status == ev.PASS
 
 
 def test_room_formulas():
@@ -232,7 +358,7 @@ def test_unclosed_walls_are_not_evaluated():
     floor, wall = ev.room_sections(room, ClaimPacket(), CFG)
     assert floor.status == ev.NOT_EVALUATED
     assert "do not close" in floor.reason
-    assert wall.status == ev.FAIL
+    assert wall.status == ev.NOT_EVALUATED
 
 
 def test_area_errors():
@@ -245,23 +371,38 @@ def test_area_errors():
     assert (floor.status, wall.status) == (ev.FAIL, ev.PASS)
 
 
-def test_time_to_packet_excludes_live_stages(tmp_path):
+def test_time_to_packet_uses_elapsed_key(tmp_path):
     packet = ClaimPacket(
-        latency_s={"capture": 600.0, "vision": 100.0, "price": 120.0},
-        costs=Costs(usd_at_paid_rates=0.5, by_stage_usd={"vision": 0.3, "price": 0.2}),
+        latency_s={"keyframes": 600.0, "tracks": 100.0, "pricing": 120.0, "after_sweep": 240.0},
+        costs=Costs(usd_at_paid_rates=0.5, by_stage_usd={"tracks": 0.3, "pricing": 0.2}),
     )
     ledger = Ledger(tmp_path / "_ledger.json")
     time, stages = ev.time_sections(packet, ledger, CFG)
-    assert time.metrics["seconds"] == pytest.approx(220.0)
+    assert time.metrics["seconds"] == pytest.approx(240.0)
     assert time.status == ev.PASS
     assert "0.3000" in "\n".join(stages.lines)
-    slow = ClaimPacket(latency_s={"vision": 400.0})
+    assert "reading" in time.metrics["missing_stages"]
+    slow = ClaimPacket(latency_s={"tracks": 400.0, "after_sweep": 400.0})
     assert ev.time_sections(slow, ledger, CFG)[0].status == ev.FAIL
+
+
+def test_time_sums_post_stages_without_elapsed_key(tmp_path):
+    packet = ClaimPacket(latency_s={"keyframes": 600.0, "tracks": 100.0, "pricing": 120.0})
+    time, _ = ev.time_sections(packet, Ledger(tmp_path / "_ledger.json"), CFG)
+    assert time.metrics["seconds"] == pytest.approx(220.0)
+
+
+def test_time_not_evaluated_without_post_sweep_stage(tmp_path):
+    ledger = Ledger(tmp_path / "_ledger.json")
+    for packet in (ClaimPacket(), ClaimPacket(latency_s={"keyframes": 10.0, "after_sweep": 5.0})):
+        time, stages = ev.time_sections(packet, ledger, CFG)
+        assert time.status == ev.NOT_EVALUATED
+        assert stages.status == ev.NOT_EVALUATED
 
 
 def test_time_falls_back_to_ledger(tmp_path):
     ledger = Ledger(tmp_path / "_ledger.json")
-    ledger.add("vision", 50.0, 10, 0.1)
+    ledger.add("tracks", 50.0, 10, 0.1)
     time, _ = ev.time_sections(ClaimPacket(), ledger, CFG)
     assert time.metrics["seconds"] == pytest.approx(50.0)
 
@@ -325,3 +466,57 @@ def test_room_json_round_trip(tmp_path):
 
 def test_main_usage_error(capsys):
     assert ev.main(["eval.py"]) == 2
+
+
+def write_truth(directory, name, text):
+    directory.mkdir(exist_ok=True)
+    (directory / name).write_text(text, encoding="utf-8")
+
+
+def test_partially_filled_truth_files_do_not_crash(tmp_path):
+    run = write_run(tmp_path, toy_packet())
+    truth = tmp_path / "truth"
+    write_truth(truth, "books.csv", "unit,row,position,title\n1,1,1,Dune\n")
+    write_truth(truth, "spines20.csv", "unit,row,position,height_cm,thickness_cm\n1,1,1,,\n")
+    write_truth(truth, "prices15.csv", "isbn,title,source,url,price,currency\n1,T,bookchor,,,INR\n")
+    write_truth(truth, "items.csv", "name,category,w_cm,h_cm,d_cm,brand\n")
+    write_truth(truth, "room.json", json.dumps({"ceiling_height_m": None, "walls": [{"length_m": None}]}))
+    statuses = {s.title: s for s in ev.evaluate(run, truth)}
+    for name in ("Book count", "Title identification", "Spine dimensions", "Book prices", "Non-book items",
+                 "Floor area", "Wall area"):
+        assert statuses[name].status == ev.NOT_EVALUATED, name
+    assert "missing column" in statuses["Book count"].reason
+    assert "no rows" in statuses["Non-book items"].reason
+    assert "ceiling_height_m" in statuses["Floor area"].reason
+
+
+def test_blank_legible_title_and_empty_files_are_reported(tmp_path):
+    run = write_run(tmp_path, toy_packet())
+    truth = tmp_path / "truth"
+    write_truth(truth, "books.csv", "unit,row,position,title,legible\n1,1,1,,y\n")
+    write_truth(truth, "room.json", "{not json")
+    statuses = {s.title: s for s in ev.evaluate(run, truth)}
+    assert statuses["Book count"].status == ev.NOT_EVALUATED
+    assert "no title" in statuses["Book count"].reason
+    assert statuses["Floor area"].status == ev.NOT_EVALUATED
+
+
+def test_relative_error_guards_zero():
+    assert ev.relative_error(0.0, 0.0) == 0.0
+    assert ev.relative_error(1.0, 0.0) == float("inf")
+
+
+def test_count_note_when_no_shelf_label_matches():
+    packet = ClaimPacket(books=[book(1, "Dune", shelf="front-room")])
+    truth = [ev.GtBook(unit="1", row="1", position=1, title="Dune", legible=True)]
+    matches = ev.match_books(truth, packet, CFG)
+    count = ev.count_section(truth, matches, packet, CFG)
+    assert "No packet shelf label matches" in "\n".join(count.lines)
+    assert (count.metrics["misses"], count.metrics["insertions"]) == (1, 1)
+
+
+def test_results_header_states_interpretation(tmp_path):
+    run = write_run(tmp_path, toy_packet())
+    out = ev.render(ev.evaluate(run, tmp_path), run, CFG)
+    assert "How the bars are read" in out
+    assert "hand-measured spines" in out
