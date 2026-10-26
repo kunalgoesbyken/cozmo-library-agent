@@ -52,6 +52,7 @@ STANDALONE_MARKERS = frozenset(range(0xD0, 0xD8)) | {0x01}
 TOKEN_BYTES = 32
 USER_AGENT_KEY = "ua"
 INVENTORY_UPSERT = "inventory.upsert"
+PROXY_IDENTITY_HEADER = "cf-connecting-ip"
 BUDGET_ERROR = "budget"
 BUDGET_REASON = "budget_exceeded"
 
@@ -285,10 +286,8 @@ def client_identity(websocket: WebSocket, config: ServerConfig) -> tuple[str, bo
     if not loopback:
         return peer, True
     if config.trust_proxy_headers:
-        headers = websocket.headers
-        forwarded = headers.get("cf-connecting-ip") or headers.get("x-forwarded-for", "").split(",")[0]
-        if forwarded.strip():
-            return forwarded.strip(), True
+        with contextlib.suppress(ValueError):
+            return str(ipaddress.ip_address(websocket.headers.get(PROXY_IDENTITY_HEADER, "").strip())), True
     return peer, False
 
 

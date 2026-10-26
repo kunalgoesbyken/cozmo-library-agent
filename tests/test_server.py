@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 
 from libclaim.budget import BudgetExceeded
-from libclaim.server import KIND_LIVE_FRAME, KIND_MIC, KIND_STILL, create_app, load_server_config, pack_binary
+from libclaim.server import client_identity, KIND_LIVE_FRAME, KIND_MIC, KIND_STILL, create_app, load_server_config, pack_binary
 from libclaim.settings import Settings
 
 TOKEN = "secret-token-0123456789abcdef"
@@ -583,7 +583,7 @@ def test_proxied_clients_with_distinct_identities_do_not_block_each_other(tmp_pa
     with proxied(h.app) as client:
         with client.websocket_connect("/ws/sweep", headers={"cf-connecting-ip": "198.51.100.1"}):
             with client.websocket_connect("/ws/sweep", headers={"cf-connecting-ip": "198.51.100.2"}):
-                with client.websocket_connect("/ws/sweep", headers={"x-forwarded-for": "198.51.100.3, 10.0.0.1"}):
+                with client.websocket_connect("/ws/sweep", headers={"cf-connecting-ip": "198.51.100.3"}):
                     with pytest.raises(WebSocketDisconnect):
                         with client.websocket_connect("/ws/sweep", headers={"cf-connecting-ip": "198.51.100.1"}):
                             pass
@@ -804,3 +804,24 @@ def test_shelves_reported_by_the_pipeline_are_known_to_the_tools(tmp_path):
         end_sweep(ws)
         read_until(ws, "packet_ready")
         assert h.bridges[0].hooks.shelves() == {"S1.1"}
+
+
+class FakeSocket:
+    def __init__(self, peer, headers):
+        self.client = type("Peer", (), {"host": peer})()
+        self.headers = headers
+
+
+@pytest.mark.parametrize(
+    ("headers", "expected"),
+    [
+        ({"cf-connecting-ip": "198.51.100.1"}, ("198.51.100.1", True)),
+        ({"cf-connecting-ip": " 2001:DB8:0::1 "}, ("2001:db8::1", True)),
+        ({"x-forwarded-for": "198.51.100.3, 10.0.0.1"}, ("127.0.0.1", False)),
+        ({"cf-connecting-ip": "not an address"}, ("127.0.0.1", False)),
+        ({"cf-connecting-ip": "198.51.100.1, 10.0.0.1"}, ("127.0.0.1", False)),
+        ({"cf-connecting-ip": "", "x-forwarded-for": "198.51.100.3"}, ("127.0.0.1", False)),
+    ],
+)
+def test_proxy_identity_is_only_a_valid_cf_connecting_ip(headers, expected):
+    assert client_identity(FakeSocket("127.0.0.1", headers), load_server_config()) == expected
