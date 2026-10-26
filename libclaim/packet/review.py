@@ -1,13 +1,12 @@
-from libclaim.packet.models import ClaimPacket, ReviewEntry
+from libclaim.packet.models import ClaimPacket, ReviewEntry, Severity
 
 
 def build_review_queue(packet: ClaimPacket) -> list[ReviewEntry]:
     queue: list[ReviewEntry] = []
 
-    def add(ref_id, severity, reason, line_ref, frame_ref):
+    def add(ref_id: str, severity: Severity, reason: str, line_ref: str, frame_ref: str) -> None:
         queue.append(
             ReviewEntry(
-                id=ref_id,
                 ref_id=ref_id,
                 severity=severity,
                 reason=reason,

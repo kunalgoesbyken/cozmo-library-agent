@@ -1,10 +1,13 @@
 from decimal import Decimal
 
+import pytest
+from pydantic import ValidationError
+
 from libclaim.packet.models import Book, Item, ItemReplacementCost
 from libclaim.packet.totals import compute_totals
 
 
-def book(id, status="identified", amount=None, thickness=None, used=None, used_type=""):
+def book(id, status="identified", amount=None, thickness=None, used=None, used_type="derived"):
     fields = {"id": id, "status": status, "spine_thickness_cm": thickness}
     if amount is not None:
         fields["replacement_cost"] = {"amount": amount}
@@ -76,3 +79,8 @@ def test_range_items_add_low_and_high_and_appraisal_items_are_excluded():
     assert totals.items_replacement_cost_low == Decimal("150")
     assert totals.items_replacement_cost_high == Decimal("250")
     assert totals.excluded_from_totals == 2
+
+
+def test_used_value_amount_requires_source_type():
+    with pytest.raises(ValidationError):
+        Book.model_validate({"id": "a", "status": "identified", "used_value": {"amount": "3"}})

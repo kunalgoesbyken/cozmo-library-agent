@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, PlainSerializer
+from pydantic import BaseModel, Field, PlainSerializer, model_validator
 
 Money = Annotated[Decimal, PlainSerializer(float, return_type=float, when_used="json")]
 
@@ -53,7 +53,13 @@ class UsedValue(BaseModel):
     retrieved_at: str = ""
     condition_assumed: str = ""
     method: str = ""
-    source_type: Literal["", "observed", "derived"] = ""
+    source_type: Literal["observed", "derived"] | None = None
+
+    @model_validator(mode="after")
+    def _amount_needs_source_type(self):
+        if self.amount is not None and self.source_type is None:
+            raise ValueError("used_value.source_type is required when amount is set")
+        return self
 
 
 class Book(BaseModel):
@@ -118,10 +124,12 @@ class Totals(BaseModel):
     excluded_from_totals: int = 0
 
 
+Severity = Literal["high", "medium", "low"]
+
+
 class ReviewEntry(BaseModel):
-    id: str
     ref_id: str
-    severity: Literal["high", "medium", "low"]
+    severity: Severity
     reason: str
     line_ref: str
     frame_ref: str = ""

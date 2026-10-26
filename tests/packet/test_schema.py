@@ -113,7 +113,6 @@ def test_review_queue_flags_unknowns_with_frame_refs():
     assert by_id["b2"].frame_ref == "frames/00002_500.jpg"
     assert by_id["b2"].line_ref == "books[1]"
     assert by_id["i2"].severity == "high"
-    assert all(entry.id == entry.ref_id for entry in queue)
 
 
 def test_report_links_frames_prices_queue_totals_costs_and_latency(tmp_path):
