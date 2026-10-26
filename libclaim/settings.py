@@ -37,6 +37,7 @@ class Settings(BaseModel):
     roboflow_api_key: str = ""
     port: int = 8000
     access_token: str = ""
+    free_tier: bool | None = None
     public_origin: str = ""
 
     @property

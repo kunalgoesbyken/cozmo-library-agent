@@ -338,7 +338,8 @@ class SweepRun:
         self.requeries = 0
         self.cut = False
         self.calls: set[asyncio.Future] = set()
-        self.timings: dict[str, float] = defaultdict(float)
+        self.busy: dict[str, float] = defaultdict(float)
+        self.spans: dict[str, list[float]] = {}
         self.done: dict[str, int] = defaultdict(int)
         self.computed: set[str] = {FAILURES}
         self.deadline_at = float("inf")
@@ -349,7 +350,7 @@ class SweepRun:
         self.computed |= {STILLS, "keyframes"}
         started = time.perf_counter()
         keyframes = self.stream.add(still)
-        self.timings["keyframes"] += time.perf_counter() - started
+        self.record("keyframes", started)
         for keyframe in keyframes:
             self.add_keyframe(keyframe)
 
@@ -365,12 +366,18 @@ class SweepRun:
         self.detections.append(task)
         self.queue.put_nowait(task)
 
+    def record(self, stage: str, started: float) -> None:
+        ended = time.perf_counter()
+        self.busy[stage] += ended - started
+        span = self.spans.setdefault(stage, [started, ended])
+        span[0], span[1] = min(span[0], started), max(span[1], ended)
+
     async def timed(self, stage: str, step: Coroutine) -> Any:
         started = time.perf_counter()
         try:
             return await step
         finally:
-            self.timings[stage] += time.perf_counter() - started
+            self.record(stage, started)
 
     async def consume(self) -> None:
         while (task := await self.queue.get()) is not None:
@@ -457,7 +464,7 @@ class SweepRun:
 
     async def detect_with(self, still: Still, local: list[Box] | None, models: list[str]) -> FrameSpines:
         try:
-            gemini = await detect_spines(still, self.llm, models)
+            gemini = await detect_spines(still, self.llm.at("spines"), models)
         except VISION_FAILURES as error:
             return self.local_only(still, local, type(error).__name__)
         key = str(still.seq)
@@ -539,7 +546,7 @@ class SweepRun:
         books = self.results.tracks.segments[plan.index].books
         crops = await asyncio.to_thread(spine_crops, books)
         try:
-            readings = await read_spines(crops, self.llm, self.services.settings.vision_models)
+            readings = await read_spines(crops, self.llm.at("reading"), self.services.settings.vision_models)
         except VISION_FAILURES as error:
             readings = [Reading(track_id=c.track_id, rotation=c.rotation, failure=type(error).__name__) for c in crops]
         by_id = {reading.track_id: reading for reading in readings}
@@ -647,7 +654,7 @@ class SweepRun:
         depths = await self.depths()
         statements = self.statements()
         try:
-            dets = await detect_items(self.item_stills(), self.llm, self.services.settings.vision_models,
+            dets = await detect_items(self.item_stills(), self.llm.at("items"), self.services.settings.vision_models,
                                       statements, depths)
         except VISION_FAILURES as error:
             self.results.items = ItemsStage(failure=type(error).__name__)
@@ -787,8 +794,10 @@ class SweepRun:
 
     def latency(self, started: float) -> dict[str, float]:
         recorded = {entry.stage: entry.seconds for entry in self.sweep.ledger.entries if entry.stage in STAGES}
-        measured = {stage: self.timings[stage] for stage in STAGES if stage in self.computed}
-        return {stage: round(seconds, 3) for stage, seconds in (recorded | measured).items()} | {
+        spans = {stage: end - start for stage, (start, end) in self.spans.items() if stage in self.computed}
+        busy = {f"{stage}_busy": seconds for stage, seconds in self.busy.items() if stage in self.computed}
+        latency = recorded | {stage: spans.get(stage, 0.0) for stage in STAGES if stage in self.computed} | busy
+        return {key: round(seconds, 3) for key, seconds in latency.items()} | {
             "after_sweep": round(time.perf_counter() - started, 3)
         }
 
@@ -801,7 +810,8 @@ class SweepRun:
     async def publish(self, started: float) -> ClaimPacket:
         self.computed.add("packet")
         self.write_stages()
-        packet = build_packet(self.results, self.sweep, self.locale(), self.cfg, self.latency(started))
+        packet = build_packet(self.results, self.sweep, self.locale(), self.cfg, self.latency(started),
+                              self.services.settings.free_tier)
         self.sweep.write_stage("packet", packet)
         (self.sweep.root / self.cfg.packet_name).write_text(packet.model_dump_json(indent=2), encoding="utf-8")
         render_report(packet, self.sweep)

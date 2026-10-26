@@ -152,8 +152,22 @@ async def test_unreadable_spines_are_unidentified_with_dims(first):
 
 async def test_every_stage_records_latency_and_cost(first):
     packet = first[0]
-    assert set(STAGES) | {"after_sweep"} <= set(packet.latency_s)
-    assert packet.costs.tokens > 0 and packet.costs.usd_at_paid_rates > 0 and packet.costs.billed_usd == 0
+    assert set(STAGES) | {"after_sweep"} | {f"{stage}_busy" for stage in STAGES[1:6]} <= set(packet.latency_s)
+    assert all(packet.latency_s[f"{stage}_busy"] >= 0 for stage in STAGES[1:6])
+    assert packet.costs.tokens > 0 and packet.costs.usd_at_paid_rates > 0
+    assert {"spines", "reading", "items"} <= set(packet.costs.by_stage_usd)
+    assert packet.costs.billed_usd is None and "unknown" in packet.costs.billing
+
+
+@pytest.mark.parametrize(("free", "billed", "words"), [(True, 0.0, "free tier"), (False, None, "paid rates")])
+async def test_billing_follows_the_free_tier_setting(sweep, tmp_path, online, free, billed, words):
+    settings = fx.SETTINGS.model_copy(update={"free_tier": free})
+    found = services(sweep, tmp_path, fx.Web())
+    found.settings = settings
+    packet = await run_pipeline(sweep, services=found)
+    assert words in packet.costs.billing
+    expected = packet.costs.usd_at_paid_rates if billed is None else billed
+    assert packet.costs.billed_usd == pytest.approx(expected)
 
 
 async def test_live_hooks_get_progress_inventory_recapture_and_readback(first):
@@ -340,7 +354,7 @@ class Storm:
     def __init__(self):
         self.calls = 0
 
-    async def structured(self, models, parts, schema):
+    async def structured(self, models, parts, schema, stage=None):
         self.calls += 1
         raise QuotaExhausted("rate limited on every model")
 

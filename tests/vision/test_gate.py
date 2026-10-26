@@ -13,7 +13,7 @@ class Recorder:
         self.error = error
         self.orders = []
 
-    async def structured(self, models, parts, schema):
+    async def structured(self, models, parts, schema, stage=None):
         self.orders.append(models)
         if self.error:
             raise self.error
@@ -67,7 +67,7 @@ class Answer:
     def __init__(self):
         self.calls = 0
 
-    async def structured(self, models, parts, schema):
+    async def structured(self, models, parts, schema, stage=None):
         self.calls += 1
         return schema(text="seen")
 

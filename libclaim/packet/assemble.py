@@ -147,13 +147,17 @@ def sweep_info(results: Results, sweep: SweepDir, locale: Locale) -> SweepInfo:
     )
 
 
-def costs_of(ledger: Ledger) -> Costs:
+def costs_of(ledger: Ledger, free_tier: bool | None, cfg: PipelineConfig) -> Costs:
     by_stage: dict[str, float] = defaultdict(float)
     for entry in ledger.entries:
         if entry.tokens:
             by_stage[entry.stage] += entry.usd_at_paid_rates
+    paid = ledger.total_usd()
+    billing = cfg.billing.unknown if free_tier is None else cfg.billing.free if free_tier else cfg.billing.paid
     return Costs(
-        usd_at_paid_rates=ledger.total_usd(),
+        usd_at_paid_rates=paid,
+        billed_usd=None if free_tier is None else 0.0 if free_tier else paid,
+        billing=billing,
         tokens=sum(entry.tokens for entry in ledger.entries),
         by_stage_usd=dict(by_stage),
     )
@@ -312,7 +316,7 @@ class Sections:
 
 
 def build_packet(results: Results, sweep: SweepDir, locale: Locale, cfg: PipelineConfig,
-                 latency_s: dict[str, float]) -> ClaimPacket:
+                 latency_s: dict[str, float], free_tier: bool | None = None) -> ClaimPacket:
     sections = Sections(cfg)
     packet = ClaimPacket(
         sweep=sweep_info(results, sweep, locale),
@@ -320,7 +324,7 @@ def build_packet(results: Results, sweep: SweepDir, locale: Locale, cfg: Pipelin
         room=sections.build("room", lambda: room_of(results, sweep), Room()),
         books=sections.build("books", lambda: book_lines(results, sweep, cfg), []),
         items=sections.build("items", lambda: item_lines(results, sweep), []),
-        costs=costs_of(sweep.ledger),
+        costs=costs_of(sweep.ledger, free_tier, cfg),
         latency_s=latency_s,
     )
     packet.totals = compute_totals(packet.books, packet.items)

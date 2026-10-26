@@ -35,5 +35,9 @@ summary:
   room: "The floor is {floor_area_m2} square metres and the walls are {wall_area_m2} square metres."
   no_room: "I could not measure the size of the room from this sweep."
   review: "{review_count} lines need a check by a person."
+billing:
+  free: "billed: $0 expected on the Gemini free tier (FREE_TIER=true)"
+  paid: "billed at the paid rates above (FREE_TIER=false)"
+  unknown: "unknown billing: set FREE_TIER in .env to true or false"
 readback:
   instruction: Read this summary to the user word for word. Do not add, round or change any number.

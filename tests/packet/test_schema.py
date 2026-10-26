@@ -42,7 +42,7 @@ ADDED = {
     "items[].replacement_cost": ["url_high"],
     "totals": ["books_used_value_observed", "books_used_value_derived"],
     "": ["second_country", "costs", "latency_s"],
-    "costs": ["usd_at_paid_rates", "billed_usd", "tokens", "by_stage_usd"],
+    "costs": ["usd_at_paid_rates", "billed_usd", "billing", "tokens", "by_stage_usd"],
 }
 
 

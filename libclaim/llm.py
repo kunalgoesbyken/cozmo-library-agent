@@ -167,7 +167,7 @@ class Llm:
             name: AsyncLimiter(limits.rpm, SECONDS_PER_MINUTE) for name, limits in self.config.models.items()
         }
 
-    async def structured(self, models: list[str], parts: list[Any], schema: type[T]) -> T:
+    async def structured(self, models: list[str], parts: list[Any], schema: type[T], stage: str | None = None) -> T:
         unknown = [name for name in models if name not in self.config.models]
         if unknown:
             raise UnknownModel(f"models not in llm config: {unknown}")
@@ -177,7 +177,7 @@ class Llm:
             delays = []
             for model in models:
                 try:
-                    result = await self._call(client, model, parts, schema)
+                    result = await self._call(client, model, parts, schema, stage or self.config.ledger_stage)
                 except errors.APIError as error:
                     if error.code != self.config.rate_limit_code and error.code < self.config.failover_min_code:
                         raise
@@ -197,7 +197,7 @@ class Llm:
                 await self.sleep(min(max(delays), self.config.retry_delay_cap_seconds))
         raise QuotaExhausted(f"rate limited on every model in {models}")
 
-    async def _call(self, client: LlmClient, model: str, parts: list[Any], schema: type[T]) -> T | None:
+    async def _call(self, client: LlmClient, model: str, parts: list[Any], schema: type[T], stage: str) -> T | None:
         async with self.limiters[model]:
             if self.quota.used(model) >= self.config.models[model].rpd:
                 return None
@@ -211,7 +211,7 @@ class Llm:
                 self.budget.release(self.config.reserve_usd)
         if self.ledger is not None:
             self.ledger.add(
-                self.config.ledger_stage,
+                stage,
                 time.monotonic() - started,
                 response.input_tokens + response.output_tokens,
                 usd,

@@ -44,6 +44,12 @@ class Readback(BaseModel):
     instruction: str
 
 
+class Billing(BaseModel):
+    free: str
+    paid: str
+    unknown: str
+
+
 class PipelineConfig(BaseModel):
     deadline_s: float
     vision_cutoff_s: float
@@ -63,6 +69,7 @@ class PipelineConfig(BaseModel):
     area_format: str
     summary: SummaryText
     readback: Readback
+    billing: Billing
 
 
 @cache
