@@ -3,7 +3,8 @@ import { Camera, Loop, enableMotion, stillFps } from "./capture";
 import { Ui } from "./ui";
 import { KIND_LIVE_FRAME, KIND_MIC, KIND_STILL, SweepSocket, type ServerMessage } from "./ws";
 
-const ui = new Ui();
+const accessToken = new URLSearchParams(location.search).get("t") ?? "";
+const ui = new Ui(accessToken);
 const camera = new Camera(ui.video);
 const mic = new MicCapture();
 const playback = new AgentPlayback();
@@ -41,6 +42,9 @@ function onSession(message: ServerMessage): void {
   }
   if (state === "processing" || state === "summary" || state === "closed") {
     stopCapture();
+  }
+  if (message.reason) {
+    ui.showStatus(`Session ended: ${String(message.reason).replaceAll("_", " ")}`);
   }
   if (state === "summary") {
     ui.showStatus("Sweep complete.");
@@ -111,7 +115,7 @@ async function begin(): Promise<void> {
     return;
   }
   ui.setRunning(true);
-  socket.connect(crypto.randomUUID().replaceAll("-", "").slice(0, 16));
+  socket.connect(accessToken);
 }
 
 function finish(): void {

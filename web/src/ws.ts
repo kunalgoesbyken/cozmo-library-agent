@@ -43,7 +43,7 @@ export class SweepSocket {
 
   constructor(private readonly handlers: Handlers) {}
 
-  connect(sweepId: string): void {
+  connect(token: string): void {
     const scheme = location.protocol === "https:" ? "wss" : "ws";
     const socket = new WebSocket(`${scheme}://${location.host}/ws/sweep`);
     socket.binaryType = "arraybuffer";
@@ -51,7 +51,7 @@ export class SweepSocket {
     this.handlers.onConnection("connecting");
     socket.onopen = () => {
       this.handlers.onConnection("open");
-      this.sendJson({ type: "hello", sweep_id: sweepId, t_ms: timestampMs(), device: { ua: navigator.userAgent } });
+      this.sendJson({ type: "hello", token, t_ms: timestampMs(), device: { ua: navigator.userAgent } });
     };
     socket.onclose = () => this.handlers.onConnection("closed");
     socket.onmessage = (event) => {

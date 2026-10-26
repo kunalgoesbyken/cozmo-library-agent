@@ -24,6 +24,8 @@ export class Ui {
   private lastRole = "";
   private lastLine: HTMLElement | null = null;
 
+  constructor(private readonly token: string) {}
+
   setConnection(label: string, tone: "ok" | "warn" | "idle"): void {
     this.connection.textContent = label;
     this.connection.dataset.tone = tone;
@@ -94,7 +96,7 @@ export class Ui {
 
   showResult(report: string): void {
     const link = document.createElement("a");
-    link.href = report;
+    link.href = `${report}?t=${encodeURIComponent(this.token)}`;
     link.textContent = "Open report";
     this.result.replaceChildren(link);
   }
@@ -116,6 +118,9 @@ export class Ui {
         return true;
       case "transcript":
         this.caption(String(message.role), String(message.text));
+        return true;
+      case "error":
+        this.toast(String(message.say), "urgent");
         return true;
       case "question":
         if (message.state === "asked") {

@@ -1,3 +1,18 @@
+host: 127.0.0.1
+max_sessions: 1
+hello_timeout_seconds: 10
+ws_max_size_bytes: 9000000
+max_image_pixels: 8294400
+max_stills_per_sweep: 6000
+max_sweep_bytes: 2000000000
+report_files:
+  - claim_packet.json
+  - report.html
+public_dirs:
+  - frames
+errors:
+  limit: This sweep has reached its storage limit.
+  storage: Could not save a frame, check free disk space.
 max_header_bytes: 4096
 max_mic_bytes: 8192
 max_frame_bytes: 8388608

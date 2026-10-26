@@ -36,6 +36,7 @@ class Settings(BaseModel):
     hf_token: str = ""
     roboflow_api_key: str = ""
     port: int = 8000
+    access_token: str = ""
 
     @property
     def user_agent(self) -> str:
