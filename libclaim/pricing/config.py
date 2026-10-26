@@ -17,6 +17,7 @@ class HttpConfig(BaseModel):
     accept_language: str
     robots_agent: str
     robots_path: str
+    allowed_schemes: list[str]
     robots_open_statuses: list[int]
     max_redirects: int
     retry_after_max_seconds: float
@@ -130,6 +131,7 @@ class PricingConfig(BaseModel):
 class ListingSpec(BaseModel):
     kind: str
     url: str
+    allowed_hosts: list[str] = []
 
 
 class CategorySpec(BaseModel):

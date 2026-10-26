@@ -1,5 +1,7 @@
 import asyncio
 import hashlib
+import ipaddress
+import socket
 import json
 import os
 from collections.abc import Awaitable, Callable
@@ -33,6 +35,36 @@ class PriceFetchError(RuntimeError):
 
 class RobotsDisallowed(PriceFetchError):
     pass
+
+
+class UnsafeTarget(PriceFetchError):
+    pass
+
+
+Resolver = Callable[[str], Awaitable[list[str]]]
+
+
+async def system_resolver(host: str) -> list[str]:
+    infos = await asyncio.get_running_loop().getaddrinfo(host, None, type=socket.SOCK_STREAM)
+    return [info[4][0] for info in infos]
+
+
+def normalized_host(url: str) -> str:
+    return (urlsplit(url).hostname or "").lower().rstrip(".")
+
+
+def is_literal(host: str) -> bool:
+    try:
+        ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    return True
+
+
+def is_public(address: str) -> bool:
+    ip = ipaddress.ip_address(address.split("%")[0])
+    ip = ip.ipv4_mapped or ip if isinstance(ip, ipaddress.IPv6Address) else ip
+    return ip.is_global and not ip.is_multicast
 
 
 def digest(url: str) -> str:
@@ -106,6 +138,7 @@ class PriceHttp(CatalogHttp):
         client: httpx.AsyncClient | None = None,
         config: PricingConfig | None = None,
         user_agent: str | None = None,
+        resolver: Resolver = system_resolver,
     ):
         self.pricing = config or load_pricing_config()
         client = client or httpx.AsyncClient(
@@ -116,8 +149,30 @@ class PriceHttp(CatalogHttp):
             timeout=self.pricing.http.timeout_seconds,
         )
         super().__init__(cache_dir, client=client)
+        self.resolver = resolver
+        self.allowed_hosts = self.configured_hosts()
         self.robots: dict[str, Protego] = {}
         self.inflight: dict[str, asyncio.Future] = {}
+
+    def configured_hosts(self) -> set[str]:
+        sources = (self.pricing.sources.bookchor, self.pricing.sources.bookswagon, self.pricing.sources.pustakkosh, self.pricing.sources.penguin_uk, self.pricing.sources.fx)
+        return {normalized_host(source.url) for source in sources}
+
+    def allow_hosts(self, hosts: set[str]) -> None:
+        self.allowed_hosts |= {host.lower().rstrip(".") for host in hosts}
+
+    async def guard(self, url: str, origin: str) -> None:
+        host = normalized_host(url)
+        if urlsplit(url).scheme not in self.pricing.http.allowed_schemes or not host:
+            raise UnsafeTarget(f"scheme not allowed for {host or 'empty host'}")
+        if host != normalized_host(origin) and host not in self.allowed_hosts:
+            raise UnsafeTarget(f"{host} is not a configured source host")
+        try:
+            addresses = [host] if is_literal(host) else await self.resolver(host)
+        except OSError as error:
+            raise PriceFetchError(f"{host}: {type(error).__name__}") from error
+        if not addresses or not all(is_public(address) for address in addresses):
+            raise UnsafeTarget(f"{host} resolves to a non-public address")
 
     def body_path(self, key: str) -> Path:
         return self.cache_dir / f"{key}.body"
@@ -181,6 +236,7 @@ class PriceHttp(CatalogHttp):
     async def follow(self, url: str, headers: dict[str, str] | None, enforce: bool) -> tuple[httpx.Response, str]:
         current = url
         for _ in range(self.pricing.http.max_redirects + 1):
+            await self.guard(current, url)
             if enforce:
                 await self.require_allowed(current)
             response = await self.send(current, headers)

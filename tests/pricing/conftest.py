@@ -7,6 +7,10 @@ import pytest
 from libclaim.pricing.config import load_pricing_config
 from libclaim.pricing.http import PriceHttp
 
+async def public_resolver(host):
+    return ["93.184.216.34"]
+
+
 FIXTURES = Path(__file__).resolve().parent.parent / "fixtures" / "pricing"
 ROUTES = json.loads((FIXTURES / "routes.json").read_text(encoding="utf-8"))
 
@@ -39,7 +43,7 @@ def fast_config(**http):
 
 def make_http(tmp_path, site, config=None):
     client = httpx.AsyncClient(transport=httpx.MockTransport(site.handler), headers={"User-Agent": "test"}, follow_redirects=True)
-    return PriceHttp(tmp_path / "cache", client=client, config=config or fast_config())
+    return PriceHttp(tmp_path / "cache", client=client, config=config or fast_config(), resolver=public_resolver)
 
 
 @pytest.fixture

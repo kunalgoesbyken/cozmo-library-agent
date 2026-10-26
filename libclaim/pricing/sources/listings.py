@@ -6,12 +6,14 @@ from urllib.parse import urljoin, urlsplit
 
 from libclaim.models import ItemRange, ListingRow, NotEnough
 from libclaim.pricing.config import ItemSources, ListingSpec, PricingConfig, CategorySpec, load_item_sources, load_pricing_config
-from libclaim.pricing.http import CachedResponse, PriceFetchError, PriceHttp
+from libclaim.pricing.http import CachedResponse, PriceFetchError, PriceHttp, normalized_host
 from libclaim.pricing.markup import has_type, walk
 from libclaim.pricing.sources.common import OK
 from libclaim.settings import load_locale
 
 logger = logging.getLogger(__name__)
+
+HTTPS = "https"
 
 
 
@@ -89,15 +91,22 @@ class Listings:
                 )
         return rows
 
-    def itemlist_entries(self, response: CachedResponse) -> list[tuple[str, str]]:
+    def itemlist_entries(self, response: CachedResponse, allowed: set[str]) -> list[tuple[str, str]]:
         marker = self.config.listings.product_url_marker
         entries = {}
         for node in walk(response.jsonld):
             if has_type(node, "ListItem"):
                 url = node.get("url") or node.get("item")
                 url = url.get("@id") or url.get("url") if isinstance(url, dict) else url
-                if isinstance(url, str) and marker in url:
-                    entries.setdefault(url, str(node.get("name", "")))
+                if not isinstance(url, str):
+                    continue
+                url = urljoin(response.final_url, url)
+                if marker not in url:
+                    continue
+                if urlsplit(url).scheme != HTTPS or normalized_host(url) not in allowed:
+                    logger.warning("skipped off-origin listing entry: %s", normalized_host(url))
+                    continue
+                entries.setdefault(url, str(node.get("name", "")))
         return list(entries.items())
 
     def product_offer(self, response: CachedResponse) -> tuple[str, Decimal, str] | None:
@@ -115,9 +124,9 @@ class Listings:
                         return str(product.get("name", "")), amount, str(node.get("priceCurrency", ""))
         return None
 
-    async def itemlist_rows(self, response: CachedResponse, category: CategorySpec) -> list[ListingRow]:
+    async def itemlist_rows(self, response: CachedResponse, category: CategorySpec, allowed: set[str]) -> list[ListingRow]:
         rows = []
-        for url, listed_name in self.itemlist_entries(response)[: self.config.listings.max_product_pages]:
+        for url, listed_name in self.itemlist_entries(response, allowed)[: self.config.listings.max_product_pages]:
             if listed_name and not matches(listed_name, category):
                 continue
             product = await self.get(url)
@@ -129,13 +138,14 @@ class Listings:
                         name=listed_name or offer[0],
                         amount=offer[1],
                         currency=offer[2],
-                        url=product.canonical,
+                        url=url,
                         cache_ref=product.cache_ref,
                     )
                 )
         return rows
 
     async def rows_for(self, spec: ListingSpec, category: CategorySpec, currency: str) -> list[ListingRow]:
+        self.http.allow_hosts({normalized_host(spec.url), *spec.allowed_hosts})
         response = await self.get(spec.url)
         if response is None:
             return []
@@ -143,7 +153,7 @@ class Listings:
             return self.ikea_rows(response)
         if spec.kind == "shopify":
             return self.shopify_rows(response, currency)
-        return await self.itemlist_rows(response, category)
+        return await self.itemlist_rows(response, category, {normalized_host(spec.url), *spec.allowed_hosts})
 
     async def range(self, category: str, locale: str) -> ItemRange | NotEnough:
         cfg = self.config.listings

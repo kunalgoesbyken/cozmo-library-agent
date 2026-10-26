@@ -19,6 +19,7 @@ http:
   accept_language: en-IN,en;q=0.9
   robots_agent: libclaim
   robots_path: /robots.txt
+  allowed_schemes: [https]
   robots_open_statuses: [404, 410]
   max_redirects: 5
   retry_after_max_seconds: 30

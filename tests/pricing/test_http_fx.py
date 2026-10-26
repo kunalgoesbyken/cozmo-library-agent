@@ -12,7 +12,7 @@ from libclaim.pricing.sources.bookchor import Bookchor
 from libclaim.pricing.sources.fx import Fx
 from libclaim.pricing.sources.penguin_uk import PenguinUk
 from libclaim.pricing.sources.pustakkosh import Pustakkosh
-from tests.pricing.conftest import Site, fast_config, make_http
+from tests.pricing.conftest import public_resolver, Site, fast_config, make_http
 
 PAGE = "https://www.bookchor.com/book/9780143127550/x"
 BLOCK_BOOKS = {"https://www.bookchor.com/robots.txt": {"status": 200, "type": "text/plain", "body": "User-agent: *\nDisallow: /book/\n"}}
@@ -66,7 +66,7 @@ async def test_rate_limited_response_is_retried_then_served(tmp_path, online):
         calls.append(1)
         return httpx.Response(429) if len(calls) < 3 else httpx.Response(200, content=b"[]")
 
-    http = PriceHttp(tmp_path / "cache", client=httpx.AsyncClient(transport=httpx.MockTransport(handler)), config=fast_config())
+    http = PriceHttp(tmp_path / "cache", resolver=public_resolver, client=httpx.AsyncClient(transport=httpx.MockTransport(handler)), config=fast_config())
     response = await http.cached_get("https://example.test/a")
     assert response.status == 200 and len(calls) == 3
 
@@ -77,6 +77,7 @@ async def test_persistent_server_error_raises_and_is_not_cached(tmp_path, online
 
     http = PriceHttp(
         tmp_path / "cache",
+        resolver=public_resolver,
         client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),
         config=fast_config(max_retries=2),
     )
@@ -91,6 +92,7 @@ async def test_source_reports_unavailable_when_the_host_keeps_failing(tmp_path, 
 
     http = PriceHttp(
         tmp_path / "cache",
+        resolver=public_resolver,
         client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),
         config=fast_config(max_retries=1),
     )
@@ -120,7 +122,7 @@ async def test_replay_with_no_network_is_byte_identical(tmp_path, site, online, 
     def refuse(request):
         raise AssertionError("network used during replay")
 
-    offline = PriceHttp(tmp_path / "cache", client=httpx.AsyncClient(transport=httpx.MockTransport(refuse)), config=fast_config())
+    offline = PriceHttp(tmp_path / "cache", resolver=public_resolver, client=httpx.AsyncClient(transport=httpx.MockTransport(refuse)), config=fast_config())
     second = await run_all(offline)
     assert [m.model_dump_json() for m in first] == [m.model_dump_json() for m in second]
     assert snapshot(tmp_path / "cache") == before

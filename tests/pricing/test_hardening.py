@@ -7,10 +7,10 @@ import httpx
 import pytest
 
 from libclaim.models import NotFound, PriceQuote
-from libclaim.pricing.http import PriceFetchError, PriceHttp, RobotsDisallowed
+from libclaim.pricing.http import PriceFetchError, PriceHttp, RobotsDisallowed, UnsafeTarget, normalized_host
 from libclaim.pricing.sources.bookchor import Bookchor
 from libclaim.pricing.sources.pustakkosh import Pustakkosh
-from tests.pricing.conftest import Site, fast_config, make_http
+from tests.pricing.conftest import public_resolver, Site, fast_config, make_http
 
 ISBN = "9780143127550"
 OTHER = "9780141439518"
@@ -45,7 +45,7 @@ def serve(tmp_path, routes, config=None):
         return httpx.Response(status, content=body, headers=headers)
 
     client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
-    return PriceHttp(tmp_path / "cache", client=client, config=config or fast_config())
+    return PriceHttp(tmp_path / "cache", resolver=public_resolver, client=client, config=config or fast_config())
 
 
 def html(body):
@@ -107,6 +107,7 @@ async def test_cross_host_redirect_is_checked_against_the_target_host(tmp_path):
         "https://two.test/private/x": html("secret"),
     }
     http = serve(tmp_path, routes)
+    http.allow_hosts({"two.test"})
     with pytest.raises(RobotsDisallowed):
         await http.cached_get(start)
 
@@ -116,7 +117,9 @@ async def test_cross_host_redirect_uses_the_target_hosts_robots_and_records_fina
         "https://one.test/a": (302, b"", {"location": "https://two.test/ok"}),
         "https://two.test/ok": html("fine"),
     }
-    response = await serve(tmp_path, routes).cached_get("https://one.test/a")
+    http = serve(tmp_path, routes)
+    http.allow_hosts({"two.test"})
+    response = await http.cached_get("https://one.test/a")
     assert response.final_url == "https://two.test/ok" and response.text == "fine"
 
 
@@ -181,7 +184,7 @@ async def test_retry_after_is_honoured_within_the_bound(tmp_path, monkeypatch):
         calls.append(1)
         return httpx.Response(429, headers={"retry-after": "7"}) if len(calls) == 1 else httpx.Response(200, content=b"ok")
 
-    http = PriceHttp(tmp_path / "cache", client=httpx.AsyncClient(transport=httpx.MockTransport(handler)), config=fast_config())
+    http = PriceHttp(tmp_path / "cache", resolver=public_resolver, client=httpx.AsyncClient(transport=httpx.MockTransport(handler)), config=fast_config())
     assert (await http.cached_get("https://one.test/a")).text == "ok"
     assert waits == [7.0]
 
@@ -193,7 +196,7 @@ async def test_concurrent_identical_requests_and_robots_are_single_flight(tmp_pa
         seen.append(str(request.url))
         return httpx.Response(404) if request.url.path == "/robots.txt" else httpx.Response(200, content=b"ok")
 
-    http = PriceHttp(tmp_path / "cache", client=httpx.AsyncClient(transport=httpx.MockTransport(handler)), config=fast_config())
+    http = PriceHttp(tmp_path / "cache", resolver=public_resolver, client=httpx.AsyncClient(transport=httpx.MockTransport(handler)), config=fast_config())
     await asyncio.gather(*[http.cached_get("https://one.test/a") for _ in range(5)], http.cached_get("https://one.test/b"))
     assert seen.count("https://one.test/a") == 1 and seen.count("https://one.test/robots.txt") == 1
 
@@ -266,3 +269,109 @@ async def test_listing_prices_far_below_the_median_are_dropped_and_unavailable_v
     result = await Listings(serve(tmp_path, {SHOP: shopify(*variants)}), item_sources=book_sources()).range("shelf", "IN")
     prices = [row.amount for row in result.rows]
     assert Decimal("5") not in prices and Decimal("50") not in prices and Decimal("1600") in prices
+
+
+def resolving(tmp_path, routes, mapping):
+    async def resolver(host):
+        return mapping.get(host, ["93.184.216.34"])
+
+    def handler(request):
+        seen.append(str(request.url))
+        status, body, headers = routes.get(str(request.url), (404, b"", {}))
+        return httpx.Response(status, content=body, headers=headers)
+
+    seen = []
+    client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    return PriceHttp(tmp_path / "cache", client=client, config=fast_config(), resolver=resolver), seen
+
+
+@pytest.mark.parametrize(
+    "target",
+    [
+        "http://169.254.169.254/latest/meta-data/",
+        "https://169.254.169.254/",
+        "https://localhost/",
+        "https://[::1]/",
+        "https://[::ffff:127.0.0.1]/",
+        "https://[fe80::1]/",
+        "https://[fd00::1]/",
+        "https://10.0.0.5/",
+        "https://192.168.1.1/",
+        "https://0.0.0.0/",
+    ],
+)
+async def test_redirect_hop_to_a_private_or_unsafe_address_is_refused(tmp_path, target):
+    http, seen = resolving(tmp_path, {"https://one.test/a": (302, b"", {"location": target})}, {"localhost": ["127.0.0.1"]})
+    http.allow_hosts({normalized_host(target)})
+    with pytest.raises(UnsafeTarget):
+        await http.cached_get("https://one.test/a")
+    assert seen == ["https://one.test/robots.txt", "https://one.test/a"]
+
+
+async def test_redirect_to_a_host_outside_the_allowlist_is_refused(tmp_path):
+    http, seen = resolving(tmp_path, {"https://one.test/a": (302, b"", {"location": "https://evil.example/x"})}, {})
+    with pytest.raises(UnsafeTarget):
+        await http.cached_get("https://one.test/a")
+    assert not any("evil.example" in url for url in seen)
+
+
+async def test_hostname_resolving_to_loopback_is_refused_even_if_allowlisted(tmp_path):
+    http, seen = resolving(tmp_path, {"https://one.test/a": (302, b"", {"location": "https://rebind.test/x"})}, {"rebind.test": ["127.0.0.1"]})
+    http.allow_hosts({"rebind.test"})
+    with pytest.raises(UnsafeTarget):
+        await http.cached_get("https://one.test/a")
+    assert not any("rebind.test" in url for url in seen)
+
+
+async def test_plain_http_is_refused(tmp_path):
+    http, seen = resolving(tmp_path, {}, {})
+    with pytest.raises(UnsafeTarget):
+        await http.cached_get("http://one.test/a")
+    assert seen == []
+
+
+async def test_cache_hits_skip_dns(tmp_path, monkeypatch):
+    http, _ = resolving(tmp_path, {"https://one.test/a": html("x")}, {})
+    await http.cached_get("https://one.test/a")
+
+    async def broken(host):
+        raise AssertionError("dns used")
+
+    http.resolver = broken
+    assert (await http.cached_get("https://one.test/a")).text == "x"
+
+
+URBAN = "https://www.urbanladder.com/collection/bookshelves"
+GOOD = "https://www.urbanladder.com/product/good-bookshelf-1"
+
+
+def itemlist(*urls):
+    entries = [{"@type": "ListItem", "name": f"Solid bookshelf {i}", "url": u} for i, u in enumerate(urls)]
+    return html(page({"@type": "ItemList", "itemListElement": entries}))
+
+
+def good_product():
+    return html(page({"@type": "Product", "name": "Solid bookshelf 9", "offers": {"@type": "Offer", "price": "1000", "priceCurrency": "INR"}}))
+
+
+async def test_itemlist_entries_off_origin_are_skipped_and_same_origin_relative_works(tmp_path):
+    from libclaim.pricing.config import CategorySpec, ItemSources, ListingSpec
+    from libclaim.pricing.sources.listings import Listings
+
+    hostile = [
+        "http://169.254.169.254/",
+        "http://localhost:8000/product/x",
+        "https://evil.example/product/x",
+        "https://rebind.example/product/x",
+        "http://www.urbanladder.com/product/downgraded",
+    ]
+    routes = {
+        URBAN: itemlist(*hostile, "/product/relative-bookshelf-2", GOOD),
+        GOOD: good_product(),
+        "https://www.urbanladder.com/product/relative-bookshelf-2": good_product(),
+    }
+    http, seen = resolving(tmp_path, routes, {"rebind.example": ["127.0.0.1"]})
+    spec = CategorySpec(must=["bookshelf"], exclude=[], listings=[ListingSpec(kind="itemlist", url=URBAN)])
+    result = await Listings(http, item_sources={"IN": ItemSources(categories={"shelf": spec})}).range("shelf", "IN")
+    assert sorted(row.url for row in result.rows) == sorted([GOOD, "https://www.urbanladder.com/product/relative-bookshelf-2"])
+    assert not any(bad in url for url in seen for bad in ("169.254", "localhost", "evil.example", "rebind.example", "downgraded"))
