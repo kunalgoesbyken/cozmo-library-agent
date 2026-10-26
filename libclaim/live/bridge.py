@@ -1,4 +1,5 @@
 import asyncio
+import json
 import time
 from collections import deque
 from collections.abc import Awaitable, Callable
@@ -222,11 +223,14 @@ class LiveBridge:
 
     async def inject(self, event: dict[str, Any], scheduling: events.Scheduling) -> None:
         session = self.ready_session()
-        if not session or not self.monitor_call_id:
-            raise LookupError("monitor tool has not been called in the live session")
-        await session.send_tool_response(
-            self.monitor_call_id, self.tools.monitor_name, {"output": event}, True, scheduling
-        )
+        if not session:
+            raise LookupError("no live session to inject into")
+        if self.monitor_call_id:
+            await session.send_tool_response(
+                self.monitor_call_id, self.tools.monitor_name, {"output": event}, True, scheduling
+            )
+        elif scheduling != events.Scheduling.SILENT:
+            await session.send_text(json.dumps(event))
 
     async def close(self) -> None:
         self.closed = True

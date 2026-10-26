@@ -350,6 +350,7 @@ class SweepRun:
         self.detections: list[asyncio.Task] = []
         self.segment_tasks: list[asyncio.Task] = []
         self.resolving: dict[str, asyncio.Future] = {}
+        self.upserted: dict[str, dict[str, Any]] = {}
         self.open: list[FrameSpines] = []
         self.carry: tuple[SegmentPlan, list[FrameSpines]] | None = None
         self.tails: list[tuple[SegmentPlan, list[FrameSpines]]] = []
@@ -634,25 +635,27 @@ class SweepRun:
         await asyncio.gather(*(price_book(resolutions[key], market, reading=reads[key].reading, statements=[],
                                           other=other, fx=fx) for key in ids))
 
-    def upsert_event(self, book: BookSlot) -> dict[str, Any]:
+    def upsert_item(self, book: BookSlot) -> dict[str, Any]:
         resolution = self.results.resolution.resolutions.get(book.id)
         identified = resolution is not None and resolution.status == "identified"
         return {
-            "type": "inventory.upsert",
-            "item": {
-                "id": book.id,
-                "kind": "book" if identified else "unidentified_book",
-                "label": resolution.title if identified else None,
-                "shelf": book.shelf,
-                "status": "identified" if identified else "detected",
-                "confidence": resolution.id_confidence if identified else None,
-                "frame_ref": frame_ref(self.sweep, book.frame.path),
-            },
+            "id": book.id,
+            "kind": "book" if identified else "unidentified_book",
+            "label": resolution.title if identified else None,
+            "shelf": book.shelf,
+            "status": "identified" if identified else "detected",
+            "confidence": resolution.id_confidence if identified else None,
+            "frame_ref": frame_ref(self.sweep, book.frame.path),
         }
+
+    async def upsert(self, item: dict[str, Any]) -> None:
+        if self.upserted.get(item["id"]) != item:
+            self.upserted[item["id"]] = item
+            await self.notify(self.hooks.emit, {"type": "inventory.upsert", "item": item})
 
     async def upsert_books(self, books: list[BookSlot]) -> None:
         for book in books:
-            await self.notify(self.hooks.emit, self.upsert_event(book))
+            await self.upsert(self.upsert_item(book))
 
     async def log_segment(self, plan: SegmentPlan, books: list[BookSlot]) -> None:
         resolutions = self.results.resolution.resolutions
@@ -897,13 +900,13 @@ class SweepRun:
         text = summary_text(packet, self.cfg)
         base = f"{self.cfg.runs_url}/{self.sweep.root.name}"
         for book in packet.books:
-            await self.notify(self.hooks.emit, {"type": "inventory.upsert", "item": {
+            await self.upsert({
                 "id": book.id, "kind": "book" if book.title else "unidentified_book", "label": book.title or None,
-                "shelf": book.shelf, "status": book.status, "confidence": book.id_confidence, "frame_ref": book.frame_ref}})
+                "shelf": book.shelf, "status": book.status, "confidence": book.id_confidence, "frame_ref": book.frame_ref})
         for item in packet.items:
-            await self.notify(self.hooks.emit, {"type": "inventory.upsert", "item": {
+            await self.upsert({
                 "id": item.id, "kind": "item", "label": item.description or item.category, "shelf": "",
-                "status": item.status, "confidence": item.confidence, "frame_ref": item.frame_ref}})
+                "status": item.status, "confidence": item.confidence, "frame_ref": item.frame_ref})
         await self.notify(self.hooks.inject, {"readback": text, "instruction": self.cfg.readback.instruction},
                           Scheduling.WHEN_IDLE)
         await self.notify(self.hooks.emit, {"type": "packet_ready", "json": f"{base}/{self.cfg.packet_name}",

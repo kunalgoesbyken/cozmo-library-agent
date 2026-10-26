@@ -1,4 +1,5 @@
 import asyncio
+import json
 from contextlib import asynccontextmanager
 
 import pytest
@@ -335,14 +336,32 @@ async def test_inject_streams_into_the_monitor_call(tmp_path):
     assert responses[2] == ("c1", "capture_monitor", {"output": {"note": "blur"}}, True, Scheduling.INTERRUPT)
 
 
-async def test_inject_before_monitor_call_is_an_error(tmp_path):
+async def test_inject_before_the_monitor_call_goes_out_as_a_text_turn(tmp_path):
     factory = FakeFactory([])
     harness = Harness(tmp_path, factory)
     harness.start()
     await harness.until(lambda: harness.bridge.session)
-    with pytest.raises(LookupError):
-        await harness.bridge.inject({"note": "x"}, Scheduling.SILENT)
+    await harness.bridge.inject({"readback": "I counted 3 books"}, Scheduling.WHEN_IDLE)
     await harness.stop()
+    [text] = factory.sessions[0].text[1:]
+    assert json.loads(text) == {"readback": "I counted 3 books"}
+    assert factory.sessions[0].tool_responses == []
+
+
+async def test_silent_inject_before_the_monitor_call_is_dropped(tmp_path):
+    factory = FakeFactory([])
+    harness = Harness(tmp_path, factory)
+    harness.start()
+    await harness.until(lambda: harness.bridge.session)
+    await harness.bridge.inject({"note": "x"}, Scheduling.SILENT)
+    await harness.stop()
+    assert factory.sessions[0].text[1:] == []
+
+
+async def test_inject_without_a_session_is_an_error(tmp_path):
+    harness = Harness(tmp_path, FakeFactory([]))
+    with pytest.raises(LookupError):
+        await harness.bridge.inject({"note": "x"}, Scheduling.WHEN_IDLE)
 
 
 async def test_goaway_straight_after_connect_is_backed_off_and_capped(tmp_path):

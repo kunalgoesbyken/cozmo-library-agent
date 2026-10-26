@@ -180,6 +180,18 @@ async def test_spine_the_ocr_missed_is_identified_from_the_catalogue_at_lower_co
     assert any(reason.startswith("identified_from_catalogue_only") for reason in reasons)
 
 
+async def test_inventory_upserts_are_sent_only_when_the_item_changed(first):
+    packet, _, recorder, _ = first
+    sent: dict[str, list[dict]] = {}
+    for event in recorder.of("inventory.upsert"):
+        sent.setdefault(event["item"]["id"], []).append(event["item"])
+    assert set(sent) == {book.id for book in packet.books} | {item.id for item in packet.items}
+    assert all(all(a != b for a, b in zip(items, items[1:])) for items in sent.values())
+    final = {book.id: book for book in packet.books}
+    assert all(items[-1]["status"] == final[key].status for key, items in sent.items() if key in final)
+    assert len(recorder.of("inventory.upsert")) < 2 * len(sent)
+
+
 async def test_every_stage_records_latency_and_cost(first):
     packet = first[0]
     assert set(STAGES) | {"after_sweep"} | {f"{stage}_busy" for stage in STAGES[1:6]} <= set(packet.latency_s)
