@@ -27,6 +27,10 @@ class LiveConfig(BaseModel):
     backoff_max_seconds: float
     max_retries: int
     ledger_stage: str
+    statement_window_ms: int
+    monitor_min_gap_seconds: float
+    monitor_region_cooldown_seconds: float
+    alert_ttl_seconds: float
 
 
 def load_live_config(path=LIVE_CONFIG_PATH) -> LiveConfig:

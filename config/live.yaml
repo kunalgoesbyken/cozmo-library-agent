@@ -10,3 +10,7 @@ backoff_base_seconds: 1.0
 backoff_max_seconds: 30.0
 max_retries: 6
 ledger_stage: live
+statement_window_ms: 4000
+monitor_min_gap_seconds: 8.0
+monitor_region_cooldown_seconds: 30.0
+alert_ttl_seconds: 5.0
