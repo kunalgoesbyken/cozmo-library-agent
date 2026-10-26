@@ -61,3 +61,44 @@ def test_stale_alert_dropped():
     assert h.push(AlertCode.blur, "A1", age=CONFIG.alert_ttl_seconds + 0.1) is False
     assert h.injected == []
     assert h.push(AlertCode.blur, "A1", age=CONFIG.alert_ttl_seconds - 0.1) is True
+
+
+def test_concurrent_pushes_inject_once():
+    h = Harness()
+
+    async def both():
+        return await asyncio.gather(
+            h.monitor.push(Alert(AlertCode.blur, "A1", h.now)), h.monitor.push(Alert(AlertCode.glare, "A2", h.now))
+        )
+
+    assert sorted(asyncio.run(both())) == [False, True]
+    assert len(h.injected) == 1
+
+
+def test_failed_inject_is_not_retried_inside_gap():
+    h = Harness()
+
+    async def fail(event, scheduling):
+        raise RuntimeError("down")
+
+    h.monitor.inject = fail
+    try:
+        h.push(AlertCode.blur, "A1")
+    except RuntimeError:
+        pass
+    h.monitor.inject = h.inject
+    assert h.push(AlertCode.blur, "A2") is False
+
+
+def test_exact_gap_boundary_allowed():
+    h = Harness()
+    h.push(AlertCode.blur, "A1")
+    h.now += CONFIG.monitor_min_gap_seconds
+    assert h.push(AlertCode.blur, "A2") is True
+
+
+def test_exact_ttl_boundary_allowed_and_future_alert_is_stale():
+    h = Harness()
+    assert h.push(AlertCode.blur, "A1", age=CONFIG.alert_ttl_seconds) is True
+    h.now += CONFIG.monitor_min_gap_seconds
+    assert h.push(AlertCode.blur, "A2", age=-1.0) is False

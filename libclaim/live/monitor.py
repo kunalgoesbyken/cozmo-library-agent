@@ -32,7 +32,8 @@ class Monitor:
         self.region_spoken_at: dict[str, float] = {}
 
     def should_speak(self, event: Alert, now: float) -> bool:
-        if now - event.raised_at > self.config.alert_ttl_seconds or self.user_speaking():
+        age = now - event.raised_at
+        if not 0 <= age <= self.config.alert_ttl_seconds or self.user_speaking():
             return False
         if self.last_spoken_at is not None and now - self.last_spoken_at < self.config.monitor_min_gap_seconds:
             return False
@@ -43,7 +44,7 @@ class Monitor:
         now = self.clock()
         if not self.should_speak(event, now):
             return False
-        await self.inject({"alert": event.code.value, "region": event.region}, Scheduling.WHEN_IDLE)
         self.last_spoken_at = now
         self.region_spoken_at[event.region] = now
+        await self.inject({"alert": event.code.value, "region": event.region}, Scheduling.WHEN_IDLE)
         return True

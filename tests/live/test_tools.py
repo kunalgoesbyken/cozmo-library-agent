@@ -125,3 +125,43 @@ def test_specs_are_shared_with_bridge_config_and_monitor_is_non_blocking():
 @pytest.mark.parametrize("spec", SPECS)
 def test_spec_parameters_are_objects_or_absent(spec):
     assert spec.parameters is None or spec.parameters["type"] == "object"
+
+
+@pytest.mark.parametrize("country", ["../IN", "IN/../GB", "", "/etc/passwd", "C:/x"])
+def test_set_locale_rejects_traversal_with_generic_error(tmp_path, country):
+    h = Harness(tmp_path)
+    result = h.call("set_locale", {"country": country, "currency": "INR"})
+    assert result == {"error": "set_locale rejected: invalid values"}
+    assert not (h.sweep.stages / "locale.json").exists()
+
+
+def test_set_locale_lowercase_and_currency_mismatch(tmp_path):
+    h = Harness(tmp_path)
+    assert h.call("set_locale", {"country": "in", "currency": "inr"}) == {"country": "IN", "currency": "INR"}
+    assert "error" in h.call("set_locale", {"country": "IN", "currency": "USD"})
+
+
+def test_storage_error_is_returned_not_raised(tmp_path):
+    h = Harness(tmp_path)
+
+    def boom(*_):
+        raise OSError("disk")
+
+    h.sweep.write_stage = boom
+    assert h.call("exclude_region", {"description": "x"}) == {"error": "exclude_region failed: storage unavailable"}
+
+
+def test_bug_inside_handler_is_not_masked_as_bad_arguments(tmp_path):
+    h = Harness(tmp_path)
+
+    def bug(*_):
+        raise TypeError("bug")
+
+    h.sweep.write_stage = bug
+    with pytest.raises(TypeError):
+        h.call("exclude_region", {"description": "x"})
+
+
+def test_unexpected_argument_is_rejected(tmp_path):
+    h = Harness(tmp_path)
+    assert h.call("end_sweep", {"extra": 1}) == {"error": "end_sweep rejected: invalid arguments"}

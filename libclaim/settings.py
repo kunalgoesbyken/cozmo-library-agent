@@ -46,8 +46,9 @@ class Settings(BaseModel):
 
 
 def load_locale(country: str) -> Locale:
-    path = CONFIG_DIR / "locales" / f"{country}.yaml"
-    if not path.is_file():
+    available = {path.stem.upper(): path for path in (CONFIG_DIR / "locales").glob("*.yaml")}
+    path = available.get(country.upper())
+    if path is None:
         raise KeyError(country)
     return Locale.model_validate(yaml.safe_load(path.read_text(encoding="utf-8")))
 

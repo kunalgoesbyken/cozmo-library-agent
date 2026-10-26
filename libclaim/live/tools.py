@@ -1,8 +1,9 @@
+import inspect
 from collections.abc import Callable
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field
 
 from libclaim.live.bridge import LiveConfig
 from libclaim.live.session import ToolSpec
@@ -127,9 +128,15 @@ class LiveTools:
         if handler is None:
             return {"error": f"unknown tool {name}"}
         try:
-            return handler(**args)
-        except (TypeError, ValueError, KeyError, ValidationError) as error:
-            return {"error": f"{name} rejected: {error}"}
+            bound = inspect.signature(handler).bind(**args)
+        except TypeError:
+            return {"error": f"{name} rejected: invalid arguments"}
+        try:
+            return handler(*bound.args, **bound.kwargs)
+        except (ValueError, KeyError):
+            return {"error": f"{name} rejected: invalid values"}
+        except OSError:
+            return {"error": f"{name} failed: storage unavailable"}
 
     def read_log(self, stage: str, cls: type[BaseModel]) -> Any:
         path = self.sweep.stages / f"{stage}.json"
@@ -163,7 +170,9 @@ class LiveTools:
 
     def set_locale(self, country: str, currency: str) -> dict[str, Any]:
         locale = load_locale(country)
-        choice = LocaleChoice(country=locale.country, currency=currency)
+        if currency.upper() != locale.currency.upper():
+            raise ValueError("currency does not match country")
+        choice = LocaleChoice(country=locale.country, currency=locale.currency)
         self.sweep.write_stage(LOCALE_STAGE, choice)
         return {"country": choice.country, "currency": choice.currency}
 

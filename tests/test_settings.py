@@ -54,3 +54,13 @@ def test_user_agent_contact_from_env_only(tmp_path, monkeypatch):
     env = tmp_path / ".env"
     env.write_text("HTTP_CONTACT_EMAIL=who@example.test\n")
     assert "who@example.test" in load_settings(env).user_agent
+
+
+@pytest.mark.parametrize("country", ["../IN", "IN/../GB", "", "C:/Windows/win", "/etc/passwd", "IN.yaml", "I"])
+def test_locale_rejects_paths_and_unknown(country):
+    with pytest.raises(KeyError):
+        load_locale(country)
+
+
+def test_locale_is_case_insensitive_and_canonical():
+    assert load_locale("in").country == "IN"
