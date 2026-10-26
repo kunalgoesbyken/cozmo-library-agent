@@ -234,7 +234,7 @@ Ultralytics (AGPL-3.0) and Piper (GPL-3.0) are not used.
 | Open Library `/search` | Its robots.txt disallows `/search` (covering `/search.json`) for all agents. Google Books is the primary title and author search; Open Library is used only for `/isbn/{isbn}.json` and `/works/{work}/editions.json`, which robots.txt allows |
 | Penguin UK, Crossword, Sapna, others | Only used where robots.txt allows the exact path; a robots block is recorded as `not_found` evidence and the line is excluded from totals |
 
-Retail requests follow robots.txt per host, 1 request per second per host (2 for one host), use an identified User-Agent, and respect `Retry-After`. Prices come only from retailer pages for the matched ISBN: Bookchor JSON-LD, then Pustakkosh store API for India; Penguin UK RRP for GB; item ranges from robots-allowed listing pages (IKEA India, Urban Ladder, Vijay Sales, Nilkamal); FX from Frankfurter (ECB).
+Retail requests follow robots.txt per host, 1 request per second per host (2 for one host), use an identified User-Agent, and respect `Retry-After`. Prices come only from retailer pages for the matched ISBN: Bookchor JSON-LD, then Pustakkosh store API for India; Penguin UK RRP for GB; Google Books `saleInfo` (new condition, only when `FOR_SALE`, retail price else list price, converted and labelled when its currency differs from the claim's); item ranges from robots-allowed listing pages (IKEA India, Urban Ladder, Vijay Sales, Nilkamal); FX from Frankfurter (ECB).
 
 ## Assumptions
 

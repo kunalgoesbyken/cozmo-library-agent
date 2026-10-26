@@ -143,12 +143,16 @@ async def price_book(
     new_found = await market.quotes(locale.new_sources, resolution.isbn, NEW)
     used_found = await market.quotes(locale.used_sources, resolution.isbn, USED)
     review = basis + list(dict.fromkeys(notes_of(new_found + used_found))) + (["year_unknown"] if resolution.year is None else [])
-    local = listings(new_found)
+    found = listings(new_found)
+    local = [item for item in found if item.currency == locale.currency]
+    foreign = [item for item in found if item.currency != locale.currency]
     new, original, record = (local[0] if local else None), None, None
-    if new is None and CONVERTED in locale.new_sources and other is not None and fx is not None:
-        other_found = await other.quotes(other.locale.new_sources, resolution.isbn, NEW)
-        review += notes_of(other_found)
-        original = next(iter(listings(other_found)), None)
+    if new is None and CONVERTED in locale.new_sources and fx is not None:
+        if not foreign and other is not None:
+            other_found = await other.quotes(other.locale.new_sources, resolution.isbn, NEW)
+            review += notes_of(other_found)
+            foreign = listings(other_found)
+        original = next(iter(foreign), None)
         if original is not None:
             try:
                 record = await fx.rate(original.currency, locale.currency, original.retrieved_at.date())

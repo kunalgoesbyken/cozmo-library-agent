@@ -49,6 +49,15 @@ class PenguinSource(UrlSource):
     currency_symbols: dict[str, str]
 
 
+class GoogleBooksSource(BaseModel):
+    enabled: bool
+    name: str
+    sale_status: str
+    isbn_query: str
+    country_param: str
+    max_results: int
+
+
 class FxSource(UrlSource):
     provider: str
     provider_label: str
@@ -59,6 +68,7 @@ class Sources(BaseModel):
     bookswagon: BookswagonSource
     pustakkosh: PustakkoshSource
     penguin_uk: PenguinSource
+    google_books: GoogleBooksSource
     fx: FxSource
 
 

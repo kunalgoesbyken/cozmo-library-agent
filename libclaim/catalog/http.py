@@ -3,6 +3,7 @@ import hashlib
 import json
 import logging
 import os
+from datetime import datetime, timezone
 from pathlib import Path
 from collections.abc import Awaitable
 from typing import Any, TypeVar
@@ -92,6 +93,10 @@ class CatalogHttp:
 
     def cache_path(self, url: str) -> Path:
         return self.cache_dir / f"{hashlib.sha1(url.encode('utf-8')).hexdigest()}.json"
+
+    def retrieval(self, url: str, params: dict[str, Any]) -> tuple[str, datetime]:
+        path = self.cache_path(str(httpx.URL(url, params=params)))
+        return path.stem, datetime.fromtimestamp(path.stat().st_mtime, timezone.utc)
 
     async def get_json(self, url: str, params: dict[str, Any], headers: dict[str, str] | None = None) -> Any:
         request = httpx.URL(url, params=params)

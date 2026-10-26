@@ -51,6 +51,13 @@ sources:
     url: https://www.penguin.co.uk/books/x/x/{isbn}
     currency_symbols:
       "£": GBP
+  google_books:
+    enabled: true
+    name: Google Books
+    sale_status: FOR_SALE
+    isbn_query: "isbn:{isbn}"
+    country_param: country
+    max_results: 5
   fx:
     url: https://api.frankfurter.dev/v2/rates
     provider: ECB

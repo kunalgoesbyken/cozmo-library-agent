@@ -1,6 +1,6 @@
 country: GB
 currency: GBP
-new_sources: [penguin_uk, converted]
+new_sources: [penguin_uk, google_books, converted]
 used_sources: [derived]
 appraisal_threshold: 60
 antiquarian_year: 1950

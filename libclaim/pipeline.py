@@ -45,6 +45,7 @@ from libclaim.pricing.items import ItemPrice, price_item, second_country
 from libclaim.pricing.sources.bookchor import Bookchor
 from libclaim.pricing.sources.bookswagon import Bookswagon
 from libclaim.pricing.sources.fx import Fx
+from libclaim.pricing.sources.google_books import GoogleBooksPrice
 from libclaim.pricing.sources.listings import Listings, matches
 from libclaim.pricing.sources.penguin_uk import PenguinUk
 from libclaim.pricing.sources.pustakkosh import Pustakkosh
@@ -113,6 +114,7 @@ from libclaim.vision.tracks import BookTrack, Frame, merge_tracks
 logger = logging.getLogger(__name__)
 
 VISION_FAILURES = (QuotaExhausted, LlmReplyInvalid, errors.APIError, BudgetExceeded, LiveCallBlocked)
+GOOGLE_BOOKS = "google_books"
 SOURCES = {"bookchor": Bookchor, "pustakkosh": Pustakkosh, "bookswagon": Bookswagon, "penguin_uk": PenguinUk}
 ART_KINDS = {StatementKind.original_art, StatementKind.art_print}
 UNATTACHED = "user said '{subject}' is {kind} but no book was in view; not attached to any line"
@@ -683,7 +685,10 @@ class SweepRun:
 
     def market(self, locale: Locale) -> Market:
         names = dict.fromkeys(locale.new_sources + locale.used_sources)
-        return Market(locale, {name: SOURCES[name](self.services.http) for name in names if name in SOURCES})
+        sources = {name: SOURCES[name](self.services.http) for name in names if name in SOURCES}
+        if GOOGLE_BOOKS in names:
+            sources[GOOGLE_BOOKS] = GoogleBooksPrice(self.services.catalogs.google_books, locale)
+        return Market(locale, sources)
 
     def all_stills(self) -> list[Still]:
         return [frame.still for frame in self.results.spines.frames]

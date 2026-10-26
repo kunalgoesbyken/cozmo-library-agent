@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from libclaim.catalog.http import CatalogHttp, Candidate
 from libclaim.resolve_config import load_resolve_config
 from libclaim.settings import load_settings
@@ -17,13 +19,19 @@ class GoogleBooks:
         self.config = load_resolve_config().catalog
         self.api_key = load_settings().google_books_api_key if api_key is None else api_key
 
-    async def search(self, title: str, author: str) -> list[Candidate]:
+    async def volumes(self, params: dict) -> list[dict]:
         cfg = self.config.googlebooks
-        params = {"q": query_for(title, author), "maxResults": self.config.search_limit}
         headers = {cfg.key_header: self.api_key} if self.api_key else None
         body = await self.http.get_json(cfg.volumes_url, params, headers)
+        return body.get("items", [])
+
+    def retrieval(self, params: dict) -> tuple[str, datetime]:
+        return self.http.retrieval(self.config.googlebooks.volumes_url, params)
+
+    async def search(self, title: str, author: str) -> list[Candidate]:
+        params = {"q": query_for(title, author), "maxResults": self.config.search_limit}
         candidates = []
-        for item in body.get("items", []):
+        for item in await self.volumes(params):
             info = item.get("volumeInfo", {})
             if not info.get("title"):
                 continue
