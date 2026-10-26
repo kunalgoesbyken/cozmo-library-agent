@@ -12,11 +12,17 @@ def available() -> bool:
     return all(find_spec(name) is not None for name in ML_MODULES)
 
 
+def device() -> str:
+    import torch
+
+    return "cuda" if torch.cuda.is_available() else "cpu"
+
+
 @cache
 def sam_model(model_id: str):
     from transformers import Sam2Model, Sam2Processor
 
-    return Sam2Processor.from_pretrained(model_id), Sam2Model.from_pretrained(model_id).eval()
+    return Sam2Processor.from_pretrained(model_id), Sam2Model.from_pretrained(model_id).eval().to(device())
 
 
 def extent(lines: np.ndarray) -> tuple[float, float] | None:
@@ -51,8 +57,8 @@ def spine_boxes(path: str, boxes: list[Box]) -> list[Box] | None:
     import torch
 
     rgb = np.ascontiguousarray(read_image(path)[:, :, ::-1])
-    inputs = processor(images=rgb, input_boxes=[[[b.x1, b.y1, b.x2, b.y2] for b in boxes]], return_tensors="pt")
+    inputs = processor(images=rgb, input_boxes=[[[b.x1, b.y1, b.x2, b.y2] for b in boxes]], return_tensors="pt").to(device())
     with torch.no_grad():
         outputs = model(**inputs, multimask_output=False)
-    found = processor.post_process_masks(outputs.pred_masks, inputs["original_sizes"])[0][:, 0].numpy()
+    found = processor.post_process_masks(outputs.pred_masks, inputs["original_sizes"])[0][:, 0].cpu().numpy()
     return [mask_box(mask, box, cfg.band) for mask, box in zip(found, boxes)]

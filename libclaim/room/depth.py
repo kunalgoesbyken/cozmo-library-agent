@@ -45,7 +45,7 @@ class DepthSet:
 def depth_model(model_id: str):
     from transformers import AutoImageProcessor, AutoModelForDepthEstimation
 
-    return AutoImageProcessor.from_pretrained(model_id), AutoModelForDepthEstimation.from_pretrained(model_id).eval()
+    return AutoImageProcessor.from_pretrained(model_id), AutoModelForDepthEstimation.from_pretrained(model_id).eval().to(masks.device())
 
 
 def metric_depth(still: Still) -> np.ndarray:
@@ -58,11 +58,11 @@ def metric_depth(still: Still) -> np.ndarray:
     import torch
 
     rgb = np.ascontiguousarray(read_image(still.path)[:, :, ::-1])
-    inputs = processor(images=rgb, return_tensors="pt")
+    inputs = processor(images=rgb, return_tensors="pt").to(masks.device())
     with torch.no_grad():
         outputs = model(**inputs)
     result = processor.post_process_depth_estimation(outputs, target_sizes=[rgb.shape[:2]])
-    return result[0]["predicted_depth"].numpy()
+    return result[0]["predicted_depth"].cpu().numpy()
 
 
 def camera(still: Still, shape: tuple[int, ...]) -> np.ndarray:

@@ -30,8 +30,9 @@ dependencies = [
 [project.optional-dependencies]
 ml = [
     "torch==2.14.1",
-    "torchvision",
-    "transformers",
+    "torchvision==0.29.1",
+    "transformers==5.20.2",
+    "accelerate==1.15.0",
 ]
 
 [tool.setuptools.packages.find]
