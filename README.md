@@ -79,7 +79,13 @@ Edit `.env` (names only here; never commit it, `.env` is gitignored):
 | `ACCESS_TOKEN` | Optional, at least 24 characters; otherwise a random token is generated per start |
 | `PUBLIC_ORIGIN` | Your tunnel URL, for the exact Origin check (see Tunnel) |
 
-Run the server:
+On Windows, after install and `.env`, one command starts the server and an https tunnel and prints the URL to open on the iPhone (needs `cloudflared`, see Phone use):
+
+```
+powershell -File start.ps1
+```
+
+Run the server alone:
 
 ```
 .venv\Scripts\python -m libclaim.server        # Windows
