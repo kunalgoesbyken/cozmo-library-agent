@@ -75,6 +75,19 @@ async def test_nothing_is_invented_without_a_for_sale_volume(tmp_path, fixture, 
     assert isinstance(result, NotFound) and result.reason == reason and result.source == "Google Books"
 
 
+async def test_an_ebook_price_is_never_a_replacement_cost(tmp_path):
+    payload = json.loads((FIXTURES / "google_books_for_sale.json").read_text(encoding="utf-8"))
+    for item in payload["items"]:
+        item["saleInfo"]["isEbook"] = True
+    (FIXTURES / "google_books_ebook_tmp.json").write_text(json.dumps(payload), encoding="utf-8")
+    try:
+        source, _ = source_for(tmp_path, "google_books_ebook_tmp.json")
+        result = await source.quote(ISBN, "new")
+    finally:
+        (FIXTURES / "google_books_ebook_tmp.json").unlink()
+    assert isinstance(result, NotFound) and result.reason == "unsupported_condition"
+
+
 async def test_not_for_sale_keeps_the_evidence(tmp_path):
     source, _ = source_for(tmp_path, "google_books_not_for_sale.json")
     result = await source.quote(ISBN, "new")

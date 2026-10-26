@@ -1,10 +1,10 @@
 {"kind": "books#volumes", "totalItems": 2, "items": [
  {"kind": "books#volume", "id": "OTHER01", "selfLink": "https://www.googleapis.com/books/v1/volumes/OTHER01",
   "volumeInfo": {"title": "Another Edition", "industryIdentifiers": [{"type": "ISBN_13", "identifier": "9780000000002"}]},
-  "saleInfo": {"country": "IN", "saleability": "FOR_SALE", "isEbook": true,
+  "saleInfo": {"country": "IN", "saleability": "FOR_SALE", "isEbook": false,
    "retailPrice": {"amount": 111.0, "currencyCode": "INR"}, "buyLink": "https://play.google.com/store/books/details?id=OTHER01"}},
  {"kind": "books#volume", "id": "ABC123", "selfLink": "https://www.googleapis.com/books/v1/volumes/ABC123",
   "volumeInfo": {"title": "Sapiens", "industryIdentifiers": [{"type": "ISBN_10", "identifier": "0099590085"}, {"type": "ISBN_13", "identifier": "9780099590088"}]},
-  "saleInfo": {"country": "IN", "saleability": "FOR_SALE", "isEbook": true,
+  "saleInfo": {"country": "IN", "saleability": "FOR_SALE", "isEbook": false,
    "listPrice": {"amount": 499.0, "currencyCode": "INR"}, "retailPrice": {"amount": 349.5, "currencyCode": "INR"},
    "buyLink": "https://play.google.com/store/books/details?id=ABC123&rdid=book-ABC123&rdot=1&source=gbs_api"}}]}

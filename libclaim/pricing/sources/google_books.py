@@ -55,6 +55,8 @@ class GoogleBooksPrice:
         sale = volume.get("saleInfo") or {}
         if sale.get("saleability") != cfg.sale_status:
             return self.missing(isbn, "not_found", evidence)
+        if sale.get("isEbook"):
+            return self.missing(isbn, "unsupported_condition", evidence)
         try:
             price = sale.get("retailPrice") or sale["listPrice"]
             amount, currency = Decimal(str(price["amount"])), price["currencyCode"]
