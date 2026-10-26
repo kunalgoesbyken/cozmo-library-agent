@@ -27,6 +27,7 @@ STREAM_STAGES = STAGES[:2]
 SEGMENT_STAGES = STAGES[2:6]
 POST_STAGES = STAGES[6:]
 STILLS = "stills"
+VISION_CUTOFF = "vision_cutoff"
 
 
 class SummaryText(BaseModel):
@@ -44,6 +45,7 @@ class Readback(BaseModel):
 
 class PipelineConfig(BaseModel):
     deadline_s: float
+    vision_cutoff_s: float
     deadline_poll_s: float
     row_min_spines: int
     row_min_spine_height_frac: float

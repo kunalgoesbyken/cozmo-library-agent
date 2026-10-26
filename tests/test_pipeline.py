@@ -124,7 +124,7 @@ async def test_fixture_sweep_gives_a_valid_packet_with_traceable_lines(first, sw
     refs = [b.frame_ref for b in packet.books] + [i.frame_ref for i in packet.items] + packet.room.frame_refs
     refs += [entry.frame_ref for entry in packet.review_queue if entry.frame_ref]
     assert refs and all(not ref.startswith(("/", "\\")) and (sweep.root / ref).is_file() for ref in refs)
-    assert packet.sweep.id == "run" and packet.sweep.currency == "INR" and packet.sweep.duration_s == 11.0
+    assert packet.sweep.id == "run" and packet.sweep.currency == "INR" and packet.sweep.duration_s == (len(fx.frames()) - 1) * fx.STEP_MS / 1000
     assert web.requests
 
 
@@ -243,6 +243,35 @@ async def test_forced_stall_finalises_at_the_deadline_with_review(sweep, tmp_pat
     assert {e.ref_id for e in unfinished if e.reason.startswith("reading")} == {b.id for b in packet.books}
     assert any(e.ref_id == "room" and e.severity == "high" for e in unfinished)
     assert recorder.of("packet_ready") and (sweep.root / "claim_packet.json").is_file()
+
+
+@dataclass
+class SpineStall(fx.FakeVision):
+    stalled: int = 0
+
+    async def generate(self, model, parts, schema):
+        if schema.__name__ == "TileSpines":
+            self.stalled += 1
+            await asyncio.Event().wait()
+        return await super().generate(model, parts, schema)
+
+
+async def test_spine_stall_hits_the_vision_cutoff_and_still_counts_books(sweep, tmp_path, online):
+    clock, client = Clock(), SpineStall()
+    llm = fx.fake_llm(sweep, tmp_path, client)
+    run = SweepRun(sweep, services(sweep, tmp_path, fx.Web(), llm, local=fx.fake_local, clock=clock), None,
+                   fast_config())
+    for still in load_stills(sweep):
+        run.add_still(still)
+    finishing = asyncio.create_task(run.finish())
+    async with asyncio.timeout(WAIT_S):
+        while client.stalled < len(fx.STRIPS) * fx.ROW_FRAMES:
+            await asyncio.sleep(0.01)
+    clock.now += load_pipeline_config().vision_cutoff_s + 1
+    packet = await asyncio.wait_for(finishing, WAIT_S)
+    assert packet.totals.book_count == BOOK_COUNT
+    assert {b.title for b in packet.books if b.status == "identified"} >= PRICED
+    assert any("spine detection failed (vision_cutoff)" in entry.reason for entry in packet.review_queue)
 
 
 class Storm:

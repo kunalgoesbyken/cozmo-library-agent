@@ -30,7 +30,7 @@ from libclaim.live.tools import (
     StatementKind,
     StatementLog,
 )
-from libclaim.llm import LiveCallBlocked, Llm, LlmReplyInvalid, QuotaExhausted
+from libclaim.llm import LiveCallBlocked, Llm, LlmReplyInvalid, QuotaExhausted, load_llm_config
 from libclaim.models import Still
 from libclaim.packet.assemble import book_lines, build_packet, frame_ref, slots, summary_text
 from libclaim.packet.models import ClaimPacket, Item, SweepInfo
@@ -53,6 +53,7 @@ from libclaim.stages import (
     SEGMENT_STAGES,
     STAGES,
     STILLS,
+    VISION_CUTOFF,
     AppraisalStage,
     BookAppraisal,
     BookRead,
@@ -79,6 +80,7 @@ from libclaim.stages import (
 from libclaim.room.geometry import RoomGeometry
 from libclaim.sweep import SweepDir
 from libclaim.vision.boxes import Box, TrackConfig, load_vision_config, read_image
+from libclaim.vision.gate import VisionGate
 from libclaim.vision.items import ItemDet, detect_items
 from libclaim.vision.keyframes import KeyframeStream, load_keyframe_config
 from libclaim.vision.reading import Reading, SpineCrop, crop_spine, read_spines
@@ -160,22 +162,6 @@ def services_for(sweep: SweepDir, settings: Settings, budget: Budget | None = No
         catalogs=Catalogs.for_sweep(sweep.root),
         http=PriceHttp(cache),
     )
-
-
-class VisionGate:
-    def __init__(self, llm: Any):
-        self.llm = llm
-        self.down: dict[tuple[str, ...], str] = {}
-
-    async def structured(self, models: list[str], parts: list[Any], schema: type[BaseModel]) -> BaseModel:
-        key = tuple(models)
-        if key in self.down:
-            raise QuotaExhausted(f"{self.down[key]} earlier in this sweep for {list(key)}")
-        try:
-            return await self.llm.structured(models, parts, schema)
-        except (QuotaExhausted, BudgetExceeded) as error:
-            self.down[key] = type(error).__name__
-            raise
 
 
 def still_from_file(path: Path, cfg: CaptureConfig) -> Still:
@@ -298,7 +284,7 @@ class SweepRun:
         self.cfg = config or load_pipeline_config()
         self.close_services = close_services
         self.results = Results()
-        self.llm = VisionGate(services.llm)
+        self.llm = VisionGate(services.llm, load_llm_config().retry_delay_cap_seconds, services.clock)
         self.measure_cfg = load_measure_config(services.settings)
         self.tracks_cfg = load_vision_config().tracks
         self.stream = KeyframeStream(load_keyframe_config())
@@ -310,6 +296,8 @@ class SweepRun:
         self.carry: tuple[SegmentPlan, list[FrameSpines]] | None = None
         self.tails: list[tuple[SegmentPlan, list[FrameSpines]]] = []
         self.requeries = 0
+        self.cut = False
+        self.calls: set[asyncio.Future] = set()
         self.timings: dict[str, float] = defaultdict(float)
         self.done: dict[str, int] = defaultdict(int)
         self.computed: set[str] = set()
@@ -407,8 +395,18 @@ class SweepRun:
         local = await asyncio.to_thread(self.services.local_boxes, image)
         if local is not None and not self.is_row(local, still):
             return FrameSpines(still=still, rows=False, local=local)
-        frame = await self.detect_with(still, local, self.services.settings.vision_models)
-        if frame.flagged:
+        if self.cut:
+            return self.local_only(still, local, VISION_CUTOFF)
+        call = asyncio.ensure_future(self.detect_with(still, local, self.services.settings.vision_models))
+        self.calls.add(call)
+        call.add_done_callback(self.calls.discard)
+        try:
+            frame = await call
+        except asyncio.CancelledError:
+            if not self.cut or asyncio.current_task().cancelling():
+                raise
+            return self.local_only(still, local, VISION_CUTOFF)
+        if frame.flagged and not self.cut:
             await self.notify(self.hooks.recapture, f"frame {still.seq}")
             frame = await self.requery(frame)
         return frame
@@ -661,11 +659,20 @@ class SweepRun:
         await self.timed(name, step())
         await self.progress(name, 1, 1)
 
+    async def wait_until(self, limit: float, tasks: list[asyncio.Future]) -> set[asyncio.Future]:
+        pending = {task for task in tasks if not task.done()}
+        while pending and (remaining := limit - self.services.clock()) > 0:
+            _, pending = await asyncio.wait(pending, timeout=min(remaining, self.cfg.deadline_poll_s))
+        return pending
+
+    def cut_vision(self) -> None:
+        self.cut = True
+        for call in list(self.calls):
+            call.cancel()
+
     async def until_deadline(self, steps: list[Awaitable]) -> None:
         tasks = [asyncio.ensure_future(step) for step in steps]
-        pending = {task for task in tasks if not task.done()}
-        while pending and (remaining := self.deadline_at - self.services.clock()) > 0:
-            _, pending = await asyncio.wait(pending, timeout=min(remaining, self.cfg.deadline_poll_s))
+        pending = await self.wait_until(self.deadline_at, tasks)
         for task in pending:
             task.cancel()
         await asyncio.gather(*pending, return_exceptions=True)
@@ -679,11 +686,14 @@ class SweepRun:
 
     async def finish(self, post: str = POST_STAGES[0]) -> ClaimPacket:
         started = time.perf_counter()
-        self.deadline_at = self.services.clock() + self.cfg.deadline_s
+        now = self.services.clock()
+        self.deadline_at = now + self.cfg.deadline_s
         for keyframe in self.stream.flush():
             self.add_keyframe(keyframe)
         if self.consumer is not None:
             self.queue.put_nowait(None)
+            await self.wait_until(now + self.cfg.vision_cutoff_s, [self.consumer])
+            self.cut_vision()
             await self.until_deadline([self.consumer])
         self.cancel_detections()
         if self.open:

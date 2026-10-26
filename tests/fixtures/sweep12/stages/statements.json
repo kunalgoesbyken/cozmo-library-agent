@@ -4,7 +4,7 @@
       "subject": "The Great Gatsby",
       "kind": "first_edition",
       "value": "first edition",
-      "t_ms": 1761460006000,
+      "t_ms": 1761460012000,
       "still_seq_from": 5,
       "still_seq_to": 6
     },
@@ -12,7 +12,7 @@
       "subject": "the harbour painting",
       "kind": "art_print",
       "value": "it is a print",
-      "t_ms": 1761460012000,
+      "t_ms": 1761460024000,
       "still_seq_from": 11,
       "still_seq_to": 12
     }

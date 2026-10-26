@@ -36,6 +36,10 @@ class QuotaExhausted(RuntimeError):
     pass
 
 
+class DailyQuotaExhausted(QuotaExhausted):
+    pass
+
+
 class UnknownModel(ValueError):
     pass
 
@@ -188,7 +192,7 @@ class Llm:
             if not delays:
                 if invalid:
                     raise LlmReplyInvalid(f"{invalid} invalid replies from {models}")
-                raise QuotaExhausted(f"daily quota exhausted for {models}")
+                raise DailyQuotaExhausted(f"daily quota exhausted for {models}")
             if round_number + 1 < self.config.max_rounds:
                 await self.sleep(min(max(delays), self.config.retry_delay_cap_seconds))
         raise QuotaExhausted(f"rate limited on every model in {models}")

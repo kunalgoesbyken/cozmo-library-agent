@@ -3,14 +3,16 @@ import numpy as np
 import pytest
 
 from libclaim.models import Still
-from libclaim.vision.keyframes import (
-    Keyframes,
-    KeyframeStream,
-    Phase,
-    PhaseMarker,
-    load_keyframe_config,
-    select_keyframes,
-)
+from libclaim.vision import keyframes as keyframes_module
+from libclaim.vision.keyframes import Keyframes, KeyframeStream, Phase, PhaseMarker, select_keyframes
+
+WINDOW_MS = 500
+
+
+@pytest.fixture(autouse=True)
+def half_second_windows(monkeypatch):
+    config = keyframes_module.load_keyframe_config().model_copy(update={"window_ms": WINDOW_MS})
+    monkeypatch.setattr(keyframes_module, "load_keyframe_config", lambda: config)
 
 
 def noise(seed, size=64):
@@ -33,7 +35,7 @@ def test_thirty_stills_give_ten_keyframes(tmp_path):
     result = select_keyframes(stills, events)
     assert isinstance(result, Keyframes)
     assert len(result.rows) + len(result.room) == 10
-    assert all(s.blur == max(x.blur for x in stills if x.t_ms // 500 == s.t_ms // 500) for s in result.rows)
+    assert all(s.blur == max(x.blur for x in stills if x.t_ms // WINDOW_MS == s.t_ms // WINDOW_MS) for s in result.rows)
 
 
 def test_sharpest_per_window_and_phase_split(tmp_path):
@@ -94,11 +96,11 @@ def test_stream_emits_each_window_when_it_closes_and_matches_batch(tmp_path):
         make_still(tmp_path, seq, seq * 160, noise(seq // 3), blur=float(seq % 3))
         for seq in range(30)
     ]
-    stream = KeyframeStream(load_keyframe_config())
+    stream = KeyframeStream(keyframes_module.load_keyframe_config())
     emitted = []
     for still in stills:
         out = stream.add(still)
-        assert all(kept.t_ms // 500 < still.t_ms // 500 for kept in out)
+        assert all(kept.t_ms // WINDOW_MS < still.t_ms // WINDOW_MS for kept in out)
         emitted += out
     emitted += stream.flush()
     assert stream.flush() == []

@@ -1,4 +1,5 @@
 deadline_s: 240
+vision_cutoff_s: 150
 deadline_poll_s: 0.5
 row_min_spines: 1
 row_min_spine_height_frac: 0.2

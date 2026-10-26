@@ -31,7 +31,7 @@ from tests.pricing.conftest import ROUTES, fast_config, public_resolver
 ROOT = Path(__file__).resolve().parent / "fixtures" / "sweep12"
 WIDTH, HEIGHT = 960, 540
 T0_MS = 1761460000000
-STEP_MS = 1000
+STEP_MS = 2000
 ROW_SHIFT = 300
 ROOM_SHIFT = 400
 SHELF_Y = 430
