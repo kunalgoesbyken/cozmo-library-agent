@@ -1,0 +1,12 @@
+{
+  "ceiling_height_m": null,
+  "walls": [
+    {"id": "A", "length_m": null, "interior_angle_deg": 90}
+  ],
+  "openings": [
+    {"kind": "door", "wall": "A", "width_m": null, "height_m": null}
+  ],
+  "shelving_fronts": [
+    {"unit": "1", "wall": "A", "width_m": null, "height_m": null}
+  ]
+}

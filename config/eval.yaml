@@ -1,0 +1,32 @@
+shelf_label: "{unit}-{row}"
+truthy: ["y", "yes", "true", "1"]
+live_stages: [capture, live]
+closure_tolerance_m: 0.05
+default_interior_angle_deg: 90.0
+alignment:
+  gap_cost: 1.0
+  unknown_cost: 0.5
+title:
+  scorer: token_sort_ratio
+  threshold: 85
+  min_accuracy: 0.70
+  max_confidently_wrong: 0.03
+count:
+  tolerance: 0.05
+dims:
+  tolerance: 0.15
+price:
+  tolerance: 0.25
+  new_conditions: [new]
+  observed_source_type: observed
+  source_scorer: token_sort_ratio
+  source_threshold: 85
+items:
+  scorer: token_set_ratio
+  threshold: 70
+  min_found: 0.80
+room:
+  floor_tolerance: 0.10
+  wall_tolerance: 0.15
+time:
+  max_seconds: 300
