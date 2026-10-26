@@ -1,0 +1,4 @@
+window_ms: 500
+max_hamming: 6
+hash_size: 8
+dct_size: 32

@@ -1,0 +1,12 @@
+models:
+  gemini-3.5-flash-lite: {rpm: 10, rpd: 500}
+  gemini-3.1-flash-lite: {rpm: 10, rpd: 500}
+  gemini-3.8-flash: {rpm: 5, rpd: 20}
+  gemini-3.6-flash: {rpm: 5, rpd: 20}
+quota_path: runs/_quota.json
+retry_delay_cap_seconds: 30.0
+default_retry_delay_seconds: 5.0
+max_rounds: 3
+ledger_stage: llm
+offline_env: LIBCLAIM_OFFLINE
+rate_limit_code: 429
