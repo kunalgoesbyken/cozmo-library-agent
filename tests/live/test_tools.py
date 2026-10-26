@@ -65,6 +65,12 @@ def test_other_statement_is_not_appraisal_and_empty_window_is_none(tmp_path):
     assert statement.still_seq_from is None and statement.still_seq_to is None
 
 
+def test_art_print_statement_is_not_appraisal(tmp_path):
+    h = Harness(tmp_path, now_ms=60_000)
+    result = h.call("record_user_statement", {"subject": "framed poster", "kind": "art_print", "value": "print"})
+    assert result["needs_appraisal"] is False
+
+
 def test_statements_accumulate(tmp_path):
     h = Harness(tmp_path)
     for _ in range(2):

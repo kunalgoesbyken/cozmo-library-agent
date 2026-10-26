@@ -102,6 +102,15 @@ class MarkerConfig(BaseModel):
     dpi: int
 
 
+class ItemConfig(BaseModel):
+    batch_size: int
+    prompt: str
+    art_categories: list[str]
+    dedup_iou: float
+    dedup_lookback: int
+    depth_core: float
+
+
 class VisionConfig(BaseModel):
     tiles: TileConfig
     jpeg_quality: int
@@ -116,6 +125,7 @@ class VisionConfig(BaseModel):
     scale: ScaleConfig
     masks: MaskConfig
     markers: MarkerConfig
+    items: ItemConfig
 
 
 class ImageUnreadable(ValueError):

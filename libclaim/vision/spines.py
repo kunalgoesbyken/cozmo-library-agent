@@ -71,10 +71,10 @@ def encode_tile(img: np.ndarray, tile: Box, cfg: VisionConfig) -> types.Part:
     return types.Part.from_bytes(data=buffer.tobytes(), mime_type=cfg.jpeg_mime)
 
 
-def to_px(spine: TileSpine, tile: Box, cfg: VisionConfig) -> Box | None:
-    if len(spine.box_2d) != BOX_COORDS:
+def to_px(box_2d: list[int], tile: Box, cfg: VisionConfig) -> Box | None:
+    if len(box_2d) != BOX_COORDS:
         return None
-    ymin, xmin, ymax, xmax = (min(max(v, 0), cfg.box_scale) / cfg.box_scale for v in spine.box_2d)
+    ymin, xmin, ymax, xmax = (min(max(v, 0), cfg.box_scale) / cfg.box_scale for v in box_2d)
     box = Box(
         x1=tile.x1 + xmin * tile.width,
         y1=tile.y1 + ymin * tile.height,
@@ -95,7 +95,7 @@ async def detect_spines(keyframe: Still, llm: Llm | None = None, models: list[st
     for spine in answer.spines:
         if not 0 <= spine.image_index < len(tiles):
             continue
-        box = to_px(spine, tiles[spine.image_index], cfg)
+        box = to_px(spine.box_2d, tiles[spine.image_index], cfg)
         if box is not None:
             dets.append(SpineDet(box_px=box, orientation=spine.orientation, source=Source.gemini))
     kept = nms([det.box_px for det in dets], cfg.nms_iou, cfg.nms_containment)

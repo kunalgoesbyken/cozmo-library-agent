@@ -21,6 +21,7 @@ class StatementKind(StrEnum):
     first_edition = "first_edition"
     signed = "signed"
     original_art = "original_art"
+    art_print = "art_print"
     other = "other"
 
 
@@ -34,7 +35,7 @@ class Statement(BaseModel):
 
     @property
     def needs_appraisal(self) -> bool:
-        return self.kind != StatementKind.other
+        return self.kind not in (StatementKind.other, StatementKind.art_print)
 
 
 class StatementLog(BaseModel):

@@ -17,4 +17,4 @@ Facts:
 - If the tool monitor has already been started, do not start it again.
 
 Art and valuables:
-- When you see framed art, ask whether it is an original or a print, and pass the answer to the tool.
+- When you see framed art, ask whether it is an original or a print, and pass the answer to the tool as kind original_art or art_print.

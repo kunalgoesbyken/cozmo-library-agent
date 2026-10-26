@@ -77,3 +77,18 @@ markers:
   gap_cm: 1.5
   label_height_cm: 0.4
   dpi: 300
+items:
+  batch_size: 4
+  prompt: >-
+    The images are photos of one room, each preceded by its image_index. List every distinct
+    object that is not a book in every image, including small ones; if an object appears in
+    several images, list it once for each image it appears in. For each object return the
+    image_index, its category, a short description, brand_model_text with only the brand or
+    model characters printed visibly on the object (empty if none), box_2d as
+    [ymin, xmin, ymax, xmax] normalised to 0-1000 within that image, is_art true for paintings,
+    prints, posters, framed photos and sculptures, and truncated true if the image edge cuts
+    the object off.
+  art_categories: [artwork]
+  dedup_iou: 0.3
+  dedup_lookback: 2
+  depth_core: 0.5
