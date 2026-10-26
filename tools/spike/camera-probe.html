@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>camera probe</title>
+<style>
+  body { font: 14px/1.4 system-ui, sans-serif; margin: 12px; background: #111; color: #eee; }
+  button { font: inherit; padding: 10px 14px; margin: 4px 4px 4px 0; }
+  video { width: 100%; max-height: 40vh; background: #000; }
+  pre { white-space: pre-wrap; word-break: break-word; background: #1c1c1c; padding: 8px; }
+</style>
+</head>
+<body>
+<video id="preview" playsinline muted autoplay></video>
+<div>
+  <button id="start">1 camera + mic</button>
+  <button id="grab">2 grab stills x5</button>
+  <button id="wake">3 wake lock</button>
+  <button id="audio">4 audio worklet x20</button>
+  <button id="copy">copy results</button>
+</div>
+<pre id="log"></pre>
+<script>
+const results = { userAgent: navigator.userAgent, secureContext: window.isSecureContext };
+const logElement = document.getElementById("log");
+const preview = document.getElementById("preview");
+let stream = null;
+
+function show() {
+  logElement.textContent = JSON.stringify(results, null, 2);
+}
+
+function note(key, value) {
+  results[key] = value;
+  show();
+}
+
+function failure(key, error) {
+  note(key, { error: `${error.name}: ${error.message}` });
+}
+
+function median(values) {
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted[Math.floor(sorted.length / 2)];
+}
+
+async function startCamera() {
+  const began = performance.now();
+  stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: { ideal: "environment" }, width: { ideal: 4096 }, height: { ideal: 2160 } },
+    audio: { echoCancellation: true, noiseSuppression: true },
+  });
+  preview.srcObject = stream;
+  await preview.play();
+  const track = stream.getVideoTracks()[0];
+  note("camera", {
+    openMs: Math.round(performance.now() - began),
+    label: track.label,
+    settings: track.getSettings(),
+    capabilities: track.getCapabilities ? track.getCapabilities() : null,
+    imageCaptureSupported: "ImageCapture" in window,
+    audioSettings: stream.getAudioTracks()[0]?.getSettings() ?? null,
+    devices: (await navigator.mediaDevices.enumerateDevices()).map((d) => ({ kind: d.kind, label: d.label })),
+  });
+}
+
+async function canvasStill(track) {
+  const settings = track.getSettings();
+  const canvas = document.createElement("canvas");
+  canvas.width = preview.videoWidth || settings.width;
+  canvas.height = preview.videoHeight || settings.height;
+  canvas.getContext("2d").drawImage(preview, 0, 0, canvas.width, canvas.height);
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92));
+  return { width: canvas.width, height: canvas.height, bytes: blob.size };
+}
+
+async function imageCaptureStill(track) {
+  const capture = new ImageCapture(track);
+  const blob = await capture.takePhoto();
+  const bitmap = await createImageBitmap(blob);
+  return { width: bitmap.width, height: bitmap.height, bytes: blob.size };
+}
+
+async function timeStills() {
+  const track = stream.getVideoTracks()[0];
+  const out = { canvas: [], imageCapture: [], imageCaptureError: null };
+  for (let i = 0; i < 5; i++) {
+    const began = performance.now();
+    const still = await canvasStill(track);
+    out.canvas.push({ ms: Math.round(performance.now() - began), ...still });
+  }
+  if ("ImageCapture" in window) {
+    for (let i = 0; i < 5; i++) {
+      const began = performance.now();
+      try {
+        const still = await imageCaptureStill(track);
+        out.imageCapture.push({ ms: Math.round(performance.now() - began), ...still });
+      } catch (error) {
+        out.imageCaptureError = `${error.name}: ${error.message}`;
+        break;
+      }
+    }
+  }
+  out.canvasMedianMs = median(out.canvas.map((s) => s.ms));
+  out.imageCaptureMedianMs = out.imageCapture.length ? median(out.imageCapture.map((s) => s.ms)) : null;
+  note("stills", out);
+}
+
+async function wakeLock() {
+  const out = { supported: "wakeLock" in navigator };
+  if (out.supported) {
+    const sentinel = await navigator.wakeLock.request("screen");
+    out.acquired = !sentinel.released;
+    sentinel.addEventListener("release", () => note("wakeLockReleasedAt", new Date().toISOString()));
+  }
+  note("wakeLock", out);
+}
+
+const workletSource = `
+class Echo extends AudioWorkletProcessor {
+  constructor() {
+    super();
+    this.port.onmessage = (event) => this.port.postMessage({ id: event.data.id, workletTime: currentTime, frame: currentFrame });
+  }
+  process() { return true; }
+}
+registerProcessor("echo", Echo);
+`;
+
+async function audioRoundTrip() {
+  const context = new AudioContext({ sampleRate: 16000 });
+  await context.resume();
+  const url = URL.createObjectURL(new Blob([workletSource], { type: "text/javascript" }));
+  await context.audioWorklet.addModule(url);
+  const node = new AudioWorkletNode(context, "echo");
+  const sent = new Map();
+  const trips = [];
+  node.port.onmessage = (event) => trips.push(performance.now() - sent.get(event.data.id));
+  if (stream) {
+    context.createMediaStreamSource(stream).connect(node);
+  }
+  for (let id = 0; id < 20; id++) {
+    sent.set(id, performance.now());
+    node.port.postMessage({ id });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  note("audioWorklet", {
+    sampleRate: context.sampleRate,
+    baseLatencyMs: Math.round(context.baseLatency * 1000),
+    outputLatencyMs: Math.round((context.outputLatency || 0) * 1000),
+    state: context.state,
+    replies: trips.length,
+    roundTripMsMedian: trips.length ? Number(median(trips).toFixed(2)) : null,
+    roundTripMsMax: trips.length ? Number(Math.max(...trips).toFixed(2)) : null,
+    micConnected: Boolean(stream),
+  });
+  await context.close();
+}
+
+function bind(id, action, key) {
+  document.getElementById(id).addEventListener("click", () => action().catch((error) => failure(key, error)));
+}
+
+bind("start", startCamera, "camera");
+bind("grab", timeStills, "stills");
+bind("wake", wakeLock, "wakeLock");
+bind("audio", audioRoundTrip, "audioWorklet");
+document.getElementById("copy").addEventListener("click", () => navigator.clipboard.writeText(JSON.stringify(results, null, 2)));
+show();
+</script>
+</body>
+</html>
