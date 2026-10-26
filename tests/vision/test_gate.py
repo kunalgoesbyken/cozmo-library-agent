@@ -1,4 +1,5 @@
 import pytest
+from pydantic import BaseModel
 
 from libclaim.llm import DailyQuotaExhausted, QuotaExhausted
 from libclaim.vision.gate import VisionGate
@@ -56,3 +57,26 @@ async def test_daily_exhaustion_trips_for_the_rest_of_the_sweep():
     with pytest.raises(QuotaExhausted):
         await gate.structured(MODELS, [], None)
     assert len(llm.orders) == 1
+
+
+class Reply(BaseModel):
+    text: str
+
+
+class Answer:
+    def __init__(self):
+        self.calls = 0
+
+    async def structured(self, models, parts, schema):
+        self.calls += 1
+        return schema(text="seen")
+
+
+async def test_identical_request_is_answered_from_the_reply_cache(tmp_path):
+    llm = Answer()
+    first = VisionGate(llm, COOLDOWN, cache_dir=tmp_path)
+    assert (await first.structured(MODELS, ["prompt"], Reply)).text == "seen"
+    again = VisionGate(llm, COOLDOWN, cache_dir=tmp_path)
+    assert (await again.structured(["b", "a"], ["prompt"], Reply)).text == "seen"
+    await again.structured(MODELS, ["other prompt"], Reply)
+    assert llm.calls == 2

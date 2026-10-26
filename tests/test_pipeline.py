@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 import time
 from dataclasses import dataclass, field
 
@@ -198,11 +199,31 @@ async def test_replays_are_deterministic(first, sweep, tmp_path):
     assert stable(again) == stable(once_more) == stable(packet)
 
 
+@dataclass
+class Poisoned(fx.FakeVision):
+    async def generate(self, model, parts, schema):
+        self.calls.append((model, schema.__name__))
+        raise AssertionError("no model call is allowed in a replay")
+
+
+@pytest.mark.parametrize("stage", ["spines", "tracks", "reading", "items"])
+async def test_moved_run_replays_from_cache_without_any_network_or_model_call(first, sweep, tmp_path, stage):
+    packet = first[0]
+    moved = SweepDir(tmp_path / "moved")
+    sweep.root.rename(moved.root)
+    dead, poisoned = fx.Web(fail=True), Poisoned()
+    llm = fx.fake_llm(moved, tmp_path, poisoned)
+    replay = await run_pipeline(moved, stage, services=services(moved, tmp_path, dead, llm, local=fx.local_with_miss(moved)))
+    assert dead.requests == [] and poisoned.calls == []
+    assert stable(replay) == stable(packet) | {"sweep": stable(replay)["sweep"]}
+    assert stable(replay)["sweep"]["id"] == "moved"
+
+
 def test_cli_replays_from_price_offline(first, sweep, monkeypatch, capsys):
     packet = first[0]
     monkeypatch.setattr(pipeline_module, "load_settings", lambda: fx.SETTINGS)
-    monkeypatch.setenv("LIBCLAIM_OFFLINE", "1")
     pipeline_module.main([str(sweep.root), "--from", "price"])
+    assert os.environ["LIBCLAIM_OFFLINE"] == "1"
     out = capsys.readouterr().out
     assert "claim_packet.json" in out and "I counted" in out
     saved = ClaimPacket.model_validate_json((sweep.root / "claim_packet.json").read_text(encoding="utf-8"))

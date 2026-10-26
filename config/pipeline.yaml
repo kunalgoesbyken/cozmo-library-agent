@@ -9,6 +9,7 @@ statement_subject_match: 80
 stage_aliases:
   price: pricing
 packet_name: claim_packet.json
+llm_cache_dir: llm
 runs_url: /runs
 cm_decimals: 1
 severity:

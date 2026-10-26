@@ -55,6 +55,7 @@ class PipelineConfig(BaseModel):
     statement_subject_match: float
     stage_aliases: dict[str, str]
     packet_name: str
+    llm_cache_dir: str
     runs_url: str
     cm_decimals: int
     severity: dict[str, Severity]

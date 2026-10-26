@@ -1,5 +1,7 @@
 import argparse
 import asyncio
+import json
+import os
 import logging
 import time
 from statistics import median
@@ -115,6 +117,7 @@ UNATTACHED = "user said '{subject}' is {kind} but no book was in view; not attac
 NO_LISTING = "no listing category in the item sources matches this item"
 OFFLINE_LISTING = "listing pages are not cached and the pipeline is offline"
 FRAME_SEPARATOR = "_"
+PATH_KEYS = {"path", "frame_path", "frame_refs"}
 STAGE_TYPES: dict[str, type[BaseModel]] = {
     STILLS: StillLog,
     FAILURES: FailureLog,
@@ -190,6 +193,28 @@ def load_stills(sweep: SweepDir) -> list[Still]:
 
 def read_or(sweep: SweepDir, name: str, cls: type[BaseModel], default: BaseModel | None) -> Any:
     return sweep.read_stage(name, cls) if (sweep.stages / f"{name}.json").is_file() else default
+
+
+def relocated(node: Any, frames: Path) -> Any:
+    if isinstance(node, dict):
+        return {key: frames_path(value, frames) if key in PATH_KEYS else relocated(value, frames)
+                for key, value in node.items()}
+    if isinstance(node, list):
+        return [relocated(value, frames) for value in node]
+    return node
+
+
+def frames_path(value: Any, frames: Path) -> Any:
+    if isinstance(value, list):
+        return [frames_path(item, frames) for item in value]
+    return str(frames / Path(value).name) if isinstance(value, str) and value else value
+
+
+def read_relocated(sweep: SweepDir, name: str, cls: type[BaseModel], default: BaseModel | None) -> Any:
+    path = sweep.stages / f"{name}.json"
+    if not path.is_file():
+        return default
+    return cls.model_validate(relocated(json.loads(path.read_text(encoding="utf-8")), sweep.frames))
 
 
 def det_of(track: BookTrack, frames: list[FrameSpines], stills: list[Still]) -> SpineDet:
@@ -298,7 +323,8 @@ class SweepRun:
         self.cfg = config or load_pipeline_config()
         self.close_services = close_services
         self.results = Results()
-        self.llm = VisionGate(services.llm, load_llm_config().retry_delay_cap_seconds, services.clock)
+        cache = sweep.root / load_resolve_config().catalog.cache_dir / self.cfg.llm_cache_dir
+        self.llm = VisionGate(services.llm, load_llm_config().retry_delay_cap_seconds, services.clock, cache)
         self.measure_cfg = load_measure_config(services.settings)
         self.tracks_cfg = load_vision_config().tracks
         self.stream = KeyframeStream(load_keyframe_config())
@@ -805,7 +831,7 @@ class SweepRun:
     def load(self, names: list[str]) -> None:
         for name in names:
             default = None if name in OPTIONAL_STAGES else STAGE_TYPES[name]()
-            setattr(self.results, name, read_or(self.sweep, name, STAGE_TYPES[name], default))
+            setattr(self.results, name, read_relocated(self.sweep, name, STAGE_TYPES[name], default))
 
     async def replay(self, from_stage: str | None = None) -> ClaimPacket:
         stage = self.cfg.stage_aliases.get(from_stage, from_stage) if from_stage else STAGES[0]
@@ -849,7 +875,11 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="python -m libclaim.pipeline")
     parser.add_argument("sweep", type=Path)
     parser.add_argument("--from", dest="from_stage", choices=STAGES + sorted(cfg.stage_aliases))
+    parser.add_argument("--online", action="store_true")
     args = parser.parse_args(argv)
+    if not args.online:
+        llm = load_llm_config()
+        os.environ[llm.offline_env] = llm.offline_value
     packet = asyncio.run(run_pipeline(SweepDir(args.sweep), args.from_stage))
     print(args.sweep / cfg.packet_name, flush=True)
     print(summary_text(packet, cfg), flush=True)
