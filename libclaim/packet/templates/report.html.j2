@@ -1,7 +1,19 @@
 {%- macro money(value) -%}{%- if value is none -%}<span class="unknown">unknown</span>{%- else -%}{{ "%.2f"|format(value) }}{%- endif -%}{%- endmacro -%}
 {%- macro num(value) -%}{%- if value is none -%}<span class="unknown">unknown</span>{%- else -%}{{ value }}{%- endif -%}{%- endmacro -%}
 {%- macro link(url, label) -%}{%- if url.startswith("http://") or url.startswith("https://") -%}<a href="{{ url }}">{{ label }}</a>{%- endif -%}{%- endmacro -%}
-{%- macro thumb(ref) -%}{%- if ref -%}<a href="{{ ref }}"><img src="{{ ref }}" alt="{{ ref }}" loading="lazy"></a>{%- endif -%}{%- endmacro -%}
+{%- macro thumb(ref) -%}{%- if ref -%}<a href="{{ ref }}"><img class="crop" src="{{ ref }}" alt="{{ ref }}" loading="lazy"></a>{%- endif -%}{%- endmacro -%}
+{%- macro pct(part, whole) -%}{{ "%.2f"|format(100 * part / whole) }}%{%- endmacro -%}
+{%- macro locate(line) -%}
+{%- if line.crop_ref and line.box and line.frame_size -%}
+<details class="loc"><summary><img class="crop" src="{{ line.crop_ref }}" alt="{{ line.id }}" loading="lazy"></summary>
+<div class="frame"><div class="stage"><img src="{{ line.frame_ref }}" alt="{{ line.frame_ref }}" loading="lazy"><span class="box" style="left: {{ pct(line.box[0], line.frame_size[0]) }}; top: {{ pct(line.box[1], line.frame_size[1]) }}; width: {{ pct(line.box[2] - line.box[0], line.frame_size[0]) }}; height: {{ pct(line.box[3] - line.box[1], line.frame_size[1]) }};"></span></div><a href="{{ line.frame_ref }}">{{ line.frame_ref }}</a> box {{ line.box|join(", ") }}</div></details>
+{%- else -%}{{ thumb(line.frame_ref) }}{%- endif -%}
+{%- endmacro -%}
+{%- macro dims(book) -%}
+{%- if book.scale_method == "aruco_homography" and book.spine_height_cm is not none -%}{{ book.spine_height_cm }} / {{ book.spine_thickness_cm if book.spine_thickness_cm is not none }}
+{%- elif book.dims_estimated_from_prior -%}<span class="est" title="estimated from the book format, not measured">est. {{ book.dims_estimated_from_prior.height_cm }} / {{ book.dims_estimated_from_prior.thickness_cm }}</span>
+{%- else -%}<span class="unknown">unknown</span>{%- endif -%}
+{%- endmacro -%}
 <!doctype html>
 <html lang="en">
 <head>
@@ -16,7 +28,14 @@
   th, td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid #e4e4e4; vertical-align: middle; }
   th { background: #f4f4f4; font-weight: 600; }
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-  img { height: 48px; width: auto; border-radius: 3px; display: block; }
+  img.crop { height: 64px; width: auto; max-width: 160px; object-fit: contain; border-radius: 3px; display: block; }
+  td.loc { position: relative; }
+  details.loc summary { cursor: pointer; list-style: none; }
+  details.loc .frame { position: absolute; left: 0; top: 100%; z-index: 5; width: min(900px, 90vw); background: #fff; border: 1px solid #ccc; padding: 4px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); }
+  .stage { position: relative; line-height: 0; }
+  .stage img { width: 100%; height: auto; }
+  .box { position: absolute; outline: 2px solid #e0245e; box-sizing: border-box; }
+  .est { color: #7a5a00; font-style: italic; }
   a { color: #0b5cad; }
   .unknown { color: #888; font-style: italic; }
   .meta { color: #555; margin: 0; }
@@ -39,11 +58,12 @@
 <h2>Totals</h2>
 <dl>
   <dt>Books</dt><dd>{{ packet.totals.book_count }} ({{ packet.totals.books_identified }} identified, {{ packet.totals.books_unidentified }} unidentified, {{ packet.totals.books_needs_appraisal }} needs appraisal)</dd>
-  <dt>Shelf run</dt><dd>{{ packet.totals.shelf_run_m }} m</dd>
+  <dt>Shelf run, measured</dt><dd>{% if packet.totals.shelf_run_m is none %}<span class="unknown">unknown</span>{% else %}{{ packet.totals.shelf_run_m }} m{% endif %}</dd>
+  <dt>Shelf run, estimated from book formats</dt><dd>{% if packet.totals.shelf_run_estimated_m is none %}<span class="unknown">none</span>{% else %}<span class="est">est. {{ packet.totals.shelf_run_estimated_m }} m</span>{% endif %}</dd>
   <dt>Books replacement cost</dt><dd>{{ packet.sweep.currency }} {{ money(packet.totals.books_replacement_cost) }}</dd>
   <dt>Books used value</dt><dd>{{ packet.sweep.currency }} {{ money(packet.totals.books_used_value) }} (observed {{ money(packet.totals.books_used_value_observed) }}, derived {{ money(packet.totals.books_used_value_derived) }})</dd>
   <dt>Items replacement cost</dt><dd>{{ packet.sweep.currency }} {{ money(packet.totals.items_replacement_cost_low) }} to {{ money(packet.totals.items_replacement_cost_high) }}</dd>
-  <dt>Excluded from totals</dt><dd>{{ packet.totals.excluded_from_totals }}</dd>
+  <dt>Excluded from totals (no price found, or excluded by the user)</dt><dd>{{ packet.totals.excluded_from_totals }}</dd>
 </dl>
 
 <h2>Room</h2>
@@ -67,7 +87,7 @@
   <tbody>
   {% for entry in packet.review_queue %}
     <tr>
-      <td>{{ thumb(entry.frame_ref) }}</td>
+      <td>{{ thumb(entry.crop_ref or entry.frame_ref) }}</td>
       <td>{{ entry.ref_id }}</td>
       <td><span class="badge {{ entry.severity }}">{{ entry.severity }}</span></td>
       <td>{{ entry.reason }}</td>
@@ -87,7 +107,7 @@
   <tbody>
   {% for book in packet.books %}
     <tr>
-      <td>{{ thumb(book.frame_ref) }}</td>
+      <td class="loc">{{ locate(book) }}</td>
       <td>{{ book.id }}</td>
       <td>{{ book.shelf }}</td>
       <td class="num">{{ book.position if book.position is not none }}</td>
@@ -95,7 +115,7 @@
       <td>{{ book.title }}</td>
       <td>{{ book.author }}</td>
       <td>{{ book.isbn }}</td>
-      <td class="num">{{ book.spine_height_cm if book.spine_height_cm is not none }} / {{ book.spine_thickness_cm if book.spine_thickness_cm is not none }}</td>
+      <td class="num">{{ dims(book) }}</td>
       <td class="num">{{ money(book.replacement_cost.amount) }} {{ link(book.replacement_cost.url, book.replacement_cost.source or "source") }}</td>
       <td class="num">{{ money(book.used_value.amount) }} {{ link(book.used_value.url, book.used_value.source or "source") }}{% if book.used_value.source_type %} <span class="badge">{{ book.used_value.source_type }}</span>{% endif %}</td>
     </tr>
@@ -130,7 +150,7 @@
   <tbody>
   {% for item in packet.items %}
     <tr>
-      <td>{{ thumb(item.frame_ref) }}</td>
+      <td class="loc">{{ locate(item) }}</td>
       <td>{{ item.id }}</td>
       <td>{{ item.category }}</td>
       <td>{{ item.description }}</td>

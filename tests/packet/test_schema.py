@@ -1,7 +1,7 @@
 import json
 
 from libclaim.models import FxRecord
-from libclaim.packet.models import BookReplacementCost, ClaimPacket, SecondCountry, SecondCountryBook
+from libclaim.packet.models import BookReplacementCost, DimsEstimate, ClaimPacket, SecondCountry, SecondCountryBook
 from libclaim.packet.report import render_report
 from libclaim.packet.review import build_review_queue
 from libclaim.packet.totals import compute_totals
@@ -36,11 +36,11 @@ CONTRACT = {
 
 ADDED = {
     "room": ["wall_area_net_m2", "openings", "shape", "polygon_m", "frame_refs"],
-    "books[]": ["scale_method", "evidence"],
+    "books[]": ["scale_method", "evidence", "crop_ref", "box", "frame_size", "dims_estimated_from_prior"],
     "books[].used_value": ["method", "source_type"],
-    "items[]": ["dimensions_method"],
+    "items[]": ["dimensions_method", "crop_ref", "box", "frame_size"],
     "items[].replacement_cost": ["url_high"],
-    "totals": ["books_used_value_observed", "books_used_value_derived"],
+    "totals": ["books_used_value_observed", "books_used_value_derived", "shelf_run_estimated_m"],
     "": ["second_country", "costs", "latency_s"],
     "costs": ["usd_at_paid_rates", "billed_usd", "billing", "tokens", "by_stage_usd"],
 }
@@ -126,7 +126,7 @@ def test_report_links_frames_prices_queue_totals_costs_and_latency(tmp_path):
     html = path.read_text(encoding="utf-8")
     assert path == tmp_path / "report.html"
     for ref in ("frames/00001_250.jpg", "frames/00002_500.jpg", "frames/00003_750.jpg"):
-        assert f'<img src="{ref}"' in html
+        assert f'src="{ref}"' in html
         assert f'<a href="{ref}">' in html
     assert 'href="https://shop.example/dune"' in html
     assert 'href="https://shop.example/lamp"' in html
@@ -137,6 +137,32 @@ def test_report_links_frames_prices_queue_totals_costs_and_latency(tmp_path):
     assert "12.50 s" in html
     assert "http://" not in html.replace("https://", "")
     assert "<script" not in html
+
+
+def located_packet():
+    built = packet()
+    built.books[0].crop_ref = "frames/crops/b1.jpg"
+    built.books[0].box = [100, 50, 300, 250]
+    built.books[0].frame_size = [1000, 500]
+    built.books[0].dims_estimated_from_prior = DimsEstimate(height_cm=21.0, thickness_cm=2.5, book_format="trade_paperback")
+    built.books[0].scale_method = "book_format_prior"
+    return built
+
+
+def test_report_shows_the_crop_and_outlines_the_box_in_the_full_frame(tmp_path):
+    html = render_report(located_packet(), SweepDir(tmp_path)).read_text(encoding="utf-8")
+    assert 'src="frames/crops/b1.jpg"' in html
+    assert 'left: 10.00%; top: 10.00%; width: 20.00%; height: 40.00%;' in html
+    assert 'href="frames/00001_250.jpg"' in html and "box 100, 50, 300, 250" in html
+
+
+def test_report_marks_prior_dimensions_as_estimates_and_unmeasured_run_as_unknown(tmp_path):
+    built = located_packet()
+    built.totals = compute_totals(built.books, built.items)
+    html = render_report(built, SweepDir(tmp_path)).read_text(encoding="utf-8")
+    assert 'class="est"' in html and "est. 21.0 / 2.5" in html
+    assert "Shelf run, measured" in html and '<span class="unknown">unknown</span>' in html
+    assert "est. 0.025 m" in html
 
 
 def test_report_does_not_link_non_http_urls(tmp_path):
