@@ -11,7 +11,7 @@ from libclaim.llm import Llm, LlmResponse
 from libclaim.models import Still
 from libclaim.room.depth import DepthSet
 from libclaim.vision.boxes import load_vision_config
-from libclaim.vision.items import FrameItems, detect_items
+from libclaim.vision.items import FrameItems, detect_items, unmatched_statements
 from libclaim.vision.scale import camera_matrix
 
 WIDTH, HEIGHT = 1000, 500
@@ -106,6 +106,31 @@ async def test_frames_beyond_lookback_are_not_merged(tmp_path):
     assert sorted(d.seen_in for d in dets) == [[0], [last]]
 
 
+async def test_two_identical_chairs_stay_two_items(tmp_path):
+    stills = panned_stills(tmp_path, 3)
+    replies = [[
+        item(f, "furniture", x - SHIFT * f, x + 100 - SHIFT * f)
+        for f in range(3)
+        for x in (300, 340)
+    ]]
+    llm, _ = llm_for(tmp_path, replies)
+    dets = await detect_items(stills, llm, MODELS)
+    assert len(dets) == 2
+    assert all(d.seen_in == [0, 1, 2] for d in dets)
+
+
+async def test_one_sighting_matches_at_most_one_item_per_frame(tmp_path):
+    stills = panned_stills(tmp_path, 2)
+    replies = [[
+        item(0, "furniture", 100, 200),
+        item(0, "furniture", 150, 250),
+        item(1, "furniture", 100 - SHIFT, 200 - SHIFT),
+    ]]
+    llm, _ = llm_for(tmp_path, replies)
+    dets = await detect_items(stills, llm, MODELS)
+    assert sorted(d.seen_in for d in dets) == [[0], [0, 1]]
+
+
 async def test_untruncated_sighting_is_preferred(tmp_path):
     stills = panned_stills(tmp_path, 2, blur={0: 9.0})
     replies = [[item(0, "electronics", 300, 400, truncated=True), item(1, "electronics", 300 - SHIFT, 400 - SHIFT)]]
@@ -169,6 +194,31 @@ async def test_sized_from_depth_when_available(tmp_path):
     assert det.dimensions_cm.h == pytest.approx(200 * 2.0 / focal * 100, rel=0.02)
     assert det.dimensions_cm.d is None
     assert det.dimensions_method == "depth_aruco"
+
+
+async def test_low_confidence_depth_is_flagged_on_the_item(tmp_path):
+    stills = panned_stills(tmp_path, 1)
+    replies = [[item(0, "lighting", 300, 400, 100, 300)]]
+    llm, _ = llm_for(tmp_path, replies)
+    depths = DepthSet({0: np.full((HEIGHT, WIDTH), 2.0)}, "depth_metric_prior", 0.3)
+    [det] = await detect_items(stills, llm, MODELS, depths=depths)
+    assert det.dimensions_cm.w is not None
+    assert any("low-confidence depth" in reason for reason in det.review)
+
+
+async def test_print_statement_without_artwork_in_view_is_reported(tmp_path):
+    stills = panned_stills(tmp_path, 1)
+    replies = [[item(0, "furniture", 300, 500)]]
+    said = [
+        Statement(subject="poster", kind=StatementKind.art_print, value="print", t_ms=0,
+                  still_seq_from=0, still_seq_to=0),
+        Statement(subject="sketch", kind=StatementKind.art_print, value="print", t_ms=0),
+    ]
+    llm, _ = llm_for(tmp_path, replies)
+    dets = await detect_items(stills, llm, MODELS, statements=said)
+    reasons = unmatched_statements(dets, said)
+    assert len(reasons) == 2
+    assert "poster" in reasons[0] and "sketch" in reasons[1]
 
 
 async def test_unsized_without_depth_gets_review(tmp_path):

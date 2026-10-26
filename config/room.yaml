@@ -20,6 +20,13 @@ close_cells: 3
 simplify_m: 0.15
 snap_tolerance_deg: 15.0
 wall_tolerance_m: 0.15
+corner_margin_m: 0.15
+min_wall_points: 3
+min_ray_reach_m: 0.15
+min_wall_support: 0.5
+max_unobserved_wall_fraction: 0.15
+max_unobserved_floor_fraction: 0.3
+unobserved_confidence_cap: 0.3
 min_edge_m: 0.3
 max_wall_fill_ratio: 0.5
 ceiling_percentile: 98.0
@@ -37,10 +44,24 @@ depth:
   max_m: 10.0
   camera_up: [0.0, -1.0, 0.0]
   min_right_spread: 0.1
+  min_image_up_alignment: 0.5
   max_tilt_deg: 15.0
+  scale:
+    interior_fraction: 0.8
+    min_markers: 2
+    factor_band: 0.25
+    high_dispersion: 0.05
+    zero_confidence_dispersion: 0.25
+  drift:
+    max_deg: 10.0
+    review_deg: 3.0
+    open_pan_factor: 0.8
   marker:
     scale_method: depth_aruco
     confidence: 0.7
+  single_marker:
+    scale_method: depth_aruco_single
+    confidence: 0.5
   prior:
     scale_method: depth_metric_prior
     confidence: 0.3

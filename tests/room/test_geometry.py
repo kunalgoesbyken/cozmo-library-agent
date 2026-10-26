@@ -199,6 +199,54 @@ def test_no_floor_plane_is_unmeasured():
     assert room.review
 
 
+WALL_FACES = {"x0": 1, "x4": 2, "z0": 3, "z3": 4}
+
+
+def without_walls(rng, *walls):
+    points, frames = shelf_room(rng)
+    dropped = {FRAME.format(WALL_FACES[w]) for w in walls}
+    keep = np.array([f not in dropped for f in frames])
+    return points[keep], [f for f, k in zip(frames, keep) if k]
+
+
+@pytest.mark.parametrize("wall", ["x4", "z3"])
+def test_one_unseen_wall_is_flagged_and_gives_no_wall_area(wall):
+    rng = np.random.default_rng(13)
+    points, frames = without_walls(rng, wall)
+    room = measure(transform(points, 25, (0.3, 0.0, 0.7)), frames, SHELVES)
+    assert room.wall_area_m2 is None
+    assert room.wall_area_net_m2 is None
+    assert room.floor_area_m2 == pytest.approx(12.0, abs=0.6)
+    assert room.confidence <= 0.3
+    assert sum("not observed" in reason for reason in room.review) >= 2
+    assert len(room.polygon_m) == 4
+
+
+@pytest.mark.parametrize("walls", [("x4", "z3"), ("x4", "x0")])
+def test_two_unseen_walls_leave_the_room_unmeasured(walls):
+    rng = np.random.default_rng(14)
+    points, frames = without_walls(rng, *walls)
+    room = measure(points, frames, SHELVES)
+    assert room.floor_area_m2 is None and room.wall_area_m2 is None
+    assert room.confidence == 0.0
+    assert any("not observed" in reason for reason in room.review)
+
+
+def test_fully_observed_walls_have_no_unobserved_review():
+    rng = np.random.default_rng(15)
+    points, frames = shelf_room(rng)
+    room = measure(points, frames, SHELVES)
+    assert not any("not observed" in reason for reason in room.review)
+
+
+def test_ceiling_is_the_plane_with_most_inliers():
+    rng = np.random.default_rng(16)
+    points, frames = shelf_room(rng)
+    patch = face(rng, 1, 3.4, {0: (1.0, 3.0), 2: (0.5, 2.5)})
+    room = measure(np.vstack([points, patch]), frames + [FRAME.format(98)] * len(patch), SHELVES)
+    assert room.height_m == pytest.approx(HEIGHT, abs=0.05)
+
+
 def test_shelving_taller_than_the_walls_leaves_no_wall_band():
     rng = np.random.default_rng(11)
     points, frames = shelf_room(rng)

@@ -10,13 +10,11 @@ from libclaim.live.tools import Statement, StatementKind
 from libclaim.llm import Llm, default_llm
 from libclaim.models import Still
 from libclaim.packet.models import Dimensions
-from libclaim.room.depth import DepthSet, camera
+from libclaim.room.depth import CM_PER_M, DepthSet, camera
 from libclaim.settings import CONFIG_DIR, load_settings
 from libclaim.vision.boxes import Box, VisionConfig, iou, load_vision_config, read_image
 from libclaim.vision.spines import encode_tile, to_px
 from libclaim.vision.tracks import pair_homography, project
-
-CM_PER_M = 100.0
 
 
 def load_categories() -> list[str]:
@@ -106,6 +104,7 @@ def dedupe(sightings: list[Sighting], stills: list[Still], cfg: VisionConfig) ->
             index = parent[index]
         return index
 
+    candidates = []
     for b, later in enumerate(sightings):
         for a, earlier in enumerate(sightings):
             if earlier.item.category != later.item.category:
@@ -113,8 +112,23 @@ def dedupe(sightings: list[Sighting], stills: list[Still], cfg: VisionConfig) ->
             if not 0 < later.frame - earlier.frame <= cfg.items.dedup_lookback:
                 continue
             matrix = step(earlier.frame, later.frame)
-            if matrix is not None and iou(project(later.box, matrix), earlier.box) >= cfg.items.dedup_iou:
-                parent[root(b)] = root(a)
+            if matrix is None:
+                continue
+            overlap = iou(project(later.box, matrix), earlier.box)
+            if overlap >= cfg.items.dedup_iou:
+                candidates.append((overlap, a, b))
+    frames_of = {index: {sighting.frame} for index, sighting in enumerate(sightings)}
+    matched: set[tuple[int, int]] = set()
+    for _, a, b in sorted(candidates, reverse=True):
+        frame_a, frame_b = sightings[a].frame, sightings[b].frame
+        if (a, frame_b) in matched or (b, frame_a) in matched:
+            continue
+        root_a, root_b = root(a), root(b)
+        if frames_of[root_a] & frames_of[root_b]:
+            continue
+        parent[root_b] = root_a
+        frames_of[root_a] |= frames_of.pop(root_b)
+        matched |= {(a, frame_b), (b, frame_a)}
     groups: dict[int, list[Sighting]] = {}
     for index, sighting in enumerate(sightings):
         groups.setdefault(root(index), []).append(sighting)
@@ -139,7 +153,10 @@ def size(box: Box, still: Still, depths: DepthSet | None, cfg: VisionConfig) -> 
         w=round(box.width * sx * distance / k[0, 0] * CM_PER_M, 1),
         h=round(box.height * sy * distance / k[1, 1] * CM_PER_M, 1),
     )
-    return dims, depths.scale_method, []
+    review = []
+    if depths.confidence < cfg.items.min_depth_confidence:
+        review.append(f"item size uses low-confidence depth ({depths.scale_method}, {depths.confidence:.2f})")
+    return dims, depths.scale_method, review
 
 
 def to_det(group: list[Sighting], stills: list[Still], depths: DepthSet | None, cfg: VisionConfig) -> ItemDet:
@@ -168,6 +185,8 @@ def to_det(group: list[Sighting], stills: list[Still], depths: DepthSet | None, 
 
 
 def art_in_view(dets: list[ItemDet], statement: Statement) -> list[int]:
+    if statement.still_seq_from is None or statement.still_seq_to is None:
+        return []
     return [
         index
         for index, det in enumerate(dets)
@@ -179,8 +198,6 @@ def apply_statements(dets: list[ItemDet], statements: list[Statement]) -> list[I
     prints: set[int] = set()
     originals: set[int] = set()
     for statement in statements:
-        if statement.still_seq_from is None or statement.still_seq_to is None:
-            continue
         in_view = art_in_view(dets, statement)
         if statement.kind == StatementKind.original_art:
             originals.update(in_view)
@@ -192,6 +209,14 @@ def apply_statements(dets: list[ItemDet], statements: list[Statement]) -> list[I
     for index in prints - originals:
         dets[index].needs_appraisal = False
     return dets
+
+
+def unmatched_statements(dets: list[ItemDet], statements: list[Statement]) -> list[str]:
+    return [
+        f"user said '{statement.subject}' is a print but no detected artwork was in view"
+        for statement in statements
+        if statement.kind == StatementKind.art_print and not art_in_view(dets, statement)
+    ]
 
 
 async def detect_items(room_keyframes: list[Still], llm: Llm | None = None, models: list[str] | None = None,

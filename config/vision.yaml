@@ -92,3 +92,4 @@ items:
   dedup_iou: 0.3
   dedup_lookback: 2
   depth_core: 0.5
+  min_depth_confidence: 0.5

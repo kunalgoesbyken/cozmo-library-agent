@@ -109,6 +109,7 @@ class ItemConfig(BaseModel):
     dedup_iou: float
     dedup_lookback: int
     depth_core: float
+    min_depth_confidence: float
 
 
 class VisionConfig(BaseModel):

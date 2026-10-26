@@ -8,7 +8,15 @@ import numpy as np
 
 from libclaim.models import Still
 from libclaim.packet.models import Opening
-from libclaim.room.geometry import RoomGeometry, ShelfUnit, fallback_room, load_room_config, room_from_points
+from libclaim.room.geometry import (
+    NO_FLOOR,
+    RoomGeometry,
+    ShelfUnit,
+    fallback_room,
+    load_room_config,
+    room_from_points,
+    unmeasured,
+)
 from libclaim.settings import load_settings
 from libclaim.vision import masks
 from libclaim.vision.boxes import load_vision_config, read_image
@@ -17,6 +25,8 @@ from libclaim.vision.tracks import pair_homography
 
 CM_PER_M = 100.0
 QUAD = 4
+PLANE_POINTS = 3
+MIN_PAN_FRAMES = 2
 
 
 class DepthUnavailable(RuntimeError):
@@ -65,22 +75,41 @@ def backproject(pixels: np.ndarray, values: np.ndarray, k: np.ndarray) -> np.nda
     return rays * values[:, None]
 
 
-def marker_factor(still: Still, depth: np.ndarray, size_m: float) -> float | None:
-    cfg = load_vision_config().scale
-    corners, ids, _ = aruco_detector(cfg).detectMarkers(read_image(still.path, cv2.IMREAD_GRAYSCALE))
-    if ids is None:
+def marker_edges(quad: np.ndarray, depth: np.ndarray, k: np.ndarray) -> np.ndarray | None:
+    centre = quad.mean(axis=0)
+    core = centre + (quad - centre) * load_room_config().depth.scale.interior_fraction
+    mask = np.zeros(depth.shape, np.uint8)
+    cv2.fillConvexPoly(mask, np.rint(core).astype(np.int32), 1)
+    rows, cols = np.nonzero(mask)
+    values = depth[rows, cols]
+    ok = np.isfinite(values) & (values > 0)
+    if np.count_nonzero(ok) < PLANE_POINTS:
         return None
+    interior = backproject(np.column_stack([cols[ok], rows[ok]]).astype(float), values[ok], k)
+    middle = np.median(interior, axis=0)
+    normal = np.linalg.svd(interior - middle, full_matrices=False)[2][-1]
+    rays = backproject(quad, np.ones(QUAD), k)
+    corners = rays * ((normal @ middle) / (rays @ normal))[:, None]
+    return np.linalg.norm(corners - np.roll(corners, 1, axis=0), axis=1)
+
+
+def marker_factors(still: Still, depth: np.ndarray, size_m: float) -> list[float]:
+    cfg = load_vision_config().scale
+    gray = read_image(still.path, cv2.IMREAD_GRAYSCALE)
+    corners, ids, _ = aruco_detector(cfg).detectMarkers(gray)
+    if ids is None:
+        return []
     k = camera(still, depth.shape)
-    height, width = depth.shape
-    edges = []
+    to_depth = np.array([depth.shape[1] / gray.shape[1], depth.shape[0] / gray.shape[0]])
+    factors = []
     for quad in corners:
         quad = quad.reshape(QUAD, 2)
         if np.mean(np.linalg.norm(quad - np.roll(quad, 1, axis=0), axis=1)) < cfg.min_marker_px:
             continue
-        cells = np.clip(np.rint(quad).astype(int), 0, [width - 1, height - 1])
-        points = backproject(quad, depth[cells[:, 1], cells[:, 0]], k)
-        edges += np.linalg.norm(points - np.roll(points, 1, axis=0), axis=1).tolist()
-    return size_m / median(edges) if edges else None
+        edges = marker_edges(quad * to_depth, depth, k)
+        if edges is not None:
+            factors.append(size_m / float(np.median(edges)))
+    return factors
 
 
 def scaled_depths(stills: list[Still], depth_fn: Callable[[Still], np.ndarray] = metric_depth,
@@ -91,18 +120,36 @@ def scaled_depths(stills: list[Still], depth_fn: Callable[[Still], np.ndarray] =
     except DepthUnavailable as error:
         return DepthSet({}, "", 0.0, [str(error)])
     size_cm = marker_size_cm if marker_size_cm is not None else load_settings().aruco_marker_size_cm
-    factors: dict[int, float] = {}
+    observed: dict[int, list[float]] = {}
     if size_cm is not None:
         for still in stills:
-            factor = marker_factor(still, raw[still.seq], size_cm / CM_PER_M)
-            if factor is not None:
-                factors[still.seq] = factor
-    if not factors:
+            found = marker_factors(still, raw[still.seq], size_cm / CM_PER_M)
+            if found:
+                observed[still.seq] = found
+    if not observed:
         why = "ARUCO_MARKER_SIZE_CM is not set" if size_cm is None else "no ArUco marker in the room frames"
         return DepthSet(raw, cfg.prior.scale_method, cfg.prior.confidence, [f"{why}: depth scale is the model's own"])
-    default = median(factors.values())
-    maps = {seq: depth * factors.get(seq, default) for seq, depth in raw.items()}
-    return DepthSet(maps, cfg.marker.scale_method, cfg.marker.confidence)
+    review = []
+    per_frame = {seq: median(found) for seq, found in observed.items()}
+    centre = median(per_frame.values())
+    kept = {seq: f for seq, f in per_frame.items() if abs(f / centre - 1) <= cfg.scale.factor_band}
+    if len(kept) < len(per_frame):
+        review.append(
+            f"{len(per_frame) - len(kept)} marker scale factors more than {cfg.scale.factor_band:.0%} "
+            "from the median were rejected"
+        )
+    centre = median(kept.values())
+    markers = sum(len(observed[seq]) for seq in kept)
+    tier = cfg.marker if markers >= cfg.scale.min_markers else cfg.single_marker
+    dispersion = median(abs(factor / centre - 1) for factor in kept.values())
+    if dispersion > cfg.scale.high_dispersion:
+        review.append(f"marker scale varies by {dispersion:.0%} between room frames")
+    unscaled = len(raw) - len(kept)
+    if unscaled:
+        review.append(f"{unscaled} of {len(raw)} room frames had no usable marker; scaled by the median marker factor")
+    confidence = tier.confidence * max(0.0, 1 - dispersion / cfg.scale.zero_confidence_dispersion)
+    maps = {seq: depth * kept.get(seq, centre) for seq, depth in raw.items()}
+    return DepthSet(maps, tier.scale_method, confidence, review)
 
 
 def rotation_from_homography(matrix: np.ndarray, k_from: np.ndarray, k_to: np.ndarray) -> np.ndarray:
@@ -132,13 +179,47 @@ def pan_rotations(stills: list[Still], cameras: list[np.ndarray]) -> list[np.nda
     return [rotation if group == largest else None for group, rotation in placed]
 
 
+def loop_drift(stills: list[Still], cameras: list[np.ndarray], rotations: list[np.ndarray | None]) -> float | None:
+    cfg = load_vision_config().tracks
+    registered = [index for index, rotation in enumerate(rotations) if rotation is not None]
+    if not registered:
+        return None
+    last = registered[-1]
+    for first in registered[: cfg.anchor_lookback]:
+        if last - first <= cfg.anchor_lookback:
+            continue
+        step = pair_homography(read_image(stills[first].path, cv2.IMREAD_GRAYSCALE),
+                               read_image(stills[last].path, cv2.IMREAD_GRAYSCALE), cfg)
+        if step is not None:
+            direct = rotation_from_homography(step, cameras[last], cameras[first])
+            residual = direct.T @ rotations[first].T @ rotations[last]
+            return float(np.degrees(np.arccos(np.clip((np.trace(residual) - 1) / 2, -1.0, 1.0))))
+    return None
+
+
+def drift_factor(drift: float | None, review: list[str]) -> float:
+    cfg = load_room_config().depth.drift
+    if drift is None:
+        review.append("the room pan did not close a loop; registration drift unknown")
+        return cfg.open_pan_factor
+    if drift > cfg.review_deg:
+        review.append(f"room pan drifted {drift:.1f} degrees around the loop")
+    return max(0.0, 1 - drift / cfg.max_deg)
+
+
 def pan_up(rotations: list[np.ndarray]) -> np.ndarray:
     cfg = load_room_config().depth
     hint = np.mean([r @ cfg.camera_up for r in rotations], axis=0)
+    if len(rotations) < MIN_PAN_FRAMES:
+        return hint / np.linalg.norm(hint)
     _, spread, vt = np.linalg.svd(np.array([r[:, 0] for r in rotations]))
-    if len(spread) < 2 or spread[1] < cfg.min_right_spread * spread[0]:
+    if spread[1] < cfg.min_right_spread * spread[0]:
         return hint / np.linalg.norm(hint)
     return vt[-1] if vt[-1] @ hint >= 0 else -vt[-1]
+
+
+def upright(rotations: list[np.ndarray], up: np.ndarray) -> float:
+    return float(np.mean([(r @ load_room_config().depth.camera_up) @ up for r in rotations]))
 
 
 def frame_points(depth: np.ndarray, k: np.ndarray) -> np.ndarray:
@@ -168,16 +249,26 @@ def room_from_depth(stills: list[Still], shelves: list[ShelfUnit], depths: Depth
     if dropped:
         review.append(f"{dropped} room frames could not be registered to the pan")
     registered = [rotation for rotation in rotations if rotation is not None]
+    cfg = load_room_config().depth
+    up = pan_up(registered) if registered else None
+    if up is not None and upright(registered, up) < cfg.min_image_up_alignment:
+        review.append("room frames are not upright (image up is far from vertical): camera orientation mismatch, "
+                      "check the phone orientation lock; room size unknown")
+        return unmeasured(shelves, depths.scale_method, 0.0, review)
+    confidence = depths.confidence * drift_factor(loop_drift(frames, cameras, rotations), review)
     room = room_from_points(
         np.vstack(clouds) if clouds else np.empty((0, 3)),
         refs,
         shelves,
         scale_method=depths.scale_method,
-        scale_confidence=depths.confidence,
+        scale_confidence=confidence,
         origins=np.zeros(3),
         openings=openings,
-        up=pan_up(registered) if registered else None,
-        max_tilt_deg=load_room_config().depth.max_tilt_deg,
+        up=up,
+        max_tilt_deg=cfg.max_tilt_deg,
     )
+    if NO_FLOOR in room.review:
+        review.append(f"no floor within {cfg.max_tilt_deg:.0f} degrees of the camera up direction: "
+                      "possible camera orientation mismatch")
     room.review = review + room.review
     return room

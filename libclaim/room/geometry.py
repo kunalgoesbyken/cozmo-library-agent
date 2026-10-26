@@ -11,6 +11,8 @@ from libclaim.packet.models import Opening, Room
 from libclaim.settings import CONFIG_DIR
 
 PLANE_SAMPLE = 3
+MIN_WALLS = 3
+NO_FLOOR = "no floor plane found in the room points"
 SYMMETRY = 4
 
 
@@ -31,6 +33,20 @@ class ScaleSource(BaseModel):
     confidence: float
 
 
+class MarkerScaleConfig(BaseModel):
+    interior_fraction: float
+    min_markers: int
+    factor_band: float
+    high_dispersion: float
+    zero_confidence_dispersion: float
+
+
+class DriftConfig(BaseModel):
+    max_deg: float
+    review_deg: float
+    open_pan_factor: float
+
+
 class DepthConfig(BaseModel):
     model_id: str
     stride: int
@@ -38,8 +54,12 @@ class DepthConfig(BaseModel):
     max_m: float
     camera_up: list[float]
     min_right_spread: float
+    min_image_up_alignment: float
     max_tilt_deg: float
+    scale: MarkerScaleConfig
+    drift: DriftConfig
     marker: ScaleSource
+    single_marker: ScaleSource
     prior: ScaleSource
 
 
@@ -57,6 +77,13 @@ class RoomConfig(BaseModel):
     simplify_m: float
     snap_tolerance_deg: float
     wall_tolerance_m: float
+    corner_margin_m: float
+    min_wall_points: int
+    min_ray_reach_m: float
+    min_wall_support: float
+    max_unobserved_wall_fraction: float
+    max_unobserved_floor_fraction: float
+    unobserved_confidence_cap: float
     min_edge_m: float
     max_wall_fill_ratio: float
     ceiling_percentile: float
@@ -131,8 +158,9 @@ def shelved_area(shelves: list[ShelfUnit]) -> float | None:
 
 def unmeasured(shelves: list[ShelfUnit], method: str, confidence: float, review: list[str],
                height_m: float | None = None) -> RoomGeometry:
+    decimals = load_room_config().decimals
     return RoomGeometry(
-        height_m=height_m,
+        height_m=None if height_m is None else round(height_m, decimals),
         shelved_wall_area_m2=shelved_area(shelves),
         scale_method=method,
         confidence=confidence,
@@ -204,7 +232,7 @@ def ceiling_height(planes: list[Plane], floor: Plane, points: np.ndarray, height
             continue
         inliers = np.abs(plane.distance(points)) < cfg.ransac.inlier_m
         height = float(np.median(heights[inliers]))
-        if height >= lowest and (best is None or height > best):
+        if height >= lowest and np.count_nonzero(inliers) > np.count_nonzero(mask):
             best, mask = height, inliers
     return best, mask
 
@@ -222,21 +250,26 @@ def occupancy(q: np.ndarray, cfg: RoomConfig) -> Grid:
     return Grid(image, low * cfg.grid_m, cfg.grid_m)
 
 
-def outer_polygon(q: np.ndarray, cfg: RoomConfig) -> np.ndarray:
+def enclosed(outline: np.ndarray, cells: np.ndarray, cfg: RoomConfig) -> bool:
+    filled = np.zeros_like(cells)
+    cv2.drawContours(filled, [outline], -1, 1, cv2.FILLED)
+    inside = np.count_nonzero(filled)
+    return bool(inside) and np.count_nonzero(cells & filled) / inside <= cfg.max_wall_fill_ratio
+
+
+def outer_polygon(q: np.ndarray, cfg: RoomConfig) -> tuple[np.ndarray, bool]:
     grid = occupancy(q, cfg)
     kernel = np.ones((cfg.close_cells, cfg.close_cells), np.uint8)
     closed = cv2.morphologyEx(grid.cells, cv2.MORPH_CLOSE, kernel)
     contours, _ = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    if not contours:
-        raise RoomUnmeasurable("no wall points above the shelving")
     contour = max(contours, key=cv2.contourArea)
-    filled = np.zeros_like(closed)
-    cv2.drawContours(filled, [contour], -1, 1, cv2.FILLED)
-    inside = np.count_nonzero(filled)
-    if not inside or np.count_nonzero(closed & filled) / inside > cfg.max_wall_fill_ratio:
-        raise RoomUnmeasurable("wall points do not enclose the room; pan along every wall-ceiling line")
+    is_closed = enclosed(contour, closed, cfg)
+    if not is_closed:
+        contour = cv2.convexHull(np.vstack(contours))
+        if not enclosed(contour, closed, cfg):
+            raise RoomUnmeasurable("wall points do not enclose the room; pan along every wall-ceiling line")
     approx = cv2.approxPolyDP(contour, cfg.simplify_m / cfg.grid_m, True).reshape(-1, 2)
-    return grid.to_metric(approx)
+    return grid.to_metric(approx), is_closed
 
 
 def manhattan_angle(polygon: np.ndarray) -> float:
@@ -280,8 +313,8 @@ def polygon_lines(polygon: np.ndarray, cfg: RoomConfig) -> list[Line]:
             merged.append(line)
     if len(merged) > 1 and parallel(merged[0], merged[-1], tolerance):
         merged[0] = combine(merged.pop(), merged[0])
-    if len(merged) < PLANE_SAMPLE:
-        raise RoomUnmeasurable("wall outline has fewer than 3 walls")
+    if len(merged) < MIN_WALLS:
+        raise RoomUnmeasurable(f"wall outline has fewer than {MIN_WALLS} walls")
     return merged
 
 
@@ -295,19 +328,22 @@ def vertices(lines: list[Line]) -> np.ndarray:
         raise RoomUnmeasurable("adjacent walls are parallel; outline is ambiguous") from error
 
 
-def wall_mask(line: Line, start: np.ndarray, end: np.ndarray, q: np.ndarray, tolerance: float) -> np.ndarray:
+def wall_mask(line: Line, start: np.ndarray, end: np.ndarray, q: np.ndarray, cfg: RoomConfig) -> np.ndarray:
     length = np.linalg.norm(end - start)
     if length == 0:
         return np.zeros(len(q), dtype=bool)
     along = (q - start) @ ((end - start) / length)
-    near = np.abs(q @ line.normal - line.offset) <= tolerance
-    return near & (along >= tolerance) & (along <= length - tolerance)
+    near = np.abs(q @ line.normal - line.offset) <= cfg.wall_tolerance_m
+    return near & (along >= cfg.corner_margin_m) & (along <= length - cfg.corner_margin_m)
+
+
+def edges(lines: list[Line], corners: np.ndarray):
+    return ((line, corners[i], corners[(i + 1) % len(lines)]) for i, line in enumerate(lines))
 
 
 def refine(lines: list[Line], q: np.ndarray, cfg: RoomConfig) -> np.ndarray:
-    corners = vertices(lines)
-    for i, line in enumerate(lines):
-        near = wall_mask(line, corners[i], corners[(i + 1) % len(lines)], q, cfg.wall_tolerance_m)
+    for line, start, end in edges(lines, vertices(lines)):
+        near = wall_mask(line, start, end, q, cfg)
         if near.any():
             line.offset += float(np.median(q[near] @ line.normal - line.offset))
     return vertices(lines)
@@ -315,9 +351,9 @@ def refine(lines: list[Line], q: np.ndarray, cfg: RoomConfig) -> np.ndarray:
 
 def wall_angle(lines: list[Line], corners: np.ndarray, q: np.ndarray, cfg: RoomConfig) -> float:
     angles, weights = [], []
-    for i, line in enumerate(lines):
-        near = wall_mask(line, corners[i], corners[(i + 1) % len(lines)], q, cfg.wall_tolerance_m)
-        if line.snapped and np.count_nonzero(near) >= PLANE_SAMPLE:
+    for line, start, end in edges(lines, corners):
+        near = wall_mask(line, start, end, q, cfg)
+        if line.snapped and np.count_nonzero(near) >= cfg.min_wall_points:
             wall = q[near] - q[near].mean(axis=0)
             direction = np.linalg.svd(wall, full_matrices=False)[2][0]
             angles.append(math.atan2(direction[1], direction[0]))
@@ -327,11 +363,19 @@ def wall_angle(lines: list[Line], corners: np.ndarray, q: np.ndarray, cfg: RoomC
     return float(np.angle(np.sum(np.array(weights) * np.exp(SYMMETRY * 1j * np.array(angles)))) / SYMMETRY)
 
 
-def aligned_outline(points_2d: np.ndarray, band: np.ndarray, angle: float,
-                    cfg: RoomConfig) -> tuple[np.ndarray, list[Line], np.ndarray]:
+@dataclass
+class Outline:
+    flat: np.ndarray
+    lines: list[Line]
+    corners: np.ndarray
+    closed: bool
+
+
+def aligned_outline(points_2d: np.ndarray, band: np.ndarray, angle: float, cfg: RoomConfig) -> Outline:
     flat = points_2d @ rotation_2d(-angle).T
-    lines = polygon_lines(outer_polygon(flat[band], cfg), cfg)
-    return flat, lines, refine(lines, flat[band], cfg)
+    polygon, closed = outer_polygon(flat[band], cfg)
+    lines = polygon_lines(polygon, cfg)
+    return Outline(flat, lines, refine(lines, flat[band], cfg), closed)
 
 
 def shoelace(polygon: np.ndarray) -> float:
@@ -343,38 +387,37 @@ def perimeter(polygon: np.ndarray) -> float:
     return float(np.linalg.norm(np.roll(polygon, -1, axis=0) - polygon, axis=1).sum())
 
 
-def coverage(polygon: np.ndarray, q: np.ndarray, cfg: RoomConfig) -> float:
+def edge_support(polygon: np.ndarray, q: np.ndarray, cfg: RoomConfig) -> np.ndarray:
     grid = occupancy(q, cfg)
     reach = 2 * math.ceil(cfg.wall_tolerance_m / cfg.grid_m) + 1
     near = cv2.dilate(grid.cells, np.ones((reach, reach), np.uint8))
-    samples = []
+    rows, cols = near.shape
+    support = []
     for start, end in zip(polygon, np.roll(polygon, -1, axis=0)):
         count = max(int(np.linalg.norm(end - start) / cfg.grid_m), 1)
-        samples.append(start + np.outer((np.arange(count) + 0.5) / count, end - start))
-    cells = grid.index(np.vstack(samples))
-    rows, cols = near.shape
-    inside = (cells[:, 0] >= 0) & (cells[:, 0] < cols) & (cells[:, 1] >= 0) & (cells[:, 1] < rows)
-    hits = np.zeros(len(cells), dtype=bool)
-    hits[inside] = near[cells[inside, 1], cells[inside, 0]] > 0
-    return float(hits.mean())
+        cells = grid.index(start + np.outer((np.arange(count) + 0.5) / count, end - start))
+        inside = (cells[:, 0] >= 0) & (cells[:, 0] < cols) & (cells[:, 1] >= 0) & (cells[:, 1] < rows)
+        hits = np.zeros(len(cells), dtype=bool)
+        hits[inside] = near[cells[inside, 1], cells[inside, 0]] > 0
+        support.append(hits.mean())
+    return np.array(support)
 
 
 def ray_plane_height(lines: list[Line], corners: np.ndarray, flat: np.ndarray, heights: np.ndarray,
                      origin_flat: np.ndarray | None, origin_heights: np.ndarray | None, start: float,
                      cfg: RoomConfig) -> float | None:
     per_wall = []
-    for i, line in enumerate(lines):
-        mask = wall_mask(line, corners[i], corners[(i + 1) % len(lines)], flat, cfg.wall_tolerance_m)
-        mask &= heights >= start
+    for line, first, last in edges(lines, corners):
+        mask = wall_mask(line, first, last, flat, cfg) & (heights >= start)
         if origin_flat is None:
             hits = heights[mask]
         else:
             reach = (flat[mask] - origin_flat[mask]) @ line.normal
-            ok = np.abs(reach) >= cfg.wall_tolerance_m
+            ok = np.abs(reach) >= cfg.min_ray_reach_m
             t = (line.offset - origin_flat[mask][ok] @ line.normal) / reach[ok]
             base = origin_heights[mask][ok]
             hits = base + t * (heights[mask][ok] - base)
-        if len(hits) >= cfg.min_cell_points:
+        if len(hits) >= cfg.min_wall_points:
             per_wall.append(float(np.percentile(hits, cfg.ceiling_percentile)))
     return float(np.median(per_wall)) if per_wall else None
 
@@ -395,7 +438,7 @@ def room_from_points(points, frames, shelves: list[ShelfUnit], *, scale_method: 
     planes = horizontal_planes(pts, unit(cfg.up_axis if up is None else up), tilt, cfg.ransac)
     floor = pick_floor(planes, pts)
     if floor is None:
-        return unmeasured(shelves, scale_method, 0.0, ["no floor plane found in the room points"])
+        return unmeasured(shelves, scale_method, 0.0, [NO_FLOOR])
     up_axis = floor.normal
     heights = pts @ up_axis - floor.offset
     shelf_top = max((s.height_m for s in shelves), default=0.0)
@@ -410,12 +453,31 @@ def room_from_points(points, frames, shelves: list[ShelfUnit], *, scale_method: 
     basis = np.array([side, np.cross(up_axis, side)])
     plan = pts @ basis.T
     try:
-        angle = manhattan_angle(outer_polygon(plan[band], cfg))
-        flat, lines, corners = aligned_outline(plan, band, angle, cfg)
-        angle += wall_angle(lines, corners, flat[band], cfg)
-        flat, lines, corners = aligned_outline(plan, band, angle, cfg)
+        rough, _ = outer_polygon(plan[band], cfg)
+        angle = manhattan_angle(rough)
+        outline = aligned_outline(plan, band, angle, cfg)
+        angle += wall_angle(outline.lines, outline.corners, outline.flat[band], cfg)
+        outline = aligned_outline(plan, band, angle, cfg)
     except RoomUnmeasurable as error:
         return unmeasured(shelves, scale_method, 0.0, [str(error)], ceiling)
+    flat, lines, corners = outline.flat, outline.lines, outline.corners
+    support = edge_support(corners, flat[band], cfg)
+    lengths = np.linalg.norm(np.roll(corners, -1, axis=0) - corners, axis=1)
+    unobserved = float(lengths @ (1 - support) / lengths.sum())
+    if not outline.closed:
+        review.append("wall outline was open; it was closed across the side with no wall points")
+    for number, value in enumerate(support, start=1):
+        if value < cfg.min_wall_support:
+            review.append(f"wall {number} not observed: {value:.0%} of its length has wall points")
+    confidence = scale_confidence * (1 - unobserved)
+    if not outline.closed or (support < cfg.min_wall_support).any():
+        confidence = min(confidence, cfg.unobserved_confidence_cap)
+    if unobserved > cfg.max_unobserved_floor_fraction:
+        review.append(f"{unobserved:.0%} of the room outline was not observed; floor and wall areas unknown")
+        return unmeasured(shelves, scale_method, 0.0, review, ceiling)
+    walls_known = unobserved <= cfg.max_unobserved_wall_fraction
+    if not walls_known:
+        review.append(f"{unobserved:.0%} of the wall perimeter was not observed; wall area unknown")
     if ceiling is None:
         origin_flat = None if origin_pts is None else origin_pts @ basis.T @ rotation_2d(-angle).T
         origin_heights = None if origin_pts is None else origin_pts @ up_axis - floor.offset
@@ -425,7 +487,7 @@ def room_from_points(points, frames, shelves: list[ShelfUnit], *, scale_method: 
         review.append("ceiling height could not be measured")
     snapped = all(line.snapped for line in lines)
     shape = cfg.shapes.get(len(lines), cfg.other_shape) if snapped else cfg.other_shape
-    gross = None if ceiling is None else perimeter(corners) * ceiling
+    gross = perimeter(corners) * ceiling if ceiling is not None and walls_known else None
     net = None
     if openings is None:
         review.append("doors and windows not measured; net wall area unknown")
@@ -450,6 +512,6 @@ def room_from_points(points, frames, shelves: list[ShelfUnit], *, scale_method: 
         polygon_m=[[rounded(x), rounded(y)] for x, y in corners - corners.min(axis=0)],
         frame_refs=sorted(set(refs[used].tolist())),
         scale_method=scale_method,
-        confidence=rounded(scale_confidence * coverage(corners, flat[band], cfg)),
+        confidence=rounded(confidence),
         review=review,
     )
