@@ -491,3 +491,42 @@ async def test_kickoff_failure_is_retried_on_next_connection(tmp_path):
     finally:
         FakeSession.send_text = original
     assert factory.sessions[1].text == ["Begin the sweep now."]
+
+
+async def test_rate_limited_sends_are_buffered_or_dropped_and_never_propagate(tmp_path):
+    gate = asyncio.Event()
+    factory = FakeFactory([gate, GoAway()], [])
+    harness = Harness(tmp_path, factory)
+    harness.start()
+    await harness.until(lambda: harness.bridge.session)
+    first = factory.sessions[0]
+
+    async def limited(data):
+        raise RateLimited()
+
+    first.send_audio = limited
+    first.send_video = limited
+    await harness.bridge.send_audio(b"a")
+    await harness.bridge.send_frame(b"f")
+    gate.set()
+    await harness.until(lambda: len(factory.sessions) == 2 and factory.sessions[1].audio)
+    await harness.stop()
+    assert factory.sessions[1].audio == [b"a"]
+    assert factory.sessions[1].video == []
+
+
+async def test_oserror_from_a_callback_is_surfaced_not_retried(tmp_path):
+    factory = FakeFactory([Audio(b"x")], [Audio(b"y")])
+    harness = Harness(tmp_path, factory)
+
+    async def broken(data):
+        raise ConnectionResetError("sink")
+
+    harness.bridge.on_audio = broken
+    harness.start()
+    with pytest.raises(ConnectionResetError):
+        await harness.task
+    assert harness.sleeps == []
+    assert len(factory.sessions) == 1
+    assert isinstance(harness.bridge.failure, ConnectionResetError)
+    await harness.bridge.close()

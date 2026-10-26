@@ -41,6 +41,10 @@ def load_live_config(path=LIVE_CONFIG_PATH) -> LiveConfig:
     return LiveConfig.model_validate(yaml.safe_load(path.read_text(encoding="utf-8")))
 
 
+class CallbackFailed(Exception):
+    pass
+
+
 class LiveBridge:
     def __init__(
         self,
@@ -90,6 +94,9 @@ class LiveBridge:
         except asyncio.CancelledError:
             if not self.closed:
                 raise
+        except CallbackFailed as error:
+            self.failure = error.__cause__
+            raise error.__cause__
         except Exception as error:
             self.failure = error
             raise
@@ -113,7 +120,10 @@ class LiveBridge:
                         if self.clock() - started >= self.config.min_healthy_seconds:
                             return
                         raise events.SessionClosed()
-                    await self.handle_event(session, event)
+                    try:
+                        await self.handle_event(session, event)
+                    except OSError as error:
+                        raise CallbackFailed() from error
                 raise events.SessionClosed()
         except (events.RateLimited, events.SessionClosed, OSError):
             self.session = None
@@ -191,7 +201,7 @@ class LiveBridge:
             return
         try:
             await session.send_audio(data)
-        except events.SessionClosed:
+        except (events.RateLimited, events.SessionClosed):
             self.buffer_audio(data)
 
     async def send_frame(self, data: bytes) -> None:
@@ -203,7 +213,7 @@ class LiveBridge:
             return
         try:
             await session.send_video(data)
-        except events.SessionClosed:
+        except (events.RateLimited, events.SessionClosed):
             return
         self.last_frame_at = now
 
