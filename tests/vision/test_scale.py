@@ -9,6 +9,7 @@ from libclaim.settings import Settings
 from libclaim.vision import masks
 from libclaim.vision.boxes import Box, load_vision_config
 from libclaim.vision.scale import (
+    NO_MARKER,
     ScaleMethod,
     SpineDims,
     cross_check,
@@ -180,7 +181,8 @@ def test_no_marker_falls_back_to_format_prior_with_review(tmp_path, cfg):
         dims = measure(track(0, [(0, boxes[0])], frames), frames, cfg, given)
         assert dims.scale_method == ScaleMethod.book_format_prior
         assert dims.confidence <= 0.4
-        assert dims.review
+        assert dims.fallback_reason == NO_MARKER
+        assert dims.review == []
     box = boxes[0]
     aspect = box.height / box.width
     nearest = min(cfg.formats.values(), key=lambda f: abs(math.log(aspect * f.thickness_cm / f.height_cm)))
@@ -194,7 +196,8 @@ def test_unset_marker_size_falls_back_to_prior(tmp_path):
     frames = [still(tmp_path, img)]
     dims = measure(track(0, [(0, boxes[0])], frames), frames, cfg, unit_scale(0, frames, cfg))
     assert dims.scale_method == ScaleMethod.book_format_prior
-    assert dims.review
+    assert dims.fallback_reason == NO_MARKER
+    assert "ARUCO" not in dims.fallback_reason
 
 
 def test_perspective_warp_measures_within_five_percent(tmp_path, cfg):
@@ -374,3 +377,55 @@ def test_open_library_cross_check_flags_large_differences():
     assert cross_check(dims_of(20.0, 3.0), "20 × 13 × 3 CM") == []
     assert cross_check(dims_of(20.0, 3.0), "") == []
     assert cross_check(dims_of(20.0, 3.0), "about a hand tall") == []
+
+
+def bleeding(factor_height, factor_width):
+    def fake(path, boxes):
+        return [
+            Box(x1=b.x1 + b.width * (1 - factor_width) / 2, x2=b.x2 - b.width * (1 - factor_width) / 2,
+                y1=b.y1, y2=b.y1 + b.height * factor_height)
+            for b in boxes
+        ]
+
+    return fake
+
+
+def marker_scene(tmp_path):
+    img, boxes = scene(60, 32, PX_PER_CM, [(30, 4, 3, 20)], marker=(0, 4, 8))
+    return [still(tmp_path, img)], boxes
+
+
+def test_mask_bleeding_over_other_objects_does_not_change_the_height(tmp_path, cfg, monkeypatch):
+    frames, boxes = marker_scene(tmp_path)
+    book = track(0, [(0, boxes[0])], frames)
+    honest = measure(book, frames, cfg, unit_scale(0, frames, cfg)).height_cm
+    monkeypatch.setattr(masks, "spine_boxes", bleeding(2.0, 1.0))
+    assert measure(book, frames, cfg, unit_scale(0, frames, cfg)).height_cm == pytest.approx(honest)
+
+
+def test_mask_covering_a_sliver_does_not_change_the_height(tmp_path, cfg, monkeypatch):
+    frames, boxes = marker_scene(tmp_path)
+    book = track(0, [(0, boxes[0])], frames)
+    honest = measure(book, frames, cfg, unit_scale(0, frames, cfg))
+    monkeypatch.setattr(masks, "spine_boxes", bleeding(0.4, 0.3))
+    dims = measure(book, frames, cfg, unit_scale(0, frames, cfg))
+    assert (dims.height_cm, dims.thickness_cm) == pytest.approx((honest.height_cm, honest.thickness_cm))
+
+
+def test_agreeing_mask_is_used(tmp_path, cfg, monkeypatch):
+    frames, boxes = marker_scene(tmp_path)
+    book = track(0, [(0, boxes[0])], frames)
+    honest = measure(book, frames, cfg, unit_scale(0, frames, cfg)).height_cm
+    monkeypatch.setattr(masks, "spine_boxes", bleeding(0.95, 1.0))
+    assert measure(book, frames, cfg, unit_scale(0, frames, cfg)).height_cm == pytest.approx(honest * 0.95, rel=0.01)
+
+
+def test_masks_never_change_the_format_class_of_a_prior(tmp_path, cfg, monkeypatch):
+    img, boxes = scene(60, 32, PX_PER_CM, [(30, 4, 3.5, 17.5)])
+    frames = [still(tmp_path, img)]
+    book = track(0, [(0, boxes[0])], frames)
+    honest = measure(book, frames, cfg, None)
+    monkeypatch.setattr(masks, "spine_boxes", bleeding(1.0, 0.55))
+    narrow = measure(book, frames, cfg, None)
+    assert (narrow.book_format, narrow.height_cm) == (honest.book_format, honest.height_cm)
+    assert honest.book_format == "hardcover"

@@ -115,7 +115,8 @@ def flat_dims(track: BookTrack, stills: list[Still], cfg: MeasureConfig, unit: U
     placement = prior_placement(standing, cfg, fallback_reason(cfg, unit))
     k = float(placement.matrix[0, 0])
     return dims.model_copy(
-        update={"height_cm": k * standing.height, "thickness_cm": k * standing.width, "review": placement.review}
+        update={"height_cm": k * standing.height, "thickness_cm": k * standing.width,
+                "book_format": placement.book_format, "fallback_reason": placement.fallback_reason}
     )
 
 

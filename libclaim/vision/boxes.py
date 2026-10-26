@@ -89,6 +89,9 @@ class ScaleConfig(BaseModel):
 class MaskConfig(BaseModel):
     model_id: str
     band: float
+    height_tolerance: float
+    min_width_ratio: float
+    max_width_ratio: float
 
 
 class MarkerConfig(BaseModel):

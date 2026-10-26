@@ -1,5 +1,6 @@
 import os
 import sys
+from pathlib import Path
 from contextlib import nullcontext
 from types import SimpleNamespace
 
@@ -10,9 +11,14 @@ import pytest
 from libclaim.models import Still
 from libclaim.room import depth
 from libclaim.vision import masks
+from libclaim.settings import Settings
+from libclaim.stages import TracksStage
+from libclaim.sweep import SweepDir
 from libclaim.vision.boxes import Box, iou
+from libclaim.vision.scale import load_measure_config, tight_boxes
 
 ml_only = pytest.mark.skipif(os.environ.get("LIBCLAIM_ML") != "1", reason="needs the [ml] extra and LIBCLAIM_ML=1")
+REAL_RUN = Path(os.environ.get("LIBCLAIM_REAL_RUN", "runs/e2e-a-ml2"))
 
 
 def fake_torch(cuda: bool):
@@ -108,3 +114,18 @@ def test_metric_depth_returns_a_finite_positive_map_at_image_size(tmp_path):
     still = Still(seq=0, t_ms=0, path=str(path), w=640, h=480, blur=1.0, glare=0.0, motion_dps=0.0)
     result = depth.metric_depth(still)
     assert result.shape == (480, 640) and np.isfinite(result).all() and result.min() > 0
+
+
+@ml_only
+@pytest.mark.skipif(not (REAL_RUN / "stages" / "tracks.json").is_file(), reason="needs a recorded real run")
+def test_real_shelf_masks_never_stray_from_the_detector_boxes():
+    cfg = load_measure_config(Settings())
+    segment = SweepDir(REAL_RUN).read_stage("tracks", TracksStage).segments[0]
+    books = [b for b in segment.books if b.orientation == "vertical"]
+    boxes = [b.box for b in books]
+    tight = tight_boxes(books[0].frame.path, boxes, cfg)
+    used = 0
+    for box, found in zip(boxes, tight):
+        assert abs(found.height - box.height) <= max(cfg.masks.height_tolerance * box.height, cfg.scale.box_height_trim * box.height)
+        used += found != box
+    assert used >= len(boxes) // 2

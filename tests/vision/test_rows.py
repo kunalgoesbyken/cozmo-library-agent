@@ -97,7 +97,7 @@ def test_flat_book_without_marker_uses_its_long_side_for_height():
     assert dims.scale_method == ScaleMethod.book_format_prior
     assert dims.height_cm > dims.thickness_cm
     assert dims.height_cm in {fmt.height_cm for fmt in cfg.formats.values()}
-    assert dims.review
+    assert dims.fallback_reason
 
 
 def test_shelf_units_are_lower_bounds_from_metric_rows_only():

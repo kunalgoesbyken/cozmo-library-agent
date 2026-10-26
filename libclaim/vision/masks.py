@@ -4,7 +4,7 @@ from importlib.util import find_spec
 
 import numpy as np
 
-from libclaim.vision.boxes import Box, load_vision_config, read_image
+from libclaim.vision.boxes import Box, MaskConfig, load_vision_config, read_image
 
 ML_MODULES = ("torch", "transformers")
 MODEL_LOAD_LOCK = threading.Lock()
@@ -47,6 +47,14 @@ def mask_box(mask: np.ndarray, box: Box, fraction: float) -> Box:
     x1, x2 = across or (box.x1, box.x2)
     y1, y2 = along or (box.y1, box.y2)
     return Box(x1=x1, y1=y1, x2=x2, y2=y2)
+
+
+def agrees(mask: Box, box: Box, cfg: MaskConfig) -> bool:
+    if box.height <= 0 or box.width <= 0:
+        return False
+    height_gap = abs(mask.height - box.height) / box.height
+    width_ratio = mask.width / box.width
+    return height_gap <= cfg.height_tolerance and cfg.min_width_ratio <= width_ratio <= cfg.max_width_ratio
 
 
 def spine_boxes(path: str, boxes: list[Box]) -> list[Box] | None:

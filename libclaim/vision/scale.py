@@ -11,10 +11,12 @@ from pydantic import BaseModel, Field
 from libclaim.models import Still
 from libclaim.settings import CONFIG_DIR, Settings, load_settings
 from libclaim.vision import masks
-from libclaim.vision.boxes import Box, ScaleConfig, TrackConfig, load_vision_config, read_image
+from libclaim.vision.boxes import Box, MaskConfig, ScaleConfig, TrackConfig, load_vision_config, read_image
 from libclaim.vision.tracks import BookTrack, pair_homography
 
 FULL_DIMENSIONS = 3
+NO_MARKER = "no scale marker was visible"
+NO_OVERLAP = "the measuring frame does not overlap a frame with the shelf-unit marker"
 
 
 class ScaleMethod(StrEnum):
@@ -29,6 +31,7 @@ class BookFormat(BaseModel):
 
 class MeasureConfig(BaseModel):
     scale: ScaleConfig
+    masks: MaskConfig
     tracks: TrackConfig
     formats: dict[str, BookFormat]
     marker_size_cm: float | None
@@ -54,6 +57,8 @@ class SpineDims(BaseModel):
     confidence: float
     frame_seq: int
     review: list[str] = Field(default_factory=list)
+    book_format: str = ""
+    fallback_reason: str = ""
 
 
 @dataclass
@@ -63,6 +68,8 @@ class Placement:
     method: ScaleMethod
     confidence: float
     review: list[str]
+    book_format: str = ""
+    fallback_reason: str = ""
 
 
 def load_measure_config(settings: Settings | None = None) -> MeasureConfig:
@@ -70,6 +77,7 @@ def load_measure_config(settings: Settings | None = None) -> MeasureConfig:
     taxonomy = yaml.safe_load((CONFIG_DIR / "taxonomy.yaml").read_text(encoding="utf-8"))
     return MeasureConfig(
         scale=vision.scale,
+        masks=vision.masks,
         tracks=vision.tracks,
         formats=taxonomy["book_formats"],
         marker_size_cm=(settings or load_settings()).aruco_marker_size_cm,
@@ -149,11 +157,9 @@ def frame_scale(still: Still, cfg: MeasureConfig, unit: UnitScale | None) -> tup
 
 
 def fallback_reason(cfg: MeasureConfig, unit: UnitScale | None) -> str:
-    if cfg.marker_size_cm is None:
-        return "ARUCO_MARKER_SIZE_CM is not set"
-    if unit is None or not unit.planes:
-        return "no ArUco marker of this shelf unit was visible"
-    return "the measuring frame does not overlap a frame with the shelf-unit marker"
+    if cfg.marker_size_cm is None or unit is None or not unit.planes:
+        return NO_MARKER
+    return NO_OVERLAP
 
 
 def prior_placement(box: Box, cfg: MeasureConfig, why: str) -> Placement:
@@ -162,16 +168,21 @@ def prior_placement(box: Box, cfg: MeasureConfig, why: str) -> Placement:
         cfg.formats.items(), key=lambda item: abs(math.log(aspect * item[1].thickness_cm / item[1].height_cm))
     )
     k = fmt.height_cm / box.height
-    review = [f"{ScaleMethod.book_format_prior} {name}: {why}"]
-    return Placement(box, np.diag([k, k, 1.0]), ScaleMethod.book_format_prior, cfg.scale.prior_confidence, review)
+    return Placement(box, np.diag([k, k, 1.0]), ScaleMethod.book_format_prior, cfg.scale.prior_confidence, [],
+                     name, why)
 
 
-def tight_boxes(path: str, boxes: list[Box], cfg: ScaleConfig) -> list[Box]:
-    found = masks.spine_boxes(path, boxes)
-    if found is not None:
-        return found
+def trimmed_boxes(boxes: list[Box], cfg: ScaleConfig) -> list[Box]:
     trim = cfg.box_height_trim / 2
     return [b.model_copy(update={"y1": b.y1 + trim * b.height, "y2": b.y2 - trim * b.height}) for b in boxes]
+
+
+def tight_boxes(path: str, boxes: list[Box], cfg: MeasureConfig) -> list[Box]:
+    trimmed = trimmed_boxes(boxes, cfg.scale)
+    found = masks.spine_boxes(path, boxes)
+    if found is None:
+        return trimmed
+    return [m if masks.agrees(m, b, cfg.masks) else t for m, b, t in zip(found, boxes, trimmed)]
 
 
 def length_cm(matrix: np.ndarray, start: tuple[float, float], end: tuple[float, float]) -> float:
@@ -216,16 +227,18 @@ def check_one_row(boxes: list[Box]) -> None:
 def measure_frame(boxes: list[Box], still: Still, cfg: MeasureConfig, unit: UnitScale | None,
                   run_cm: float | None) -> list[SpineDims]:
     order = sorted(range(len(boxes)), key=lambda i: boxes[i].x1)
-    tight = tight_boxes(still.path, [boxes[i] for i in order], cfg.scale)
+    ordered = [boxes[i] for i in order]
     scale = frame_scale(still, cfg, unit)
-    if scale is not None and run_cm is not None:
-        y = mean(middle(b) for b in tight)
-        ratio = run_cm / length_cm(scale[0], (tight[0].x1, y), (tight[-1].x2, y))
-        scale = np.diag([ratio, ratio, 1.0]) @ scale[0], scale[1]
     if scale is None:
+        tight = trimmed_boxes(ordered, cfg.scale)
         why = fallback_reason(cfg, unit)
         placed = [prior_placement(box, cfg, why) for box in tight]
     else:
+        tight = tight_boxes(still.path, ordered, cfg)
+        if run_cm is not None:
+            y = mean(middle(b) for b in tight)
+            ratio = run_cm / length_cm(scale[0], (tight[0].x1, y), (tight[-1].x2, y))
+            scale = np.diag([ratio, ratio, 1.0]) @ scale[0], scale[1]
         placed = [Placement(box, scale[0], ScaleMethod.aruco_homography, scale[1], []) for box in tight]
     thickness = [0.0] * len(tight)
     for cluster in clusters(tight, cfg.scale.shared_gap_factor):
@@ -243,6 +256,8 @@ def measure_frame(boxes: list[Box], still: Still, cfg: MeasureConfig, unit: Unit
             confidence=placement.confidence,
             frame_seq=still.seq,
             review=placement.review,
+            book_format=placement.book_format,
+            fallback_reason=placement.fallback_reason,
         )
     return [dims[i] for i in range(len(boxes))]
 
