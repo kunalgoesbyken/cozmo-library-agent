@@ -1,3 +1,7 @@
+from functools import cache
+
+import cv2
+import numpy as np
 import yaml
 from pydantic import BaseModel
 
@@ -36,6 +40,8 @@ class RfdetrConfig(BaseModel):
     threshold: float
     mean: list[float]
     std: list[float]
+    boxes_output: str
+    logits_output: str
     providers: list[str]
 
 
@@ -44,6 +50,9 @@ class ReconcileConfig(BaseModel):
     count_diff_fraction: float
     gap_thickness_factor: float
     max_requery_rows: int
+    phantom_containment: float
+    vertical_min_aspect: float
+    sweep_label: str
 
 
 class TrackConfig(BaseModel):
@@ -52,6 +61,11 @@ class TrackConfig(BaseModel):
     ransac_reproj_px: float
     min_inliers: int
     track_iou: float
+    anchor_lookback: int
+    det_min: float
+    det_max: float
+    area_ratio_min: float
+    area_ratio_max: float
 
 
 class VisionConfig(BaseModel):
@@ -60,28 +74,52 @@ class VisionConfig(BaseModel):
     jpeg_mime: str
     box_scale: int
     nms_iou: float
+    nms_containment: float
     prompt: str
     rfdetr: RfdetrConfig
     reconcile: ReconcileConfig
     tracks: TrackConfig
 
 
+class ImageUnreadable(ValueError):
+    pass
+
+
+@cache
 def load_vision_config() -> VisionConfig:
     path = CONFIG_DIR / "vision.yaml"
     return VisionConfig.model_validate(yaml.safe_load(path.read_text(encoding="utf-8")))
 
 
+def read_image(path: str, flags: int = cv2.IMREAD_COLOR) -> np.ndarray:
+    img = cv2.imread(path, flags)
+    if img is None:
+        raise ImageUnreadable(f"cannot read image {path}")
+    return img
+
+
+def intersection(a: Box, b: Box) -> float:
+    return Box(x1=max(a.x1, b.x1), y1=max(a.y1, b.y1), x2=min(a.x2, b.x2), y2=min(a.y2, b.y2)).area
+
+
 def iou(a: Box, b: Box) -> float:
-    inter = Box(
-        x1=max(a.x1, b.x1), y1=max(a.y1, b.y1), x2=min(a.x2, b.x2), y2=min(a.y2, b.y2)
-    ).area
+    inter = intersection(a, b)
     union = a.area + b.area - inter
     return inter / union if union else 0.0
 
 
-def nms(boxes: list[Box], threshold: float) -> list[int]:
+def containment(a: Box, b: Box) -> float:
+    smaller = min(a.area, b.area)
+    return intersection(a, b) / smaller if smaller else 0.0
+
+
+def nms(boxes: list[Box], iou_threshold: float, containment_threshold: float) -> list[int]:
     kept: list[int] = []
     for index in sorted(range(len(boxes)), key=lambda i: boxes[i].area, reverse=True):
-        if all(iou(boxes[index], boxes[other]) <= threshold for other in kept):
+        if all(
+            iou(boxes[index], boxes[other]) <= iou_threshold
+            and containment(boxes[index], boxes[other]) < containment_threshold
+            for other in kept
+        ):
             kept.append(index)
     return sorted(kept)

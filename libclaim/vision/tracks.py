@@ -3,7 +3,7 @@ import numpy as np
 from pydantic import BaseModel
 
 from libclaim.models import Still
-from libclaim.vision.boxes import Box, TrackConfig, iou, load_vision_config
+from libclaim.vision.boxes import Box, TrackConfig, iou, load_vision_config, read_image
 
 HOMOGRAPHY_MIN_MATCHES = 4
 
@@ -25,6 +25,19 @@ class BookTrack(BaseModel):
     best_box: Box
 
 
+def plausible(matrix: np.ndarray, width: int, height: int, cfg: TrackConfig) -> bool:
+    if not np.isfinite(matrix).all():
+        return False
+    if not cfg.det_min <= abs(np.linalg.det(matrix[:2, :2])) <= cfg.det_max:
+        return False
+    corners = np.float32([[0, 0], [width, 0], [width, height], [0, height]]).reshape(-1, 1, 2)
+    moved = cv2.perspectiveTransform(corners, matrix).reshape(-1, 2)
+    if not np.isfinite(moved).all():
+        return False
+    ratio = cv2.contourArea(moved.astype(np.float32)) / (width * height)
+    return cfg.area_ratio_min <= ratio <= cfg.area_ratio_max
+
+
 def pair_homography(prev: np.ndarray, cur: np.ndarray, cfg: TrackConfig) -> np.ndarray | None:
     orb = cv2.ORB_create(cfg.orb_features)
     kp_prev, des_prev = orb.detectAndCompute(prev, None)
@@ -40,7 +53,8 @@ def pair_homography(prev: np.ndarray, cur: np.ndarray, cfg: TrackConfig) -> np.n
     matrix, mask = cv2.findHomography(src, dst, cv2.RANSAC, cfg.ransac_reproj_px)
     if matrix is None or int(mask.sum()) < cfg.min_inliers:
         return None
-    return matrix
+    height, width = cur.shape[:2]
+    return matrix if plausible(matrix, width, height, cfg) else None
 
 
 def project(box: Box, matrix: np.ndarray) -> Box:
@@ -49,43 +63,56 @@ def project(box: Box, matrix: np.ndarray) -> Box:
     return Box(x1=moved[:, 0].min(), y1=moved[:, 1].min(), x2=moved[:, 0].max(), y2=moved[:, 1].max())
 
 
+def register(grays: list[np.ndarray], cfg: TrackConfig) -> list[tuple[int, np.ndarray]]:
+    placed: list[tuple[int, np.ndarray]] = []
+    for index, gray in enumerate(grays):
+        group, matrix = index, np.eye(3)
+        for earlier in range(index - 1, max(index - 1 - cfg.anchor_lookback, -1), -1):
+            step = pair_homography(grays[earlier], gray, cfg)
+            if step is not None:
+                group, matrix = placed[earlier][0], placed[earlier][1] @ step
+                break
+        placed.append((group, matrix))
+    return placed
+
+
+def track_overlap(box: Box, track: list[tuple[int, Box, Box, int]], group: int) -> float:
+    return max((iou(box, ref) for _, _, ref, g in track if g == group), default=0.0)
+
+
 def merge_tracks(frames: list[Frame]) -> list[BookTrack]:
     cfg = load_vision_config().tracks
-    grays = [cv2.imread(f.still.path, cv2.IMREAD_GRAYSCALE) for f in frames]
-    to_reference: list[np.ndarray | None] = []
-    for index, gray in enumerate(grays):
-        if index == 0:
-            to_reference.append(np.eye(3))
-            continue
-        step = pair_homography(grays[index - 1], gray, cfg)
-        before = to_reference[index - 1]
-        to_reference.append(None if step is None or before is None else before @ step)
-    members: list[list[tuple[int, Box, Box | None]]] = []
+    grays = [read_image(f.still.path, cv2.IMREAD_GRAYSCALE) for f in frames]
+    placed = register(grays, cfg)
+    members: list[list[tuple[int, Box, Box, int]]] = []
     for index, frame in enumerate(frames):
-        matrix = to_reference[index]
+        group, matrix = placed[index]
+        moved = [project(box, matrix) for box in frame.boxes]
+        candidates = sorted(
+            (overlap, bi, ti)
+            for bi, box in enumerate(moved)
+            for ti, track in enumerate(members)
+            for overlap in [track_overlap(box, track, group)]
+            if overlap >= cfg.track_iou
+        )[::-1]
+        assigned: dict[int, int] = {}
         taken: set[int] = set()
-        for box in frame.boxes:
-            moved = project(box, matrix) if matrix is not None else None
-            best, best_iou = None, cfg.track_iou
-            if moved is not None:
-                for track_id, track in enumerate(members):
-                    if track_id in taken:
-                        continue
-                    overlap = max((iou(moved, ref) for _, _, ref in track if ref is not None), default=0.0)
-                    if overlap >= best_iou:
-                        best, best_iou = track_id, overlap
-            if best is None:
+        for _, bi, ti in candidates:
+            if bi not in assigned and ti not in taken:
+                assigned[bi] = ti
+                taken.add(ti)
+        for bi, box in enumerate(frame.boxes):
+            if bi not in assigned:
                 members.append([])
-                best = len(members) - 1
-            taken.add(best)
-            members[best].append((index, box, moved))
+                assigned[bi] = len(members) - 1
+            members[assigned[bi]].append((index, box, moved[bi], group))
     tracks = []
     for track_id, track in enumerate(members):
         sharpest = max(track, key=lambda m: frames[m[0]].still.blur)
         tracks.append(
             BookTrack(
                 track_id=track_id,
-                refs=[BoxRef(frame=i, box=b) for i, b, _ in track],
+                refs=[BoxRef(frame=i, box=b) for i, b, _, _ in track],
                 best_frame=frames[sharpest[0]].still,
                 best_box=sharpest[1],
             )

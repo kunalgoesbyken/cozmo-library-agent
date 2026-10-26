@@ -1,4 +1,5 @@
 import json
+import warnings
 
 import cv2
 import numpy as np
@@ -8,7 +9,7 @@ from pydantic import BaseModel
 from libclaim.budget import Budget
 from libclaim.llm import Llm, LlmResponse
 from libclaim.models import Still
-from libclaim.vision.boxes import Box, nms
+from libclaim.vision.boxes import Box, ImageUnreadable, nms
 from libclaim.vision.spines import Orientation, Source, SpineDet, detect_spines, reconcile
 from libclaim.vision.rfdetr import decode, rfdetr_boxes
 
@@ -83,9 +84,23 @@ async def test_detect_nms_drops_overlap_duplicates_and_bad_boxes(tmp_path):
     assert len(dets) == 1
 
 
+async def test_detect_suppresses_tile_edge_clipped_duplicate(tmp_path):
+    llm, _ = llm_for(tmp_path, [spine(0, [0, 836, 1000, 950]), spine(1, [0, 0, 1000, 50])])
+    dets = await detect_spines(keyframe(tmp_path), llm, ["gemini-3.5-flash-lite"])
+    assert len(dets) == 1
+    assert dets[0].box_px.width > 55
+
+
+async def test_detect_unreadable_keyframe_raises_clear_error(tmp_path):
+    llm, _ = llm_for(tmp_path, [])
+    still = keyframe(tmp_path).model_copy(update={"path": str(tmp_path / "missing.png")})
+    with pytest.raises(ImageUnreadable):
+        await detect_spines(still, llm, ["gemini-3.5-flash-lite"])
+
+
 def test_nms_keeps_distinct_boxes():
     boxes = [Box(x1=0, y1=0, x2=10, y2=10), Box(x1=1, y1=0, x2=11, y2=10), Box(x1=50, y1=0, x2=60, y2=10)]
-    assert nms(boxes, 0.6) == [0, 2]
+    assert nms(boxes, 0.6, 0.8) == [0, 2]
 
 
 def test_reconcile_flags_twenty_percent_disagreement():
@@ -122,15 +137,38 @@ def test_reconcile_adds_rfdetr_only_boxes_and_caps_requeries():
     assert any(d.source == Source.rfdetr for d in extra.rows["r"])
 
 
-def test_reconcile_without_local_model_flags_review():
-    result = reconcile({"row-1": row_of(5)}, {"row-1": None})
+def test_reconcile_without_local_model_flags_review_once():
+    result = reconcile({"row-1": row_of(5), "row-2": row_of(5)}, {"row-1": None, "row-2": None})
     assert [e.reason for e in result.review_entries] == ["local_counter_unavailable"]
     assert len(result.rows["row-1"]) == 5
+
+
+def test_reconcile_shifted_duplicate_is_not_a_phantom_book():
+    gemini = [det(0, 30)]
+    shifted = Box(x1=10, y1=0, x2=40, y2=300)
+    result = reconcile({"r": gemini}, {"r": [shifted]})
+    assert len(result.rows["r"]) == 1
+
+
+def test_reconcile_local_only_box_orientation_from_aspect():
+    wide = Box(x1=500, y1=0, x2=700, y2=40)
+    tall = Box(x1=800, y1=0, x2=830, y2=300)
+    result = reconcile({"r": row_of(2)}, {"r": [d.box_px for d in row_of(2)] + [wide, tall]})
+    added = {d.box_px.x1: d.orientation for d in result.rows["r"] if d.source == Source.rfdetr}
+    assert added == {500: Orientation.horizontal, 800: Orientation.vertical}
 
 
 def test_rfdetr_returns_none_when_model_absent(monkeypatch, tmp_path):
     monkeypatch.setenv("LIBCLAIM_RFDETR_PATH", str(tmp_path / "missing.onnx"))
     assert rfdetr_boxes(np.zeros((10, 10, 3), np.uint8)) is None
+
+
+def test_rfdetr_decode_extreme_logits_do_not_warn():
+    boxes = np.array([[0.5, 0.5, 0.2, 0.4]], np.float32)
+    logits = np.array([[-5000.0, 5000.0]], np.float32)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        assert len(decode(boxes, logits, 100, 100, 0.5)) == 1
 
 
 def test_rfdetr_decode_scales_centres_to_pixels():

@@ -31,8 +31,21 @@ def preprocess(img: np.ndarray, cfg: VisionConfig) -> np.ndarray:
     return pixels.transpose(2, 0, 1)[None].astype(np.float32)
 
 
+def run_model(session: ort.InferenceSession, img: np.ndarray, cfg: VisionConfig) -> tuple[np.ndarray, np.ndarray]:
+    names = [output.name for output in session.get_outputs()]
+    wanted = [cfg.rfdetr.boxes_output, cfg.rfdetr.logits_output]
+    if not set(wanted) <= set(names) and len(names) != len(wanted):
+        raise ValueError(f"unexpected RF-DETR outputs {names}, expected {wanted}")
+    results = dict(zip(names, session.run(None, {session.get_inputs()[0].name: preprocess(img, cfg)})))
+    if set(wanted) <= set(names):
+        return results[wanted[0]], results[wanted[1]]
+    first, second = results.values()
+    return first, second
+
+
 def decode(boxes: np.ndarray, logits: np.ndarray, width: int, height: int, threshold: float) -> list[Box]:
-    scores = (1.0 / (1.0 + np.exp(-logits))).max(axis=1)
+    cutoff = np.log(threshold / (1.0 - threshold))
+    scores = logits.max(axis=1)
     return [
         Box(
             x1=(cx - w / 2) * width,
@@ -40,7 +53,7 @@ def decode(boxes: np.ndarray, logits: np.ndarray, width: int, height: int, thres
             x2=(cx + w / 2) * width,
             y2=(cy + h / 2) * height,
         )
-        for cx, cy, w, h in boxes[scores >= threshold]
+        for cx, cy, w, h in boxes[scores >= cutoff]
     ]
 
 
@@ -50,6 +63,6 @@ def rfdetr_boxes(img: np.ndarray) -> list[Box] | None:
     if not path.is_file():
         return None
     session = load_session(path, tuple(cfg.rfdetr.providers))
-    boxes, logits = session.run(None, {session.get_inputs()[0].name: preprocess(img, cfg)})
+    boxes, logits = run_model(session, img, cfg)
     height, width = img.shape[:2]
     return decode(boxes[0], logits[0], width, height, cfg.rfdetr.threshold)

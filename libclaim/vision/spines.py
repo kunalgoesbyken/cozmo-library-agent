@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from libclaim.llm import Llm, default_llm
 from libclaim.models import Still
 from libclaim.settings import load_settings
-from libclaim.vision.boxes import Box, VisionConfig, iou, load_vision_config, nms
+from libclaim.vision.boxes import Box, ReconcileConfig, VisionConfig, containment, iou, load_vision_config, nms, read_image
 
 BOX_COORDS = 4
 
@@ -86,7 +86,7 @@ def to_px(spine: TileSpine, tile: Box, cfg: VisionConfig) -> Box | None:
 
 async def detect_spines(keyframe: Still, llm: Llm | None = None, models: list[str] | None = None) -> list[SpineDet]:
     cfg = load_vision_config()
-    img = cv2.imread(keyframe.path)
+    img = read_image(keyframe.path)
     height, width = img.shape[:2]
     tiles = tile_origins(width, height, cfg)
     parts = [encode_tile(img, tile, cfg) for tile in tiles] + [cfg.prompt]
@@ -98,7 +98,7 @@ async def detect_spines(keyframe: Still, llm: Llm | None = None, models: list[st
         box = to_px(spine, tiles[spine.image_index], cfg)
         if box is not None:
             dets.append(SpineDet(box_px=box, orientation=spine.orientation, source=Source.gemini))
-    kept = nms([det.box_px for det in dets], cfg.nms_iou)
+    kept = nms([det.box_px for det in dets], cfg.nms_iou, cfg.nms_containment)
     return [dets[i] for i in kept]
 
 
@@ -120,29 +120,56 @@ def count_difference(gemini: int, local: int) -> float:
     return abs(gemini - local) / largest if largest else 0.0
 
 
+def local_orientation(box: Box, cfg: ReconcileConfig) -> Orientation:
+    vertical = box.width > 0 and box.height / box.width >= cfg.vertical_min_aspect
+    return Orientation.vertical if vertical else Orientation.horizontal
+
+
+def unmatched_local(local: list[Box], dets: list[SpineDet], cfg: ReconcileConfig) -> list[Box]:
+    pairs = sorted(
+        ((iou(b, d.box_px), li, di) for li, b in enumerate(local) for di, d in enumerate(dets)),
+        reverse=True,
+    )
+    used_local: set[int] = set()
+    used_gemini: set[int] = set()
+    for overlap, li, di in pairs:
+        if overlap < cfg.match_iou:
+            break
+        if li not in used_local and di not in used_gemini:
+            used_local.add(li)
+            used_gemini.add(di)
+    return [
+        b
+        for li, b in enumerate(local)
+        if li not in used_local and all(containment(b, d.box_px) < cfg.phantom_containment for d in dets)
+    ]
+
+
 def reconcile(gemini: dict[str, list[SpineDet]], rfdetr: dict[str, list[Box] | None]) -> ReconcileResult:
     cfg = load_vision_config().reconcile
     rows: dict[str, list[SpineDet]] = {}
     entries: list[ReviewEntry] = []
     severity: dict[str, float] = {}
+    if any(rfdetr.get(row) is None for row in gemini):
+        entries.append(ReviewEntry(row=cfg.sweep_label, reason="local_counter_unavailable", detail="no local boxes"))
     for row, dets in gemini.items():
         local = rfdetr.get(row)
         merged = list(dets)
         flagged = 0.0
-        if local is None:
-            entries.append(ReviewEntry(row=row, reason="local_counter_unavailable", detail=f"gemini {len(dets)}"))
-        else:
-            unmatched = [b for b in local if all(iou(b, d.box_px) < cfg.match_iou for d in dets)]
-            merged += [SpineDet(box_px=b, orientation=Orientation.vertical, source=Source.rfdetr) for b in unmatched]
+        if local is not None:
+            merged += [
+                SpineDet(box_px=b, orientation=local_orientation(b, cfg), source=Source.rfdetr)
+                for b in unmatched_local(local, dets, cfg)
+            ]
             diff = count_difference(len(dets), len(local))
             if diff > cfg.count_diff_fraction:
-                flagged = max(flagged, diff)
+                flagged = max(flagged, diff / cfg.count_diff_fraction)
                 entries.append(
                     ReviewEntry(row=row, reason="count_mismatch", detail=f"gemini {len(dets)} rfdetr {len(local)}")
                 )
         for gap, typical in row_gaps(merged):
             if gap > cfg.gap_thickness_factor * typical:
-                flagged = max(flagged, gap / typical)
+                flagged = max(flagged, gap / (cfg.gap_thickness_factor * typical))
                 entries.append(ReviewEntry(row=row, reason="gap", detail=f"gap {gap:.0f}px thickness {typical:.0f}px"))
                 break
         rows[row] = merged
