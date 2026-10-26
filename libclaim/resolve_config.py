@@ -21,6 +21,11 @@ class OcrConfig(BaseModel):
 
 class GateConfig(BaseModel):
     ocr_overlap_min: float
+    ocr_contradiction_yield: float
+    catalogue_only_score: float
+    catalogue_only_title: float
+    catalogue_only_margin: float
+    catalogue_only_confidence: float
     token_match: float
     score_min: float
     margin_min: float
@@ -33,6 +38,11 @@ class GateConfig(BaseModel):
     extra_token_penalty: float
     agree_score: float
     publisher_match: float
+
+
+class EditionConfig(BaseModel):
+    title_match: float
+    preferred_formats: list[str]
 
 
 class OpenLibraryConfig(BaseModel):
@@ -61,6 +71,7 @@ class ResolveConfig(BaseModel):
     reading: ReadingConfig
     ocr: OcrConfig
     gates: GateConfig
+    editions: EditionConfig
     catalog: CatalogConfig
 
 

@@ -1,0 +1,410 @@
+{
+  "kind": "books#volumes",
+  "totalItems": 2,
+  "items": [
+    {
+      "kind": "books#volume",
+      "id": "yK0ICgAAQBAJ",
+      "etag": "pdOBA0d8lGg",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/yK0ICgAAQBAJ",
+      "volumeInfo": {
+        "title": "Naughty Amelia Jane!",
+        "subtitle": "Book 1",
+        "authors": [
+          "Enid Blyton"
+        ],
+        "publisher": "Hachette UK",
+        "publishedDate": "2015-08-06",
+        "description": "Enid Blyton's Amelia Jane is big, bad and the world's naughtiest toy! Look out! Amelia snips the tail off pink rabbit, squirts Tom the soldier with water and gets up to mischief at the beach. The other toys try to teach the terror of the toy cupboard to be well-behaved, but will they succeed? First published in 1939, this edition contains the classic text and illustrations by Deborah Allwright, cover by Alex T. Smith (2011).",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_13",
+            "identifier": "9781444927009"
+          },
+          {
+            "type": "ISBN_10",
+            "identifier": "1444927000"
+          }
+        ],
+        "readingModes": {
+          "text": true,
+          "image": false
+        },
+        "pageCount": 97,
+        "printType": "BOOK",
+        "categories": [
+          "Juvenile Fiction"
+        ],
+        "averageRating": 5,
+        "ratingsCount": 1,
+        "maturityRating": "MATURE",
+        "allowAnonLogging": true,
+        "contentVersion": "1.5.7.0.preview.2",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=yK0ICgAAQBAJ&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=yK0ICgAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.co.in/books?id=yK0ICgAAQBAJ&printsec=frontcover&dq=intitle:naughty+amelia+jane+inauthor:enid+blyton&hl=&cd=1&source=gbs_api",
+        "infoLink": "https://play.google.com/store/books/details?id=yK0ICgAAQBAJ&source=gbs_api",
+        "canonicalVolumeLink": "https://play.google.com/store/books/details?id=yK0ICgAAQBAJ"
+      },
+      "saleInfo": {
+        "country": "IN",
+        "saleability": "FOR_SALE",
+        "isEbook": true,
+        "listPrice": {
+          "amount": 123.9,
+          "currencyCode": "INR"
+        },
+        "retailPrice": {
+          "amount": 123.9,
+          "currencyCode": "INR"
+        },
+        "buyLink": "https://play.google.com/store/books/details?id=yK0ICgAAQBAJ&rdid=book-yK0ICgAAQBAJ&rdot=1&source=gbs_api",
+        "offers": [
+          {
+            "finskyOfferType": 1,
+            "listPrice": {
+              "amountInMicros": 123900000,
+              "currencyCode": "INR"
+            },
+            "retailPrice": {
+              "amountInMicros": 123900000,
+              "currencyCode": "INR"
+            }
+          }
+        ]
+      },
+      "accessInfo": {
+        "country": "IN",
+        "viewability": "PARTIAL",
+        "embeddable": true,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": true,
+          "acsTokenLink": "http://books.google.co.in/books/download/Naughty_Amelia_Jane-sample-epub.acsm?id=yK0ICgAAQBAJ&format=epub&output=acs4_fulfillment_token&dl_type=sample&source=gbs_api"
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=yK0ICgAAQBAJ&hl=&source=gbs_api",
+        "accessViewStatus": "SAMPLE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "The other toys try to teach the terror of the toy cupboard to be well-behaved, but will they succeed? First published in 1939, this edition contains the classic text and illustrations by Deborah Allwright, cover by Alex T. Smith (2011)."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "aAD9AAAACAAJ",
+      "etag": "uAdG5FWBiYs",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/aAD9AAAACAAJ",
+      "volumeInfo": {
+        "title": "Naughty Amelia Jane",
+        "authors": [
+          "Enid Blyton"
+        ],
+        "publisher": "Amelia Jane",
+        "publishedDate": "2001",
+        "description": "A classic children's story from the world's best-loved children's author, Enid Blyton Amelia Jane is big, bad and the terror of the toy cupboard! In this book, she snips the tail off the pink rabbit, squirts Tom the soldier with water and gets up to mischief at the beach. The other toys try to teach her to be good, but will they succeed? Not if the world's most mischievous toy has anything to say about it! Enid Blyton is arguably the most famous children's author of all time. Thanks to series such as The Wishing-Chair, The Faraway Tree-, The Mysteries, The Famous Five and The Secret Seven she has earned a place in the hearts of millions of fans around the world. Her characters can be funny, heroic, naughty and scary - but always memorable. And they are as popular today as they have ever been.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "074974667X"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9780749746674"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 185,
+        "printType": "BOOK",
+        "categories": [
+          "Amelia Jane (Fictitious character)"
+        ],
+        "averageRating": 5,
+        "ratingsCount": 1,
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=aAD9AAAACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=aAD9AAAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.co.in/books?id=aAD9AAAACAAJ&dq=intitle:naughty+amelia+jane+inauthor:enid+blyton&hl=&cd=2&source=gbs_api",
+        "infoLink": "http://books.google.co.in/books?id=aAD9AAAACAAJ&dq=intitle:naughty+amelia+jane+inauthor:enid+blyton&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/Naughty_Amelia_Jane.html?hl=&id=aAD9AAAACAAJ"
+      },
+      "saleInfo": {
+        "country": "IN",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "IN",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=aAD9AAAACAAJ&hl=&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "In this book, she snips the tail off the pink rabbit, squirts Tom the soldier with water and gets up to mischief at the beach. The other toys try to teach her to be good, but will they succeed?"
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "rUSMEQAAQBAJ",
+      "etag": "uyaWVOYu0+s",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/rUSMEQAAQBAJ",
+      "volumeInfo": {
+        "title": "Naughty Amelia Jane",
+        "authors": [
+          "Enid Blyton"
+        ],
+        "publisher": "Rare Treasure Editions",
+        "publishedDate": "2025-10-03T00:00:00Z",
+        "description": "Amelia Jane is a very naughty doll. She plays all sorts of nasty tricks on the other toys. She cuts off Rabbit's tail, turns Teddy's tail into a snake and pushes the toys out of their snow house. Sometimes they teach her a lesson and she promises to be good - but it doesn't last.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_13",
+            "identifier": "9781987817607"
+          },
+          {
+            "type": "ISBN_10",
+            "identifier": "1987817605"
+          }
+        ],
+        "readingModes": {
+          "text": true,
+          "image": true
+        },
+        "pageCount": 69,
+        "printType": "BOOK",
+        "categories": [
+          "Juvenile Fiction"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "0.1.1.0.preview.3",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=rUSMEQAAQBAJ&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=rUSMEQAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.co.in/books?id=rUSMEQAAQBAJ&printsec=frontcover&dq=intitle:naughty+amelia+jane+inauthor:enid+blyton&hl=&cd=3&source=gbs_api",
+        "infoLink": "http://books.google.co.in/books?id=rUSMEQAAQBAJ&dq=intitle:naughty+amelia+jane+inauthor:enid+blyton&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/Naughty_Amelia_Jane.html?hl=&id=rUSMEQAAQBAJ"
+      },
+      "saleInfo": {
+        "country": "IN",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "IN",
+        "viewability": "PARTIAL",
+        "embeddable": true,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": true,
+          "acsTokenLink": "http://books.google.co.in/books/download/Naughty_Amelia_Jane-sample-epub.acsm?id=rUSMEQAAQBAJ&format=epub&output=acs4_fulfillment_token&dl_type=sample&source=gbs_api"
+        },
+        "pdf": {
+          "isAvailable": true,
+          "acsTokenLink": "http://books.google.co.in/books/download/Naughty_Amelia_Jane-sample-pdf.acsm?id=rUSMEQAAQBAJ&format=pdf&output=acs4_fulfillment_token&dl_type=sample&source=gbs_api"
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=rUSMEQAAQBAJ&hl=&source=gbs_api",
+        "accessViewStatus": "SAMPLE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "Amelia Jane is a very naughty doll."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "n0teHAAACAAJ",
+      "etag": "eezu3jQGGOs",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/n0teHAAACAAJ",
+      "volumeInfo": {
+        "title": "Enid Blyton's Naughty Amelia Jane!",
+        "authors": [
+          "Enid Blyton"
+        ],
+        "publisher": "Dean & Son",
+        "publishedDate": "1969",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "0603032710"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9780603032714"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 184,
+        "printType": "BOOK",
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "language": "en",
+        "previewLink": "http://books.google.co.in/books?id=n0teHAAACAAJ&dq=intitle:naughty+amelia+jane+inauthor:enid+blyton&hl=&cd=4&source=gbs_api",
+        "infoLink": "http://books.google.co.in/books?id=n0teHAAACAAJ&dq=intitle:naughty+amelia+jane+inauthor:enid+blyton&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/Enid_Blyton_s_Naughty_Amelia_Jane.html?hl=&id=n0teHAAACAAJ"
+      },
+      "saleInfo": {
+        "country": "IN",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "IN",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=n0teHAAACAAJ&hl=&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "7a0ICgAAQBAJ",
+      "etag": "3BuumutLn54",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/7a0ICgAAQBAJ",
+      "volumeInfo": {
+        "title": "Amelia Jane is Naughty Again",
+        "subtitle": "Book 4",
+        "authors": [
+          "Enid Blyton"
+        ],
+        "publisher": "Hachette UK",
+        "publishedDate": "2015-08-06",
+        "description": "Enid Blyton's Amelia Jane is big, bad and the world's naughtiest toy! Amelia Jane causes mayhem with a boomerang, defaces the nursery walls and plays all sorts of tricks on poor Mr Up-and-To! The toys have enough and Amelia Jane promises to be behave. But can the world's naughtiest toy ever learn to behave? First published in 1954, this edition contains the classic text and illustrations by Deborah Allwright, cover by Alex T. Smith (2011).",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_13",
+            "identifier": "9781444927030"
+          },
+          {
+            "type": "ISBN_10",
+            "identifier": "1444927035"
+          }
+        ],
+        "readingModes": {
+          "text": true,
+          "image": false
+        },
+        "pageCount": 105,
+        "printType": "BOOK",
+        "categories": [
+          "Juvenile Fiction"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": true,
+        "contentVersion": "1.6.8.0.preview.2",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=7a0ICgAAQBAJ&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=7a0ICgAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.co.in/books?id=7a0ICgAAQBAJ&printsec=frontcover&dq=intitle:naughty+amelia+jane+inauthor:enid+blyton&hl=&cd=5&source=gbs_api",
+        "infoLink": "https://play.google.com/store/books/details?id=7a0ICgAAQBAJ&source=gbs_api",
+        "canonicalVolumeLink": "https://play.google.com/store/books/details?id=7a0ICgAAQBAJ"
+      },
+      "saleInfo": {
+        "country": "IN",
+        "saleability": "FOR_SALE",
+        "isEbook": true,
+        "listPrice": {
+          "amount": 395.3,
+          "currencyCode": "INR"
+        },
+        "retailPrice": {
+          "amount": 276.71,
+          "currencyCode": "INR"
+        },
+        "buyLink": "https://play.google.com/store/books/details?id=7a0ICgAAQBAJ&rdid=book-7a0ICgAAQBAJ&rdot=1&source=gbs_api",
+        "offers": [
+          {
+            "finskyOfferType": 1,
+            "listPrice": {
+              "amountInMicros": 395300000,
+              "currencyCode": "INR"
+            },
+            "retailPrice": {
+              "amountInMicros": 276710000,
+              "currencyCode": "INR"
+            }
+          }
+        ]
+      },
+      "accessInfo": {
+        "country": "IN",
+        "viewability": "PARTIAL",
+        "embeddable": true,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": true,
+          "acsTokenLink": "http://books.google.co.in/books/download/Amelia_Jane_is_Naughty_Again-sample-epub.acsm?id=7a0ICgAAQBAJ&format=epub&output=acs4_fulfillment_token&dl_type=sample&source=gbs_api"
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=7a0ICgAAQBAJ&hl=&source=gbs_api",
+        "accessViewStatus": "SAMPLE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "But can the world&#39;s naughtiest toy ever learn to behave? First published in 1954, this edition contains the classic text and illustrations by Deborah Allwright, cover by Alex T. Smith (2011)."
+      }
+    }
+  ]
+}

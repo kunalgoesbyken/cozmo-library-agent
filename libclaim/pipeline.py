@@ -747,7 +747,8 @@ class SweepRun:
             pricing.items[item_key(index)] = await self.price_det(index, det, locale, sources, listings)
         lines = book_lines(self.results, self.sweep, self.cfg, locale)
         provisional = ClaimPacket(sweep=SweepInfo(currency=locale.currency), books=lines)
-        pricing.second_country = await second_country(provisional, market=other, other=market, fx=fx)
+        pricing.second_country = await second_country(provisional, market=other, other=market, fx=fx,
+                                                      resolutions=self.results.resolution.resolutions)
 
     async def run_stage(self, name: str, step: Callable[[], Coroutine]) -> None:
         self.computed.add(name)

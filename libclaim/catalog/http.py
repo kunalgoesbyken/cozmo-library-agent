@@ -38,7 +38,7 @@ async def guarded(call: Awaitable[list[T]], name: str) -> tuple[list[T], bool]:
         return [], True
 
 
-class CatalogOffline(RuntimeError):
+class CatalogOffline(httpx.HTTPError):
     pass
 
 
@@ -59,6 +59,8 @@ class Edition(BaseModel):
     url: str
     year: int | None = None
     physical_dimensions: str = ""
+    title: str = ""
+    physical_format: str = ""
 
 
 YEAR_DIGITS = 4

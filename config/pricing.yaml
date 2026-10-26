@@ -76,6 +76,10 @@ books:
   disagreement_ratio: 0.25
   used_new_ratio: 1.5
   rounding: "0.01"
+  equivalent_source: "{source} (equivalent edition, ISBN {isbn})"
+  basis_notes:
+    equivalent_edition: "equivalent_edition_priced: ISBN {isbn} is the most recent catalogue edition that fits the spine; the exact printed edition is not known"
+    catalogue_only: "identified_from_catalogue_only: OCR did not confirm the spine text; title and author match one catalogue record"
   appraisal_triggers:
     - signed
     - signature

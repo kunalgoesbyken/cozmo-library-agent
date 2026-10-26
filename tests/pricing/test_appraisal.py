@@ -77,6 +77,20 @@ def test_missing_isbn():
     assert reasons(res=resolution(isbn="")) == ["no_isbn"]
 
 
+def test_equivalent_edition_of_a_modern_work_needs_no_appraisal():
+    assert reasons(res=resolution(equivalent_edition=True, edition_unverified=True, work_year=1993)) == []
+
+
+def test_equivalent_edition_of_an_old_work_without_publisher_evidence_needs_appraisal():
+    old = resolution(equivalent_edition=True, edition_unverified=True, work_year=1942, year=2016)
+    assert reasons(res=old) == ["old_work_edition_unverified"]
+
+
+def test_old_work_whose_printed_publisher_matched_the_equivalent_is_priced():
+    old = resolution(equivalent_edition=True, edition_unverified=True, work_year=1942, year=2016, edition="Award")
+    assert reasons(res=old) == []
+
+
 def test_used_at_threshold():
     threshold = IN.appraisal_threshold
     assert reasons(quotes=[quote(threshold, condition="used")]) == ["used_over_threshold"]

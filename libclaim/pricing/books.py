@@ -100,6 +100,18 @@ def converted_quote(original: PriceQuote, record: FxRecord, locale: Locale, cfg:
     return original.model_copy(update={"amount": amount, "currency": locale.currency, "kind": CONVERTED})
 
 
+def basis_notes(resolution: Resolution, cfg: PricingConfig) -> list[str]:
+    notes = cfg.books.basis_notes
+    equivalent = [notes[EQUIVALENT_EDITION].format(isbn=resolution.isbn)] if resolution.equivalent_edition else []
+    return equivalent + ([notes[resolution.corroboration]] if resolution.corroboration in notes else [])
+
+
+def labelled(quote: PriceQuote, resolution: Resolution, cfg: PricingConfig) -> PriceQuote:
+    if not resolution.equivalent_edition:
+        return quote
+    return quote.model_copy(update={"source": cfg.books.equivalent_source.format(source=quote.source, isbn=resolution.isbn)})
+
+
 def disagreement(found: list[PriceQuote], cfg: PricingConfig) -> list[str]:
     if len(found) < 2:
         return []
@@ -124,12 +136,13 @@ async def price_book(
     locale = market.locale
     if resolution.status != "identified":
         return BookPrices(status="unidentified")
+    basis = basis_notes(resolution, cfg)
     reasons = appraisal_reasons(resolution, reading, statements, [], locale)
     if reasons:
-        return BookPrices(status="needs_appraisal", review=reasons)
+        return BookPrices(status="needs_appraisal", review=basis + reasons)
     new_found = await market.quotes(locale.new_sources, resolution.isbn, NEW)
     used_found = await market.quotes(locale.used_sources, resolution.isbn, USED)
-    review = list(dict.fromkeys(notes_of(new_found + used_found))) + (["year_unknown"] if resolution.year is None else [])
+    review = basis + list(dict.fromkeys(notes_of(new_found + used_found))) + (["year_unknown"] if resolution.year is None else [])
     local = listings(new_found)
     new, original, record = (local[0] if local else None), None, None
     if new is None and CONVERTED in locale.new_sources and other is not None and fx is not None:
@@ -158,8 +171,9 @@ async def price_book(
         review.append("no_new_price")
     return BookPrices(
         status="identified",
-        replacement_cost=replacement_cost_of(new) if new else BookReplacementCost(),
-        used_value=used_value_of(used, cfg, new is not None and new.kind == CONVERTED) if used else UsedValue(),
+        replacement_cost=replacement_cost_of(labelled(new, resolution, cfg)) if new else BookReplacementCost(),
+        used_value=used_value_of(labelled(used, resolution, cfg), cfg, new is not None and new.kind == CONVERTED)
+        if used else UsedValue(),
         original=original,
         fx=record,
         review=review + disagreement(local, cfg),

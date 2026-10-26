@@ -41,6 +41,8 @@ class OpenLibrary:
                 url=cfg.site_url + entry["key"],
                 year=year_of(str(entry.get("publish_date", ""))),
                 physical_dimensions=str(entry.get("physical_dimensions", "")),
+                title=str(entry.get("title", "")),
+                physical_format=str(entry.get("physical_format", "")),
             )
             for entry in body.get("entries", [])
             if entry.get(ISBN_13) and entry.get("key")

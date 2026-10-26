@@ -103,6 +103,8 @@ class BooksConfig(BaseModel):
     disagreement_ratio: Decimal
     used_new_ratio: Decimal
     rounding: Decimal
+    equivalent_source: str
+    basis_notes: dict[str, str]
     appraisal_triggers: list[str]
 
 

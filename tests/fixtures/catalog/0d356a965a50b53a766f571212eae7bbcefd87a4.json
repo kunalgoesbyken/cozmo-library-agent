@@ -1,0 +1,378 @@
+{
+  "kind": "books#volumes",
+  "totalItems": 1,
+  "items": [
+    {
+      "kind": "books#volume",
+      "id": "SD6FEAAAQBAJ",
+      "etag": "JbWWNqndLd0",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/SD6FEAAAQBAJ",
+      "volumeInfo": {
+        "title": "Well Done, Secret Seven (ESL/EFL Version with Audio)",
+        "authors": [
+          "Qiliang Feng"
+        ],
+        "publisher": "百萬英語閱讀計劃",
+        "publishedDate": "2013-07-18",
+        "description": "This is Book 3, Collection V, of the Million-Word Reading Project (MWRP) readers. It is suitable for learners with a basic vocabulary of 1,500 words. Million-Word Reading Project (MWRP) is a reading project for ESL/EFL learners at the elementary level (with a basic vocabulary of 1,500 words). In two years, for about fifteen minutes each day, an ESL/EFL learner can read one million words, and reach the upper-intermediate level, gaining a vocabulary of about 3,500 words and a large number of expressions. Text Information Readability | 86.4 Total word count | 16419 Words beyond 1500 | 1000 Unknown word percentage (%) | 6.09 Unknown headword occurrence | 3.4 Unknown words that occur 5 times or more | 46 Unknown words that occur 2 times or more | 139 Synopsis This book is rewritten from Book 3 of Enid Blyton’s THE SECRET SEVEN collection. The Secret Seven are Peter and his sister Janet, Jack, Barbara, Pam, Colin and George. They form the Secret Seven Society - ready to solve any mystery, any time. They have a secret password, a badge, and a secret meeting place in a garden shed. Because the Society shed is too hot for their meetings, the Seven build a meeting place in a large oak tree in Windy woods. But they discover someone else is hiding in their tree – he is in trouble because of something he over-heard. He tells the Secret Seven what he remembers. A red pillow - MKX - a date, Thursday 25th, and Emma Lane. Will the Secret Seven be able to find out what all this means? Enid Blyton (1897 - 1968) is one of the world’s best-loved children’s authors. Her books have been translated into over 90 languages and are still enjoyed by children and adults all over the world.",
+        "readingModes": {
+          "text": true,
+          "image": true
+        },
+        "pageCount": 99,
+        "printType": "BOOK",
+        "categories": [
+          "Fiction"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "0.4.4.0.preview.3",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=SD6FEAAAQBAJ&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=SD6FEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.co.in/books?id=SD6FEAAAQBAJ&printsec=frontcover&dq=intitle:well+done,+secret+seven+inauthor:enid+blyton&hl=&cd=1&source=gbs_api",
+        "infoLink": "https://play.google.com/store/books/details?id=SD6FEAAAQBAJ&source=gbs_api",
+        "canonicalVolumeLink": "https://play.google.com/store/books/details?id=SD6FEAAAQBAJ"
+      },
+      "saleInfo": {
+        "country": "IN",
+        "saleability": "FOR_SALE",
+        "isEbook": true,
+        "listPrice": {
+          "amount": 538.51,
+          "currencyCode": "INR"
+        },
+        "retailPrice": {
+          "amount": 269.26,
+          "currencyCode": "INR"
+        },
+        "buyLink": "https://play.google.com/store/books/details?id=SD6FEAAAQBAJ&rdid=book-SD6FEAAAQBAJ&rdot=1&source=gbs_api",
+        "offers": [
+          {
+            "finskyOfferType": 1,
+            "listPrice": {
+              "amountInMicros": 538510000,
+              "currencyCode": "INR"
+            },
+            "retailPrice": {
+              "amountInMicros": 269260000,
+              "currencyCode": "INR"
+            }
+          }
+        ]
+      },
+      "accessInfo": {
+        "country": "IN",
+        "viewability": "PARTIAL",
+        "embeddable": true,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": true,
+          "acsTokenLink": "http://books.google.co.in/books/download/Well_Done_Secret_Seven_ESL_EFL_Version_w-sample-epub.acsm?id=SD6FEAAAQBAJ&format=epub&output=acs4_fulfillment_token&dl_type=sample&source=gbs_api"
+        },
+        "pdf": {
+          "isAvailable": true,
+          "acsTokenLink": "http://books.google.co.in/books/download/Well_Done_Secret_Seven_ESL_EFL_Version_w-sample-pdf.acsm?id=SD6FEAAAQBAJ&format=pdf&output=acs4_fulfillment_token&dl_type=sample&source=gbs_api"
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=SD6FEAAAQBAJ&hl=&source=gbs_api",
+        "accessViewStatus": "SAMPLE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "This is Book 3, Collection V, of the Million-Word Reading Project (MWRP) readers."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "EHwaBQAAQBAJ",
+      "etag": "7aMNKbUFxJg",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/EHwaBQAAQBAJ",
+      "volumeInfo": {
+        "title": "Secret Seven: Well Done, Secret Seven",
+        "subtitle": "Book 3",
+        "authors": [
+          "Enid Blyton"
+        ],
+        "publisher": "Hachette UK",
+        "publishedDate": "2014-11-27",
+        "description": "The Secret Seven are siblings Peter and Janet, and Jack, Barbara, Pam, Colin and George. Together they are The Secret Seven - ready to solve any mystery, any time - in Enid Blyton's classic series of 15 mystery novels. In book three, the Secret Seven have a new meeting place - a treehouse! But someone else is using it too. The gang are furious, but then they learn the intruder is in big trouble and needs their help. Can the Seven come to the rescue? First published in 1951, this edition features the original text and artwork.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_13",
+            "identifier": "9781444925906"
+          },
+          {
+            "type": "ISBN_10",
+            "identifier": "1444925903"
+          }
+        ],
+        "readingModes": {
+          "text": true,
+          "image": false
+        },
+        "pageCount": 79,
+        "printType": "BOOK",
+        "categories": [
+          "Juvenile Fiction"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "1.4.5.0.preview.2",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=EHwaBQAAQBAJ&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=EHwaBQAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.co.in/books?id=EHwaBQAAQBAJ&printsec=frontcover&dq=intitle:well+done,+secret+seven+inauthor:enid+blyton&hl=&cd=2&source=gbs_api",
+        "infoLink": "http://books.google.co.in/books?id=EHwaBQAAQBAJ&dq=intitle:well+done,+secret+seven+inauthor:enid+blyton&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/Secret_Seven_Well_Done_Secret_Seven.html?hl=&id=EHwaBQAAQBAJ"
+      },
+      "saleInfo": {
+        "country": "IN",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "IN",
+        "viewability": "PARTIAL",
+        "embeddable": true,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": true,
+          "acsTokenLink": "http://books.google.co.in/books/download/Secret_Seven_Well_Done_Secret_Seven-sample-epub.acsm?id=EHwaBQAAQBAJ&format=epub&output=acs4_fulfillment_token&dl_type=sample&source=gbs_api"
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=EHwaBQAAQBAJ&hl=&source=gbs_api",
+        "accessViewStatus": "SAMPLE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "But someone else is using it too. The gang are furious, but then they learn the intruder is in big trouble and needs their help. Can the Seven come to the rescue? First published in 1951, this edition features the original text and artwork."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "u2cKEAAAQBAJ",
+      "etag": "5ngkfaN7Kok",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/u2cKEAAAQBAJ",
+      "volumeInfo": {
+        "title": "Well Done Secret Seven",
+        "subtitle": "Secret Seven #3",
+        "authors": [
+          "Enid Blyton"
+        ],
+        "publisher": "Wildside Press LLC",
+        "publishedDate": "2020-11-16",
+        "description": "Because the Society shed is too hot for their meetings, the Seven built a meeting place in a large oak tree in Windy woods. They tie large planks to the branches to sit on and bring cushions and find a nice cubby-hole in the tree to store their food. But they discover someone else is hiding in their tree - because of something he over-heard which had caused him to run away. He tells the Secret Seven what he remembers. A red pillow - MKX - a date, Thursday 25th, and Emma Lane. Will the Secret Seven be able to find out what all this means?",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_13",
+            "identifier": "9781479455744"
+          },
+          {
+            "type": "ISBN_10",
+            "identifier": "1479455741"
+          }
+        ],
+        "readingModes": {
+          "text": true,
+          "image": true
+        },
+        "pageCount": 77,
+        "printType": "BOOK",
+        "categories": [
+          "Juvenile Fiction"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "0.2.2.0.preview.3",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=u2cKEAAAQBAJ&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=u2cKEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.co.in/books?id=u2cKEAAAQBAJ&printsec=frontcover&dq=intitle:well+done,+secret+seven+inauthor:enid+blyton&hl=&cd=3&source=gbs_api",
+        "infoLink": "https://play.google.com/store/books/details?id=u2cKEAAAQBAJ&source=gbs_api",
+        "canonicalVolumeLink": "https://play.google.com/store/books/details?id=u2cKEAAAQBAJ"
+      },
+      "saleInfo": {
+        "country": "IN",
+        "saleability": "FOR_SALE",
+        "isEbook": true,
+        "listPrice": {
+          "amount": 115,
+          "currencyCode": "INR"
+        },
+        "retailPrice": {
+          "amount": 115,
+          "currencyCode": "INR"
+        },
+        "buyLink": "https://play.google.com/store/books/details?id=u2cKEAAAQBAJ&rdid=book-u2cKEAAAQBAJ&rdot=1&source=gbs_api",
+        "offers": [
+          {
+            "finskyOfferType": 1,
+            "listPrice": {
+              "amountInMicros": 115000000,
+              "currencyCode": "INR"
+            },
+            "retailPrice": {
+              "amountInMicros": 115000000,
+              "currencyCode": "INR"
+            }
+          }
+        ]
+      },
+      "accessInfo": {
+        "country": "IN",
+        "viewability": "PARTIAL",
+        "embeddable": true,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": true,
+          "acsTokenLink": "http://books.google.co.in/books/download/Well_Done_Secret_Seven-sample-epub.acsm?id=u2cKEAAAQBAJ&format=epub&output=acs4_fulfillment_token&dl_type=sample&source=gbs_api"
+        },
+        "pdf": {
+          "isAvailable": true,
+          "acsTokenLink": "http://books.google.co.in/books/download/Well_Done_Secret_Seven-sample-pdf.acsm?id=u2cKEAAAQBAJ&format=pdf&output=acs4_fulfillment_token&dl_type=sample&source=gbs_api"
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=u2cKEAAAQBAJ&hl=&source=gbs_api",
+        "accessViewStatus": "SAMPLE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "Because the Society shed is too hot for their meetings, the Seven built a meeting place in a large oak tree in Windy woods."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "uJ4FqAAACAAJ",
+      "etag": "swDxavoTJKo",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/uJ4FqAAACAAJ",
+      "volumeInfo": {
+        "title": "Well Done, Secret Seven",
+        "authors": [
+          "Enid Blyton"
+        ],
+        "publishedDate": "1992",
+        "industryIdentifiers": [
+          {
+            "type": "OTHER",
+            "identifier": "OCLC:682283111"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 117,
+        "printType": "BOOK",
+        "categories": [
+          "Detective and mystery stories"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "language": "en",
+        "previewLink": "http://books.google.co.in/books?id=uJ4FqAAACAAJ&dq=intitle:well+done,+secret+seven+inauthor:enid+blyton&hl=&cd=4&source=gbs_api",
+        "infoLink": "http://books.google.co.in/books?id=uJ4FqAAACAAJ&dq=intitle:well+done,+secret+seven+inauthor:enid+blyton&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/Well_Done_Secret_Seven.html?hl=&id=uJ4FqAAACAAJ"
+      },
+      "saleInfo": {
+        "country": "IN",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "IN",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=uJ4FqAAACAAJ&hl=&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "BBmkzQEACAAJ",
+      "etag": "msjClUdbpeo",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/BBmkzQEACAAJ",
+      "volumeInfo": {
+        "title": "Well done, Secret Seven",
+        "authors": [
+          "Enid BLYTON"
+        ],
+        "publishedDate": "1986",
+        "industryIdentifiers": [
+          {
+            "type": "OTHER",
+            "identifier": "OCLC:1158317212"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "printType": "BOOK",
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "language": "en",
+        "previewLink": "http://books.google.co.in/books?id=BBmkzQEACAAJ&dq=intitle:well+done,+secret+seven+inauthor:enid+blyton&hl=&cd=5&source=gbs_api",
+        "infoLink": "http://books.google.co.in/books?id=BBmkzQEACAAJ&dq=intitle:well+done,+secret+seven+inauthor:enid+blyton&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/Well_done_Secret_Seven.html?hl=&id=BBmkzQEACAAJ"
+      },
+      "saleInfo": {
+        "country": "IN",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "IN",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=BBmkzQEACAAJ&hl=&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      }
+    }
+  ]
+}

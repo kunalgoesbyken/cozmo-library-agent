@@ -22,6 +22,8 @@ def appraisal_reasons(
         ("user_statement", any(s.needs_appraisal for s in statements)),
         ("spine_wording", any(set(tokens(term)) <= spine for term in cfg.appraisal_triggers)),
         ("antiquarian_year", resolution.year is not None and resolution.year < locale.antiquarian_year),
+        ("old_work_edition_unverified", resolution.equivalent_edition and not resolution.edition
+         and resolution.work_year is not None and resolution.work_year < locale.antiquarian_year),
         ("no_isbn", not resolution.isbn),
         ("used_over_threshold", used >= locale.appraisal_threshold),
         ("used_over_new", new > 0 and used >= cfg.used_new_ratio * new),

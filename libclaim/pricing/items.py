@@ -52,11 +52,12 @@ def sample(packet: ClaimPacket, n: int):
 
 
 async def second_country(
-    packet: ClaimPacket, n: int = 10, *, market: Market, other: Market, fx: Fx
+    packet: ClaimPacket, n: int = 10, *, market: Market, other: Market, fx: Fx,
+    resolutions: dict[str, Resolution] | None = None,
 ) -> SecondCountry:
     rows = []
     for book in sample(packet, n):
-        resolution = Resolution(
+        resolution = (resolutions or {}).get(book.id) or Resolution(
             status="identified", title=book.title, author=book.author, edition=book.edition, isbn=book.isbn
         )
         priced = await price_book(resolution, market, reading=Reading(track_id=0), statements=[], other=other, fx=fx)

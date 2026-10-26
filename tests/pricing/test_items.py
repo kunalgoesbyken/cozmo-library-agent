@@ -8,6 +8,7 @@ from libclaim.pricing.sources.fx import Fx
 from libclaim.pricing.sources.listings import Listings
 from libclaim.settings import load_locale
 from tests.pricing.conftest import Site, make_http
+from libclaim.vision.resolve import Resolution
 from tests.pricing.factories import FakeSource, not_found, quote
 from tests.pricing.test_listings import NILKAMAL, sources
 
@@ -163,3 +164,16 @@ async def test_limit_n_is_respected(tmp_path, online):
     fx = Fx(make_http(tmp_path, site_with()))
     result = await second_country(packet, 2, market=gb, other=india, fx=fx)
     assert [b.book_id for b in result.books] == ["b5", "b4"]
+
+
+async def test_second_country_keeps_the_equivalent_edition_label_from_the_resolution(tmp_path, online):
+    isbn = "9780000000001"
+    gb, india = markets(ByIsbn({isbn: "8.99"}))
+    resolutions = {"b1": Resolution(status="identified", title="T1", isbn=isbn, equivalent_edition=True,
+                                    edition_unverified=True, work_year=1993)}
+    fx = Fx(make_http(tmp_path, site_with()))
+    result = await second_country(packet_of(book(1, 900, isbn)), 10, market=gb, other=india, fx=fx,
+                                  resolutions=resolutions)
+    row = result.books[0]
+    assert row.replacement_cost.amount == Decimal("8.99")
+    assert "equivalent edition" in row.replacement_cost.source

@@ -6,9 +6,10 @@ import pytest
 from libclaim.catalog.googlebooks import GoogleBooks
 from libclaim.catalog.http import Candidate, CatalogHttp, Edition
 from libclaim.catalog.openlibrary import OpenLibrary
+from libclaim.resolve_config import load_resolve_config
 from libclaim.vision.reading import Reading
 import libclaim.vision.resolve as resolve_module
-from libclaim.vision.resolve import Catalogs, SpineDims, accept_identification, rank, resolve
+from libclaim.vision.resolve import Catalogs, SpineDims, accept_identification, ocr_overlap, rank, resolve
 
 FIXTURES = Path(__file__).resolve().parent.parent / "fixtures" / "catalog"
 
@@ -190,13 +191,20 @@ async def test_lone_catalogue_hit_needs_a_stricter_score_or_corroboration(monkey
 
 
 @pytest.mark.parametrize(
-    "gate", ["ocr_overlap_min", "score_min", "margin_min", "confident_score"]
+    "changes",
+    [
+        {"ocr_overlap_min": 101, "catalogue_only_score": 101},
+        {"ocr_overlap_min": 101, "catalogue_only_margin": 101},
+        {"score_min": 101},
+        {"margin_min": 101},
+        {"confident_score": 101},
+    ],
 )
-async def test_each_gate_can_reject_on_its_own(monkeypatch, catalogs, gate):
+async def test_each_gate_can_reject_on_its_own(monkeypatch, catalogs, changes):
     spine = reading("SAPIENS", "HARARI")
     ranked = rank(spine, await catalogs.open_library.search("sapiens", "harari"))[:2]
     assert accept_identification(spine, ("SAPIENS HARARI", 0.9), ranked)
-    gates_with(monkeypatch, **{gate: 101})
+    gates_with(monkeypatch, **changes)
     assert not accept_identification(spine, ("SAPIENS HARARI", 0.9), ranked)
 
 
@@ -235,15 +243,20 @@ async def test_failed_reading_is_reported():
     assert result.reason == "reading_failed"
 
 
-async def test_ambiguous_publisher_gives_no_isbn_claim(catalogs):
+async def test_ambiguous_publisher_prices_an_equivalent_edition_of_that_publisher(catalogs):
     found = await catalogs.open_library.search("sapiens", "harari")
-    editions = [Edition(publisher="Penguin", isbn="111", url="u1"), Edition(publisher="Penguin", isbn="222", url="u2")]
+    editions = [
+        Edition(publisher="Penguin", isbn="9780000000111", url="u1", year=2014),
+        Edition(publisher="Penguin", isbn="9780000000222", url="u2", year=2019),
+        Edition(publisher="Vintage", isbn="9780000000333", url="u3", year=2023),
+    ]
     result = await resolve(
         reading("SAPIENS", "HARARI", "PENGUIN"), ("SAPIENS HARARI", 0.9), None, fakes(found, editions=editions)
     )
     assert result.status == "identified"
-    assert result.edition_unverified
-    assert result.isbn == "" and result.edition == ""
+    assert result.edition_unverified and result.equivalent_edition
+    assert result.edition == "Penguin"
+    assert result.isbn == "9780000000222"
 
 
 async def test_query_keeps_punctuation(tmp_path, monkeypatch):
@@ -300,3 +313,149 @@ async def test_all_digit_title_is_not_stripped():
     stub = Catalogs(StubLibrary(["Transhimalaja"]), StubBooks())
     result = await resolve(reading("1984", "Sven Hedin"), ("1984 Sven Hedin", 0.9), None, stub)
     assert result.reason == "no_catalogue_match"
+
+
+def blyton(title, **fields):
+    return cand(title, "Enid Blyton", **fields)
+
+
+SKYTOP = [blyton("The Secret of Skytop Hill and Other Stories"), blyton("The Secret of Skytop Hill and Other Stories"),
+          blyton("The Secret of Spiggy Holes")]
+
+
+async def test_empty_ocr_with_a_strong_catalogue_match_is_identified_from_the_catalogue_only():
+    spine = reading("The Secret of Skytop Hill and other stories", "Enid Blyton", "Award")
+    result = await resolve(spine, ("", 0.0), None, fakes(SKYTOP))
+    assert result.status == "identified"
+    assert result.title == "The Secret of Skytop Hill and Other Stories"
+    assert result.corroboration == "catalogue_only"
+    assert 0 < result.id_confidence <= 0.5
+
+
+async def test_ocr_corroborated_read_records_ocr_and_keeps_the_full_confidence():
+    spine = reading("The Secret of Skytop Hill and other stories", "Enid Blyton")
+    result = await resolve(spine, ("The Secret of Skytop Hill and other stories", 0.9), None, fakes(SKYTOP))
+    assert result.corroboration == "ocr"
+    assert result.id_confidence > 0.9
+
+
+async def test_hallucinated_title_that_matches_nothing_is_unidentified():
+    spine = reading("The Moonlit Lighthouse of Kerrigan Bay", "Enid Blyton")
+    result = await resolve(spine, ("", 0.0), None, fakes(SKYTOP, SKYTOP))
+    assert result.status == "unidentified"
+    assert result.corroboration == ""
+
+
+async def test_real_title_by_a_different_author_is_unidentified():
+    spine = reading("The Secret of Skytop Hill and other stories", "Enid Blyton")
+    other = [cand("The Secret of Skytop Hill and Other Stories", "Margaret Jennings"),
+             cand("The Secret of Skytop Hill and Other Stories", "Margaret Jennings")]
+    result = await resolve(spine, ("", 0.0), None, fakes(other, other))
+    assert result.status == "unidentified"
+
+
+@pytest.mark.parametrize("title", ["IT", "EMMA"])
+async def test_short_generic_title_without_author_and_without_ocr_is_unidentified(title):
+    library = [cand(title.title(), "Stephen King"), cand(title.title(), "Jane Austen")]
+    result = await resolve(reading(title), ("", 0.0), None, fakes(library, library))
+    assert result.status == "unidentified"
+    assert result.reason == "not_corroborated"
+
+
+async def test_ocr_that_reads_other_words_blocks_the_catalogue_only_path():
+    spine = reading("The Secret of Skytop Hill and other stories", "Enid Blyton")
+    result = await resolve(spine, ("ZEBRA CROSSING TIMETABLE", 0.9), None, fakes(SKYTOP))
+    assert result.status == "unidentified"
+    assert result.reason == "ocr_disagrees"
+
+
+async def test_catalogue_only_needs_a_clear_margin():
+    spine = reading("The Secret Seven", "Enid Blyton")
+    library = [blyton("The Secret Seven"), blyton("The Secret Seven Win Through")]
+    result = await resolve(spine, ("", 0.0), None, fakes(library, library))
+    assert result.status == "unidentified"
+
+
+async def test_partial_ocr_support_still_allows_the_catalogue_path():
+    spine = reading("Ein ewiger Traum", "Borges", "Hanser")
+    library = [cand("Ein ewiger Traum", "Jorge Luis Borges"), cand("Ein ewiger Traum", "Jorge Luis Borges")]
+    result = await resolve(spine, ("Hanser Traum", 0.9), None, fakes(library))
+    assert result.status == "identified"
+    assert result.corroboration == "catalogue_only"
+
+
+NECKLACE = [blyton("The Secret of the Lost Necklace", year=2014)]
+
+
+def edition(isbn, year, publisher="Hodder", title="The Secret of the Lost Necklace", physical_format="Paperback"):
+    return Edition(publisher=publisher, isbn=isbn, url=f"https://openlibrary.org/books/{isbn}", year=year, title=title,
+                   physical_format=physical_format)
+
+
+async def test_unknown_printed_edition_takes_the_most_recent_isbn_edition_as_equivalent():
+    editions = [edition("9780000000001", 2001), edition("9780000000003", 2019, physical_format="Hardcover"),
+                edition("9780000000002", 2016), edition("9780000000004", 2022, title="Das Geheimnis der Halskette")]
+    spine = reading("The Secret of the LOST NECKLACE", "Enid Blyton")
+    result = await resolve(spine, ("The Secret of the LOST NECKLACE", 0.9), None, fakes(NECKLACE, editions=editions))
+    assert result.status == "identified"
+    assert result.isbn == "9780000000002"
+    assert result.edition == "" and result.edition_unverified and result.equivalent_edition
+    assert result.year == 2016
+    assert result.work_year == 2014
+    assert "https://openlibrary.org/books/9780000000002" in result.source_urls
+
+
+async def test_printed_publisher_that_matches_one_edition_is_that_edition_not_an_equivalent():
+    editions = [edition("9780000000001", 2001, publisher="Award Publications"), edition("9780000000002", 2016)]
+    spine = reading("The Secret of the LOST NECKLACE", "Enid Blyton", "AWARD")
+    result = await resolve(spine, ("The Secret of the LOST NECKLACE", 0.9), None, fakes(NECKLACE, editions=editions))
+    assert result.isbn == "9780000000001"
+    assert result.edition == "Award Publications"
+    assert not result.equivalent_edition and not result.edition_unverified
+
+
+async def test_no_edition_with_an_isbn_leaves_the_isbn_empty():
+    spine = reading("The Secret of the LOST NECKLACE", "Enid Blyton")
+    result = await resolve(spine, ("The Secret of the LOST NECKLACE", 0.9), None, fakes(NECKLACE))
+    assert result.status == "identified"
+    assert result.isbn == "" and not result.equivalent_edition
+
+
+def test_ocr_words_run_together_still_support_the_read():
+    spine = reading("Gemeinsame Werke 1", "J.L.Borges")
+    assert ocr_overlap(spine, "Hanser GemeinsameWerke1 J.L.Borges") == 1.0
+
+
+def test_short_title_is_not_supported_by_a_longer_ocr_word():
+    assert ocr_overlap(reading("IT"), "WITCHES") == 0.0
+
+
+async def test_series_name_run_together_by_ocr_does_not_block_the_catalogue_path():
+    spine = reading("Five on a Treasure Island", "Enid Blyton", "The Famous Five")
+    library = [blyton("Five on a Treasure Island"), blyton("Five on a Treasure Island"), blyton("Five Go to Camp")]
+    result = await resolve(spine, ("FAMOUSFIVE", 1.0), None, fakes(library))
+    assert result.status == "identified"
+    assert result.corroboration == "catalogue_only"
+
+
+async def test_recorded_blyton_spine_with_empty_ocr_is_identified_from_the_catalogue(catalogs):
+    spine = reading("The Secret of the LOST NECKLACE", "Enid Blyton", "AWARD")
+    result = await resolve(spine, ("", 0.0), None, catalogs)
+    assert result.status == "identified"
+    assert result.title == "The Secret of the Lost Necklace"
+    assert result.corroboration == "catalogue_only" and result.id_confidence == 0.5
+    assert result.equivalent_edition and result.edition == "" and result.isbn == "9780753727041"
+
+
+async def test_recorded_google_books_reply_identifies_well_done_secret_seven_without_ocr(catalogs):
+    result = await resolve(reading("Well Done, Secret Seven", "Enid Blyton"), ("", 0.0), None, catalogs)
+    assert result.status == "identified"
+    assert result.corroboration == "catalogue_only"
+    assert result.equivalent_edition and len(result.isbn) == 13
+
+
+async def test_recorded_runner_up_one_word_longer_keeps_amelia_jane_unidentified_without_ocr(catalogs):
+    result = await resolve(reading("Naughty Amelia Jane", "Enid Blyton"), ("", 0.0), None, catalogs)
+    assert result.status == "unidentified"
+    assert result.reason == "catalogue_unavailable"
+    assert result.margin < load_resolve_config().gates.catalogue_only_margin

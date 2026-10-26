@@ -13,6 +13,11 @@ ocr:
   log_level: error
 gates:
   ocr_overlap_min: 0.6
+  ocr_contradiction_yield: 8
+  catalogue_only_score: 95
+  catalogue_only_title: 95
+  catalogue_only_margin: 15
+  catalogue_only_confidence: 0.5
   token_match: 80
   score_min: 90
   margin_min: 8
@@ -25,6 +30,9 @@ gates:
   extra_token_penalty: 20
   agree_score: 85
   publisher_match: 80
+editions:
+  title_match: 95
+  preferred_formats: [paperback, mass market paperback, trade paperback]
 catalog:
   cache_dir: cache
   timeout_seconds: 20

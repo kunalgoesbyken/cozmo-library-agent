@@ -132,6 +132,41 @@ async def test_equivalent_edition_goes_to_review_not_price():
     assert "equivalent_edition: Bookchor" in result.review
 
 
+async def test_equivalent_edition_is_priced_from_its_isbn_and_labelled_in_the_line(http):
+    seen = []
+
+    class Recording:
+        async def quote(self, isbn, condition):
+            seen.append(isbn)
+            return quote(400, source="Bookchor") if condition == "new" else not_found()
+
+    equivalent = resolution(isbn="9780000000002", edition="", edition_unverified=True, equivalent_edition=True,
+                            work_year=1993)
+    result = await price(res=equivalent, market=india(bookchor=Recording()), fx=Fx(http))
+    assert result.status == "identified" and result.replacement_cost.amount == Decimal(400)
+    assert set(seen) == {"9780000000002"}
+    assert "equivalent edition" in result.replacement_cost.source and "9780000000002" in result.replacement_cost.source
+    assert "equivalent edition" in result.used_value.source
+    assert result.replacement_cost.url.endswith("/new")
+    assert any(note.startswith("equivalent_edition_priced") and "9780000000002" in note for note in result.review)
+
+
+async def test_catalogue_only_identification_is_noted_for_review():
+    chor = FakeSource(new=quote(400))
+    result = await price(res=resolution(corroboration="catalogue_only"), market=india(bookchor=chor))
+    assert result.replacement_cost.amount == Decimal(400)
+    assert any(note.startswith("identified_from_catalogue_only") for note in result.review)
+
+
+async def test_equivalent_edition_of_an_old_work_is_not_priced():
+    chor = FakeSource(new=quote(400))
+    old = resolution(isbn="9780000000002", edition_unverified=True, equivalent_edition=True, work_year=1942)
+    result = await price(res=old, market=india(bookchor=chor))
+    assert result.status == "needs_appraisal"
+    assert result.replacement_cost.amount is None
+    assert "old_work_edition_unverified" in result.review
+
+
 async def test_unidentified_book_is_not_priced():
     result = await price(res=resolution(status="unidentified", isbn=""))
     assert result.status == "unidentified" and not result.excluded and result.review == []
