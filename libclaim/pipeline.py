@@ -106,7 +106,7 @@ from libclaim.vision.rows import (
     shelf_units,
     split_rows,
 )
-from libclaim.vision.scale import SpineDims, load_measure_config, unit_scale
+from libclaim.vision.scale import ScaleMethod, SpineDims, load_measure_config, unit_scale
 from libclaim.vision.spines import Orientation, Source, SpineDet, detect_spines, local_orientation, reconcile
 from libclaim.vision.tracks import BookTrack, Frame, merge_tracks
 
@@ -614,7 +614,8 @@ class SweepRun:
         await self.log_segment(plan, books)
 
     async def resolve_book(self, read: BookRead, dims: SpineDims | None) -> Resolution:
-        spine = None if dims is None else ResolveDims(height_cm=dims.height_cm, thickness_cm=dims.thickness_cm)
+        measured = dims is not None and dims.scale_method != ScaleMethod.book_format_prior
+        spine = ResolveDims(height_cm=dims.height_cm, thickness_cm=dims.thickness_cm) if measured else None
         try:
             return await resolve(read.reading, (read.ocr_text, read.ocr_score), spine, self.services.catalogs)
         except CatalogOffline:

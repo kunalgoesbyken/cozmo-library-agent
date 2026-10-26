@@ -13,6 +13,8 @@ from libclaim.vision.boxes import Box
 from libclaim.vision.reading import Reading, SpineCrop
 from libclaim.catalog.http import Candidate
 from libclaim.vision.resolve import Catalogs
+from libclaim.vision.resolve import SpineDims as ResolveDims
+from libclaim.vision.scale import ScaleMethod, SpineDims
 from libclaim.vision.spines import Orientation
 from tests import sweep12 as fx
 from tests.test_pipeline import services
@@ -129,3 +131,18 @@ async def test_resolution_starts_while_later_batches_are_still_being_read(sweep,
     await run.resolve_segment(plan)
     assert client.calls == 2 and client.resolved_during_reading
     assert len(run.results.resolution.resolutions) == BOOKS
+
+
+def dims_with(method):
+    return SpineDims(height_cm=21.0, thickness_cm=3.0, scale_method=method, confidence=0.5, frame_seq=1)
+
+
+@pytest.mark.parametrize(
+    ("method", "given"),
+    [(ScaleMethod.book_format_prior, None), (ScaleMethod.aruco_homography, ResolveDims(height_cm=21.0, thickness_cm=3.0))],
+)
+async def test_resolver_gets_only_measured_dimensions(sweep, tmp_path, method, given):
+    run = run_with(sweep, tmp_path, Library([]), [])
+    read = BookRead(reading=read_of(0), ocr_text="")
+    resolution = await run.resolve_book(read, dims_with(method))
+    assert resolution.dims == given
