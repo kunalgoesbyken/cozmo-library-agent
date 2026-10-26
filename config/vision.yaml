@@ -39,6 +39,8 @@ tracks:
   track_iou: 0.5
   edge_px: 4.0
   cut_containment: 0.8
+  noise_min_views: 4
+  noise_max_rate: 0.4
   anchor_lookback: 3
   det_min: 0.5
   det_max: 2.0

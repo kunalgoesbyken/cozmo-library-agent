@@ -75,8 +75,9 @@ From `runs/f3-live/claim_packet.json` (`costs`, `latency_s`), the latest live ru
 - Equivalent editions: the "most recent matching ISBN-13" rule can pick a print-on-demand reprint. It is labelled and reviewed, not verified.
 - Dimensions: all 93 books are `book_format_prior`. No marker was used, so there are no marker-calibrated dimensions, the 2.5 cm recess is an assumption, and `box_height_trim` is uncalibrated. Pass bar not evaluated.
 - Room: no area result from these runs (base install, no room photos); depth model accuracy against a tape is unmeasured. Pass bars not evaluated.
-- Detector: overlapping boxes on tilted stacks and one box spanning two spines remain (NMS thresholds left alone on purpose); the Blyton count is 3 short.
+- Detector: overlapping boxes on tilted stacks and one box spanning two spines remain (NMS thresholds left alone on purpose); the Blyton count was 3 short on stills. On a simulated pan in a real browser the tracker first counted 123 books for 96 true; merging frame-edge slivers and dropping boxes seen in at most 40% of the frames that view them (`config/vision.yaml`, `tracks`) gave 93, but that pan was synthetic and no marker was at book scale.
 - Noise: the review queue has 216 entries for 93 books (10 high, 137 medium, 69 low); unidentified books still get two entries each.
 - Live and phone: no iPhone run, no real GoAway, compression at 12K/6K never observed firing, the abrupt-disconnect path takes minutes when 150 stills arrive in a burst and Gemini rate limits bind.
 - Tuning: gates and cutoffs were tuned on three public photos, not on a real library sweep.
 - Ground truth: none of the five files exists, so [results.md](results.md) can evaluate only time and cost.
+- Google Books as a price source: switched off (`enabled: false` in `config/pricing.yaml`). Live queries on 2026-10-26 showed that `isbn:` returns nothing with the project key, a bare ISBN query returns unrelated volumes, and every `FOR_SALE` volume was an ebook, which is not a replacement cost. Google Books stays the title-search catalogue.

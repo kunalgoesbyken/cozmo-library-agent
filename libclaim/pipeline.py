@@ -529,6 +529,8 @@ class SweepRun:
             return
         try:
             await hook(*args)
+        except LookupError:
+            logger.debug("live hook skipped: no live session")
         except Exception as error:
             logger.warning("live hook failed: %s", type(error).__name__)
 

@@ -92,6 +92,24 @@ def track_overlap(box: Box, cut: bool, track: list[tuple[int, Box, Box, int, boo
     return best
 
 
+def views_of(track: list[tuple[int, Box, Box, int, bool]], frames: list[Frame], placed: list[tuple[int, np.ndarray]], cfg: TrackConfig) -> int:
+    group = track[0][3]
+    cx = float(np.mean([(m[2].x1 + m[2].x2) / 2 for m in track]))
+    cy = float(np.mean([(m[2].y1 + m[2].y2) / 2 for m in track]))
+    views = 0
+    for frame, (g, matrix) in zip(frames, placed):
+        if g != group:
+            continue
+        field = project(Box(x1=0, y1=0, x2=frame.still.w, y2=frame.still.h), matrix)
+        views += field.x1 + cfg.edge_px < cx < field.x2 - cfg.edge_px and field.y1 < cy < field.y2
+    return views
+
+
+def is_noise(track: list[tuple[int, Box, Box, int, bool]], frames: list[Frame], placed: list[tuple[int, np.ndarray]], cfg: TrackConfig) -> bool:
+    views = views_of(track, frames, placed, cfg)
+    return views >= cfg.noise_min_views and len(track) / views <= cfg.noise_max_rate
+
+
 def merge_tracks(frames: list[Frame]) -> list[BookTrack]:
     cfg = load_vision_config().tracks
     grays = [read_image(f.still.path, cv2.IMREAD_GRAYSCALE) for f in frames]
@@ -119,6 +137,7 @@ def merge_tracks(frames: list[Frame]) -> list[BookTrack]:
                 members.append([])
                 assigned[bi] = len(members) - 1
             members[assigned[bi]].append((index, box, moved[bi], group, cuts[bi]))
+    members = [track for track in members if not is_noise(track, frames, placed, cfg)]
     tracks = []
     for track_id, track in enumerate(members):
         sharpest = max(track, key=lambda m: (not m[4], frames[m[0]].still.blur))

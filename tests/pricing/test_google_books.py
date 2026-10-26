@@ -22,6 +22,12 @@ IN = load_locale("IN")
 VOLUMES = "https://www.googleapis.com/books/v1/volumes"
 
 
+def enabled_config():
+    config = load_pricing_config()
+    on = config.sources.google_books.model_copy(update={"enabled": True})
+    return config.model_copy(update={"sources": config.sources.model_copy(update={"google_books": on})})
+
+
 def source_for(tmp_path, fixture, locale=IN, config=None, status=200):
     seen = []
 
@@ -31,7 +37,7 @@ def source_for(tmp_path, fixture, locale=IN, config=None, status=200):
 
     client = httpx.AsyncClient(transport=httpx.MockTransport(handler), headers={"User-Agent": "test"})
     books = GoogleBooks(CatalogHttp(tmp_path / "cache", client=client), api_key=KEY)
-    return GoogleBooksPrice(books, locale, config), seen
+    return GoogleBooksPrice(books, locale, config or enabled_config()), seen
 
 
 @pytest.fixture(autouse=True)
@@ -140,7 +146,7 @@ async def test_malformed_price_is_unavailable(tmp_path):
         return httpx.Response(200, content=(tmp_path / "bad.json").read_bytes())
 
     client = httpx.AsyncClient(transport=httpx.MockTransport(handler), headers={"User-Agent": "test"})
-    source = GoogleBooksPrice(GoogleBooks(CatalogHttp(tmp_path / "cache", client=client), api_key=KEY), IN)
+    source = GoogleBooksPrice(GoogleBooks(CatalogHttp(tmp_path / "cache", client=client), api_key=KEY), IN, enabled_config())
     result = await source.quote(ISBN, "new")
     assert isinstance(result, NotFound) and result.reason == "unavailable"
 

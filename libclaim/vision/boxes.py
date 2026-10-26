@@ -65,6 +65,8 @@ class TrackConfig(BaseModel):
     track_iou: float
     edge_px: float
     cut_containment: float
+    noise_min_views: int
+    noise_max_rate: float
     anchor_lookback: int
     det_min: float
     det_max: float

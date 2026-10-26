@@ -17,7 +17,7 @@ flowchart LR
     store --> room["room<br/>Depth Anything V2 + planes, ArUco rescale"]
     store --> it["items<br/>Gemini detection"]
     rs --> ap["appraisal<br/>appraisal_reasons"]
-    ap --> pr["pricing<br/>Bookchor, Pustakkosh, Penguin UK, Google Books, listings, FX"]
+    ap --> pr["pricing<br/>Bookchor, Pustakkosh, Penguin UK, listings, FX"]
     it --> pr
     room --> pk["packet<br/>assemble, crops, totals, review queue"]
     pr --> pk
@@ -67,7 +67,7 @@ flowchart LR
 
 | Price | Source |
 |---|---|
-| India new | Bookchor ISBN page JSON-LD `NewCondition`, then Pustakkosh store API, then Google Books `saleInfo` (`FOR_SALE` only; foreign currency goes through the converted path) |
+| India new | Bookchor ISBN page JSON-LD `NewCondition`, then Pustakkosh store API |
 | India used | Bookchor `UsedCondition`, then Pustakkosh `_Used`; otherwise derived: sourced new times a versioned condition factor, labelled `derived` |
 | Second country (GB) | Penguin UK RRP for the exact ISBN where robots.txt allows; otherwise converted from the first country at the ECB rate (Frankfurter), labelled `converted` |
 | Item ranges | Category listing pages that robots.txt allows (IKEA India, Urban Ladder, Vijay Sales, Nilkamal): P25 to P75 when at least 5 matches, each bound a real URL |

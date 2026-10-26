@@ -52,7 +52,7 @@ sources:
     currency_symbols:
       "£": GBP
   google_books:
-    enabled: true
+    enabled: false
     name: Google Books
     sale_status: FOR_SALE
     isbn_query: "isbn:{isbn}"

@@ -139,3 +139,19 @@ def test_books_cut_by_the_frame_edge_do_not_become_extra_tracks(tmp_path):
     assert len(found) == SPINES
     for track in found:
         assert track.best_box.width == SPINE_W
+
+
+def test_a_box_seen_once_among_many_views_is_noise_but_a_short_pass_keeps_it(tmp_path):
+    frames = make_frames(tmp_path)
+    ghost = Box(x1=300, y1=5, x2=330, y2=30)
+    frames[1].boxes.append(ghost)
+    assert len(merge_tracks(frames)) == SPINES + 1
+
+    canvas, _ = scene()
+    many = []
+    for seq in range(5):
+        path = tmp_path / f"many{seq}.png"
+        cv2.imwrite(str(path), canvas[:, :FRAME_W])
+        still = Still(seq=seq, t_ms=seq * 500, path=str(path), w=FRAME_W, h=SCENE_H, blur=0.5, glare=0.0, motion_dps=0.0)
+        many.append(Frame(still=still, boxes=list(frames[0].boxes) + ([ghost] if seq == 2 else [])))
+    assert len(merge_tracks(many)) == len(frames[0].boxes)
