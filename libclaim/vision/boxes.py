@@ -63,6 +63,8 @@ class TrackConfig(BaseModel):
     ransac_reproj_px: float
     min_inliers: int
     track_iou: float
+    edge_px: float
+    cut_containment: float
     anchor_lookback: int
     det_min: float
     det_max: float

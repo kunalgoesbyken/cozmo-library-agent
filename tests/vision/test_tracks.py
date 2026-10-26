@@ -119,3 +119,23 @@ def test_unreadable_frame_raises_clear_error(tmp_path):
     frames[1].still.path = str(tmp_path / "gone.png")
     with pytest.raises(ImageUnreadable):
         merge_tracks(frames)
+
+
+def test_books_cut_by_the_frame_edge_do_not_become_extra_tracks(tmp_path):
+    canvas, spans = scene()
+    width = 620
+    frames = []
+    for seq, shift in enumerate([0, 60]):
+        path = tmp_path / f"cut{seq}.png"
+        cv2.imwrite(str(path), canvas[:, shift : shift + width])
+        still = Still(seq=seq, t_ms=seq * 500, path=str(path), w=width, h=SCENE_H, blur=0.5, glare=0.0, motion_dps=0.0)
+        boxes = []
+        for x1, y1, x2, y2 in spans:
+            left, right = max(x1 - shift, 0), min(x2 - shift, width)
+            if right - left > 5:
+                boxes.append(Box(x1=left, y1=y1, x2=right, y2=y2))
+        frames.append(Frame(still=still, boxes=boxes))
+    found = merge_tracks(frames)
+    assert len(found) == SPINES
+    for track in found:
+        assert track.best_box.width == SPINE_W

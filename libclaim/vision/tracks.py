@@ -3,7 +3,7 @@ import numpy as np
 from pydantic import BaseModel
 
 from libclaim.models import Still
-from libclaim.vision.boxes import Box, TrackConfig, iou, load_vision_config, read_image
+from libclaim.vision.boxes import Box, TrackConfig, containment, iou, load_vision_config, read_image
 
 HOMOGRAPHY_MIN_MATCHES = 4
 
@@ -76,23 +76,36 @@ def register(grays: list[np.ndarray], cfg: TrackConfig) -> list[tuple[int, np.nd
     return placed
 
 
-def track_overlap(box: Box, track: list[tuple[int, Box, Box, int]], group: int) -> float:
-    return max((iou(box, ref) for _, _, ref, g in track if g == group), default=0.0)
+def is_cut(box: Box, width: int, height: int, cfg: TrackConfig) -> bool:
+    return box.x1 <= cfg.edge_px or box.y1 <= cfg.edge_px or box.x2 >= width - cfg.edge_px or box.y2 >= height - cfg.edge_px
+
+
+def track_overlap(box: Box, cut: bool, track: list[tuple[int, Box, Box, int, bool]], group: int, cfg: TrackConfig) -> float:
+    best = 0.0
+    for _, _, ref, g, ref_cut in track:
+        if g != group:
+            continue
+        overlap = iou(box, ref)
+        if overlap < cfg.track_iou and (cut or ref_cut) and containment(box, ref) >= cfg.cut_containment:
+            overlap = cfg.track_iou
+        best = max(best, overlap)
+    return best
 
 
 def merge_tracks(frames: list[Frame]) -> list[BookTrack]:
     cfg = load_vision_config().tracks
     grays = [read_image(f.still.path, cv2.IMREAD_GRAYSCALE) for f in frames]
     placed = register(grays, cfg)
-    members: list[list[tuple[int, Box, Box, int]]] = []
+    members: list[list[tuple[int, Box, Box, int, bool]]] = []
     for index, frame in enumerate(frames):
         group, matrix = placed[index]
         moved = [project(box, matrix) for box in frame.boxes]
+        cuts = [is_cut(box, frame.still.w, frame.still.h, cfg) for box in frame.boxes]
         candidates = sorted(
             (overlap, bi, ti)
             for bi, box in enumerate(moved)
             for ti, track in enumerate(members)
-            for overlap in [track_overlap(box, track, group)]
+            for overlap in [track_overlap(box, cuts[bi], track, group, cfg)]
             if overlap >= cfg.track_iou
         )[::-1]
         assigned: dict[int, int] = {}
@@ -105,14 +118,14 @@ def merge_tracks(frames: list[Frame]) -> list[BookTrack]:
             if bi not in assigned:
                 members.append([])
                 assigned[bi] = len(members) - 1
-            members[assigned[bi]].append((index, box, moved[bi], group))
+            members[assigned[bi]].append((index, box, moved[bi], group, cuts[bi]))
     tracks = []
     for track_id, track in enumerate(members):
-        sharpest = max(track, key=lambda m: frames[m[0]].still.blur)
+        sharpest = max(track, key=lambda m: (not m[4], frames[m[0]].still.blur))
         tracks.append(
             BookTrack(
                 track_id=track_id,
-                refs=[BoxRef(frame=i, box=b) for i, b, _, _ in track],
+                refs=[BoxRef(frame=i, box=b) for i, b, _, _, _ in track],
                 best_frame=frames[sharpest[0]].still,
                 best_box=sharpest[1],
             )
