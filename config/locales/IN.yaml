@@ -1,6 +1,6 @@
 country: IN
 currency: INR
-new_sources: [bookchor, pustakkosh, bookswagon]
+new_sources: [bookchor, pustakkosh, bookswagon, converted]
 used_sources: [bookchor, pustakkosh, derived]
 appraisal_threshold: 5000
 antiquarian_year: 1950

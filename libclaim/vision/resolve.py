@@ -8,6 +8,7 @@ from rapidfuzz.utils import default_process
 
 from libclaim.catalog.googlebooks import GoogleBooks
 from libclaim.catalog.http import Candidate, CatalogHttp, Edition, guarded
+from libclaim.catalog.googlebooks import SOURCE as GOOGLE_BOOKS
 from libclaim.catalog.openlibrary import SOURCE as OPEN_LIBRARY
 from libclaim.catalog.openlibrary import OpenLibrary
 from libclaim.resolve_config import load_resolve_config
@@ -39,6 +40,7 @@ class Resolution(BaseModel):
     author: str = ""
     edition: str = ""
     isbn: str = ""
+    year: int | None = None
     edition_unverified: bool = False
     id_confidence: float = 0.0
     match_score: float = 0.0
@@ -260,6 +262,7 @@ async def resolve(
             "author": top.best.author,
             "edition": edition.publisher if edition else "",
             "isbn": edition.isbn if edition else "",
+            "year": next((m.year for m in top.members if m.source == GOOGLE_BOOKS and m.year), None),
             "edition_unverified": unverified or editions_down,
             "id_confidence": round(top.score / 100 * ocr_overlap(reading, ocr[0]), 3),
             "match_score": top.score,
