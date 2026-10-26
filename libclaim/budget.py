@@ -3,10 +3,10 @@ from pathlib import Path
 
 import yaml
 
-from libclaim.settings import CONFIG_DIR
+from libclaim.settings import CONFIG_DIR, ROOT
 
 PRICES_PATH = CONFIG_DIR / "model_prices.yaml"
-DEFAULT_LEDGER = Path("runs") / "spend.jsonl"
+DEFAULT_LEDGER = ROOT / "runs" / "spend.jsonl"
 DEFAULT_CAP_USD = 0.80
 TOKENS_PER_PRICE_UNIT = 1_000_000
 
@@ -19,6 +19,7 @@ class Budget:
     def __init__(self, path: Path = DEFAULT_LEDGER, cap_usd: float = DEFAULT_CAP_USD):
         self.path = Path(path)
         self.cap_usd = cap_usd
+        self.pending = 0.0
         self.models = yaml.safe_load(PRICES_PATH.read_text(encoding="utf-8"))["models"]
         rates = [rate for table in self.models.values() for rate in table.values()]
         self.worst = {
@@ -51,6 +52,15 @@ class Budget:
         return sum(json.loads(line)["usd"] for line in lines if line)
 
     def check(self) -> None:
-        total = self.total_usd()
+        total = self.total_usd() + self.pending
         if total >= self.cap_usd:
             raise BudgetExceeded(f"spend {total:.4f} USD reached cap {self.cap_usd:.2f} USD")
+
+    def reserve(self, usd: float) -> None:
+        total = self.total_usd() + self.pending
+        if total + usd > self.cap_usd:
+            raise BudgetExceeded(f"spend {total:.4f} USD plus reserve {usd:.4f} USD exceeds cap {self.cap_usd:.2f} USD")
+        self.pending += usd
+
+    def release(self, usd: float) -> None:
+        self.pending = max(0.0, self.pending - usd)

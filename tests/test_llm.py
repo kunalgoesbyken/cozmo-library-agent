@@ -1,3 +1,4 @@
+import asyncio
 import json
 from datetime import UTC, datetime, timedelta
 
@@ -6,7 +7,15 @@ from google.genai import errors
 from pydantic import BaseModel
 
 from libclaim.budget import Budget, BudgetExceeded
-from libclaim.llm import Llm, LlmResponse, LiveCallBlocked, load_llm_config
+from libclaim.llm import (
+    Llm,
+    LiveCallBlocked,
+    LlmReplyInvalid,
+    LlmResponse,
+    QuotaExhausted,
+    UnknownModel,
+    load_llm_config,
+)
 from libclaim.sweep import Ledger
 
 CFG = load_llm_config()
@@ -30,11 +39,14 @@ class FakeClient:
 
     async def generate(self, model, parts, schema):
         self.calls.append(model)
+        await asyncio.sleep(0)
         outcome = self.script[model]
         if isinstance(outcome, list):
             outcome = outcome.pop(0)
         if isinstance(outcome, Exception):
             raise outcome
+        if isinstance(outcome, str):
+            return LlmResponse(text=outcome, input_tokens=10, output_tokens=0)
         return LlmResponse(text=json.dumps({"value": outcome}), input_tokens=100, output_tokens=20)
 
 
@@ -141,3 +153,76 @@ async def test_offline_guard_raises_for_live_client(tmp_path):
     with pytest.raises(LiveCallBlocked):
         await llm.structured([FIRST], ["hi"], Answer)
     assert not (tmp_path / "_quota.json").exists()
+
+
+def seed_quota(tmp_path, clock, model, used):
+    (tmp_path / "_quota.json").write_text(
+        json.dumps({"day": clock.now.date().isoformat(), "counts": {model: used}})
+    )
+
+
+async def test_concurrent_calls_cannot_overshoot_budget(tmp_path):
+    llm, client, _, _ = make(tmp_path, {FIRST: 1})
+    llm.budget.cap_usd = CFG.reserve_usd * 1.5
+    results = await asyncio.gather(*[llm.structured([FIRST], ["hi"], Answer) for _ in range(3)], return_exceptions=True)
+    assert sum(isinstance(r, Answer) for r in results) == 1
+    assert sum(isinstance(r, BudgetExceeded) for r in results) == 2
+    assert llm.budget.pending == 0
+
+
+async def test_concurrent_calls_respect_rpd(tmp_path):
+    llm, client, _, clock = make(tmp_path, {FIRST: 1, SECOND: 2})
+    seed_quota(tmp_path, clock, FIRST, CFG.models[FIRST].rpd - 1)
+    await asyncio.gather(*[llm.structured([FIRST, SECOND], ["hi"], Answer) for _ in range(3)])
+    assert client.calls.count(FIRST) == 1
+    assert counts(tmp_path)[FIRST] == CFG.models[FIRST].rpd
+
+
+@pytest.mark.parametrize("content", ["{not json", '{"day": "2026-10-26"}', '{"counts": {}}', "[]"])
+async def test_corrupt_quota_resets_to_empty(tmp_path, content):
+    llm, client, _, _ = make(tmp_path, {FIRST: 1})
+    (tmp_path / "_quota.json").write_text(content)
+    assert (await llm.structured([FIRST], ["hi"], Answer)).value == 1
+    assert counts(tmp_path) == {FIRST: 1}
+    assert not list(tmp_path.glob("*.tmp"))
+
+
+@pytest.mark.parametrize("reply", ["", '{"value": ', '{"value": "x"}'])
+async def test_invalid_reply_fails_over_then_raises(tmp_path, reply):
+    llm, client, _, _ = make(tmp_path, {FIRST: reply, SECOND: reply})
+    with pytest.raises(LlmReplyInvalid):
+        await llm.structured([FIRST, SECOND], ["hi"], Answer)
+    assert client.calls == [FIRST, SECOND]
+
+
+async def test_invalid_reply_on_first_model_succeeds_on_second(tmp_path):
+    llm, client, _, _ = make(tmp_path, {FIRST: "{", SECOND: 3})
+    assert (await llm.structured([FIRST, SECOND], ["hi"], Answer)).value == 3
+
+
+async def test_server_error_fails_over(tmp_path):
+    boom = errors.ServerError(503, {"error": {"code": 503, "status": "UNAVAILABLE"}})
+    llm, client, _, _ = make(tmp_path, {FIRST: boom, SECOND: 4})
+    assert (await llm.structured([FIRST, SECOND], ["hi"], Answer)).value == 4
+
+
+async def test_unknown_model_rejected_up_front(tmp_path):
+    llm, client, _, _ = make(tmp_path, {})
+    with pytest.raises(UnknownModel):
+        await llm.structured(["nope"], ["hi"], Answer)
+    assert client.calls == []
+
+
+async def test_no_sleep_after_final_round(tmp_path):
+    limited = rate_limited("1s")
+    llm, client, _, clock = make(tmp_path, {FIRST: [limited] * CFG.max_rounds})
+    with pytest.raises(QuotaExhausted):
+        await llm.structured([FIRST], ["hi"], Answer)
+    assert len(clock.slept) == CFG.max_rounds - 1
+
+
+async def test_retry_info_without_delay_uses_default(tmp_path):
+    body = {"error": {"code": 429, "details": [{"@type": "type.googleapis.com/google.rpc.RetryInfo"}]}}
+    llm, client, _, clock = make(tmp_path, {FIRST: [errors.ClientError(429, body), 2]})
+    assert (await llm.structured([FIRST], ["hi"], Answer)).value == 2
+    assert clock.slept == [CFG.default_retry_delay_seconds]

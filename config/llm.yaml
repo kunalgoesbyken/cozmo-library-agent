@@ -10,3 +10,7 @@ max_rounds: 3
 ledger_stage: llm
 offline_env: LIBCLAIM_OFFLINE
 rate_limit_code: 429
+offline_value: "1"
+reserve_usd: 0.01
+failover_min_code: 500
+max_invalid_replies: 4

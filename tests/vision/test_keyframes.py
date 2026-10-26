@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import pytest
 
 from libclaim.models import Still
 from libclaim.vision.keyframes import Keyframes, Phase, PhaseMarker, select_keyframes
@@ -64,3 +65,24 @@ def test_stills_before_first_marker_are_ignored(tmp_path):
     result = select_keyframes(stills, [PhaseMarker(t_ms=800, phase=Phase.room)])
     assert result.rows == []
     assert [s.seq for s in result.room] == [1]
+
+
+def bars(vertical, size=64, period=8):
+    cells = (np.indices((size, size))[1 if vertical else 0] // period) % 2
+    gray = (cells * 200 + 20).astype(np.uint8)
+    return np.dstack([gray] * 3)
+
+
+def test_structured_distinct_images_both_survive(tmp_path):
+    stills = [
+        make_still(tmp_path, 0, 0, bars(True), 1.0),
+        make_still(tmp_path, 1, 600, bars(False), 1.0),
+    ]
+    result = select_keyframes(stills, [PhaseMarker(t_ms=0, phase=Phase.rows)])
+    assert [s.seq for s in result.rows] == [0, 1]
+
+
+def test_unreadable_still_raises(tmp_path):
+    still = Still(seq=0, t_ms=0, path=str(tmp_path / "missing.png"), w=1, h=1, blur=1.0, glare=0.0, motion_dps=0.0)
+    with pytest.raises(ValueError):
+        select_keyframes([still], [PhaseMarker(t_ms=0, phase=Phase.rows)])

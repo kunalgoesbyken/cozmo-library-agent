@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import logging
 import time
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
@@ -12,7 +13,7 @@ import yaml
 from aiolimiter import AsyncLimiter
 from google import genai
 from google.genai import errors, types
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from libclaim.budget import Budget
 from libclaim.settings import CONFIG_DIR, load_settings
@@ -22,6 +23,8 @@ LLM_CONFIG_PATH = CONFIG_DIR / "llm.yaml"
 SECONDS_PER_MINUTE = 60
 RETRY_INFO_SUFFIX = "RetryInfo"
 
+logger = logging.getLogger(__name__)
+
 T = TypeVar("T", bound=BaseModel)
 
 
@@ -30,6 +33,14 @@ class LiveCallBlocked(RuntimeError):
 
 
 class QuotaExhausted(RuntimeError):
+    pass
+
+
+class UnknownModel(ValueError):
+    pass
+
+
+class LlmReplyInvalid(RuntimeError):
     pass
 
 
@@ -47,6 +58,10 @@ class LlmConfig(BaseModel):
     ledger_stage: str
     offline_env: str
     rate_limit_code: int
+    offline_value: str
+    reserve_usd: float
+    failover_min_code: int
+    max_invalid_replies: int
 
 
 class LlmResponse(BaseModel):
@@ -75,8 +90,8 @@ class GenaiClient:
         usage = response.usage_metadata
         return LlmResponse(
             text=response.text or "",
-            input_tokens=usage.prompt_token_count or 0,
-            output_tokens=(usage.candidates_token_count or 0) + (usage.thoughts_token_count or 0),
+            input_tokens=(usage.prompt_token_count or 0) if usage else 0,
+            output_tokens=((usage.candidates_token_count or 0) + (usage.thoughts_token_count or 0)) if usage else 0,
         )
 
 
@@ -87,7 +102,7 @@ def load_llm_config(path: Path = LLM_CONFIG_PATH) -> LlmConfig:
 def retry_delay_seconds(error: errors.APIError, default: float) -> float:
     body = error.details if isinstance(error.details, dict) else {}
     for detail in body.get("error", {}).get("details", []):
-        if detail.get("@type", "").endswith(RETRY_INFO_SUFFIX):
+        if detail.get("@type", "").endswith(RETRY_INFO_SUFFIX) and detail.get("retryDelay"):
             return float(str(detail["retryDelay"]).removesuffix("s"))
     return default
 
@@ -100,9 +115,12 @@ class Quota:
     def _load(self) -> dict[str, Any]:
         today = self.now().astimezone(UTC).date().isoformat()
         if self.path.is_file():
-            data = json.loads(self.path.read_text(encoding="utf-8"))
-            if data["day"] == today:
-                return data
+            try:
+                data = json.loads(self.path.read_text(encoding="utf-8"))
+                if data["day"] == today:
+                    return {"day": today, "counts": dict(data["counts"])}
+            except (OSError, ValueError, KeyError, TypeError):
+                logger.warning("quota file %s unreadable, resetting counts", self.path)
         return {"day": today, "counts": {}}
 
     def used(self, model: str) -> int:
@@ -112,11 +130,14 @@ class Quota:
         data = self._load()
         data["counts"][model] = data["counts"].get(model, 0) + 1
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        temp = self.path.with_suffix(self.path.suffix + ".tmp")
+        temp.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        os.replace(temp, self.path)
 
 
 def live_client() -> LlmClient:
-    if os.environ.get(load_llm_config().offline_env):
+    config = load_llm_config()
+    if os.environ.get(config.offline_env) == config.offline_value:
         raise LiveCallBlocked("live Gemini call attempted while offline")
     return GenaiClient(load_settings().gemini_api_key)
 
@@ -143,30 +164,47 @@ class Llm:
         }
 
     async def structured(self, models: list[str], parts: list[Any], schema: type[T]) -> T:
+        unknown = [name for name in models if name not in self.config.models]
+        if unknown:
+            raise UnknownModel(f"models not in llm config: {unknown}")
         client = self.client or live_client()
-        for _ in range(self.config.max_rounds):
+        invalid = 0
+        for round_number in range(self.config.max_rounds):
             delays = []
             for model in models:
-                if self.quota.used(model) >= self.config.models[model].rpd:
-                    continue
                 try:
-                    return await self._call(client, model, parts, schema)
+                    result = await self._call(client, model, parts, schema)
                 except errors.APIError as error:
-                    if error.code != self.config.rate_limit_code:
+                    if error.code != self.config.rate_limit_code and error.code < self.config.failover_min_code:
                         raise
                     delays.append(retry_delay_seconds(error, self.config.default_retry_delay_seconds))
+                except ValidationError:
+                    invalid += 1
+                    if invalid >= self.config.max_invalid_replies:
+                        raise LlmReplyInvalid(f"{invalid} invalid replies from {models}") from None
+                else:
+                    if result is not None:
+                        return result
             if not delays:
+                if invalid:
+                    raise LlmReplyInvalid(f"{invalid} invalid replies from {models}")
                 raise QuotaExhausted(f"daily quota exhausted for {models}")
-            await self.sleep(min(max(delays), self.config.retry_delay_cap_seconds))
+            if round_number + 1 < self.config.max_rounds:
+                await self.sleep(min(max(delays), self.config.retry_delay_cap_seconds))
         raise QuotaExhausted(f"rate limited on every model in {models}")
 
-    async def _call(self, client: LlmClient, model: str, parts: list[Any], schema: type[T]) -> T:
-        self.budget.check()
+    async def _call(self, client: LlmClient, model: str, parts: list[Any], schema: type[T]) -> T | None:
         async with self.limiters[model]:
-            self.quota.add(model)
-            started = time.monotonic()
-            response = await client.generate(model, parts, schema)
-        usd = self.budget.record(model, response.input_tokens, response.output_tokens)
+            if self.quota.used(model) >= self.config.models[model].rpd:
+                return None
+            self.budget.reserve(self.config.reserve_usd)
+            try:
+                self.quota.add(model)
+                started = time.monotonic()
+                response = await client.generate(model, parts, schema)
+                usd = self.budget.record(model, response.input_tokens, response.output_tokens)
+            finally:
+                self.budget.release(self.config.reserve_usd)
         if self.ledger is not None:
             self.ledger.add(
                 self.config.ledger_stage,

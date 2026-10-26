@@ -38,9 +38,11 @@ def load_keyframe_config() -> KeyframeConfig:
 
 def phash(path: str, cfg: KeyframeConfig) -> np.ndarray:
     gray = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+    if gray is None:
+        raise ValueError(f"unreadable still image: {path}")
     small = cv2.resize(gray, (cfg.dct_size, cfg.dct_size), interpolation=cv2.INTER_AREA)
     low = cv2.dct(small.astype(np.float32))[: cfg.hash_size, : cfg.hash_size]
-    return low > np.median(low)
+    return low >= np.median(low)
 
 
 def phase_at(t_ms: int, markers: list[PhaseMarker]) -> Phase | None:
