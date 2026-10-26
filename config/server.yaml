@@ -1,0 +1,24 @@
+max_header_bytes: 4096
+max_mic_bytes: 8192
+max_frame_bytes: 8388608
+state_poll_seconds: 0.2
+unassigned_region: sweep
+alerts:
+  blur:
+    severity: warn
+    say: Hold steady, that is blurry.
+  glare:
+    severity: warn
+    say: There is glare, tilt the camera slightly.
+  too_fast:
+    severity: warn
+    say: Slow down, you are moving too fast.
+  occluded:
+    severity: warn
+    say: Something is blocking the view.
+  too_far:
+    severity: info
+    say: Move a little closer.
+  missed_region:
+    severity: info
+    say: We missed a spot, go back over it.
