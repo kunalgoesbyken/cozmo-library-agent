@@ -1,0 +1,18 @@
+User-agent: Avengineers-Crawler
+Disallow: /
+
+User-agent: *
+Allow: /
+
+# Directories
+Disallow: /api/*
+Disallow: /preview/*
+
+# Paths (no clean URLs)
+Disallow: /*.php$
+Disallow: /*?p=*&
+Disallow: /*search-results*
+Disallow: */wp-admin/*
+Disallow: /*?resize=*
+
+Sitemap: https://www.penguin.co.uk/sitemap_index.xml

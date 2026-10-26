@@ -8,3 +8,57 @@ condition_factors:
     acceptable: 0.35
 bookswagon:
   enabled: false
+http:
+  timeout_seconds: 30
+  min_interval_seconds: 1.0
+  host_min_interval_seconds:
+    www.nilkamalfurniture.com: 2.0
+  max_retries: 3
+  backoff_seconds: 1.0
+  retry_statuses: [429, 500, 502, 503, 504]
+  accept_language: en-IN,en;q=0.9
+  robots_agent: libclaim
+  robots_path: /robots.txt
+conditions:
+  new: NewCondition
+  used: UsedCondition
+jsonld_repairs:
+  - name: unquoted_url_value
+    pattern: '(:\s*)(https?://[^"\s,}]*")'
+    replacement: '\1"\2'
+  - name: trailing_comma
+    pattern: ',\s*([}\]])'
+    replacement: '\1'
+sources:
+  bookchor:
+    url: https://www.bookchor.com/book/{isbn}/x
+  bookswagon:
+    url: https://www.bookswagon.com/book/x/{isbn}
+    isbn_label: "ISBN-13:"
+  pustakkosh:
+    url: https://pustakkosh.com/wp-json/wc/store/v1/products?search={isbn}
+    used_sku_suffix: _Used
+    in_stock: InStock
+    out_of_stock: OutOfStock
+  penguin_uk:
+    url: https://www.penguin.co.uk/books/x/x/{isbn}
+    currency_symbols:
+      "£": GBP
+  fx:
+    url: https://api.frankfurter.dev/v2/rates
+    provider: ECB
+    provider_label: ECB via Frankfurter v2
+listings:
+  min_matches: 5
+  low_percentile: 0.25
+  high_percentile: 0.75
+  max_product_pages: 12
+  shopify_product_path: /products/
+  ikea_cards:
+    card_class: plp-mastercard
+    price_attr: data-price
+    currency_attr: data-currency
+    name_attr: data-product-name
+    label_attr: aria-label
+    label_separator: "product comparison, "
+  product_url_marker: /product/

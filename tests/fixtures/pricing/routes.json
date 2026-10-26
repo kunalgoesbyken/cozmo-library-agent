@@ -1,0 +1,179 @@
+{
+ "https://www.bookchor.com/robots.txt": {
+  "file": "robots_www.bookchor.com.txt",
+  "status": 200,
+  "type": "text/plain"
+ },
+ "https://pustakkosh.com/robots.txt": {
+  "file": "robots_pustakkosh.com.txt",
+  "status": 200,
+  "type": "text/plain"
+ },
+ "https://www.bookswagon.com/robots.txt": {
+  "file": "robots_www.bookswagon.com.txt",
+  "status": 200,
+  "type": "text/plain"
+ },
+ "https://www.penguin.co.uk/robots.txt": {
+  "file": "robots_www.penguin.co.uk.txt",
+  "status": 200,
+  "type": "text/plain"
+ },
+ "https://www.ikea.com/robots.txt": {
+  "file": "robots_www.ikea.com.txt",
+  "status": 200,
+  "type": "text/plain"
+ },
+ "https://www.urbanladder.com/robots.txt": {
+  "file": "robots_www.urbanladder.com.txt",
+  "status": 200,
+  "type": "text/plain"
+ },
+ "https://www.nilkamalfurniture.com/robots.txt": {
+  "file": "robots_www.nilkamalfurniture.com.txt",
+  "status": 200,
+  "type": "text/plain"
+ },
+ "https://www.bookchor.com/book/9780143127550/x": {
+  "file": "bookchor_einty.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.bookchor.com/book/9780099590088/x": {
+  "file": "bookchor_sapiens.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.bookchor.com/search/?query=9789354892227": {
+  "file": "bookchor_search.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.bookchor.com/book/9789354892227/x": {
+  "status": 302,
+  "location": "https://www.bookchor.com/search/?query=9789354892227"
+ },
+ "https://www.bookswagon.com/book/x/9788129104595": {
+  "file": "bookswagon_five_point.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.bookswagon.com/book/x/9789354892227": {
+  "file": "bookswagon_blank.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://pustakkosh.com/wp-json/wc/store/v1/products?search=9788173711466": {
+  "file": "pustakkosh_wings_used.json",
+  "status": 200,
+  "type": "application/json"
+ },
+ "https://pustakkosh.com/wp-json/wc/store/v1/products?search=9780099590088": {
+  "file": "pustakkosh_sapiens.json",
+  "status": 200,
+  "type": "application/json"
+ },
+ "https://pustakkosh.com/wp-json/wc/store/v1/products?search=9780141439518": {
+  "file": "pustakkosh_empty.json",
+  "status": 200,
+  "type": "application/json"
+ },
+ "https://www.penguin.co.uk/books/419795/sapiens-by-harari-yuval-noah/9780099590088": {
+  "file": "penguin_sapiens.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.penguin.co.uk/books/x/x/9780099590088": {
+  "status": 302,
+  "location": "https://www.penguin.co.uk/books/419795/sapiens-by-harari-yuval-noah/9780099590088"
+ },
+ "https://www.penguin.co.uk/search-results": {
+  "file": "penguin_search.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.penguin.co.uk/books/x/x/9780143127550": {
+  "status": 302,
+  "location": "https://www.penguin.co.uk/search-results"
+ },
+ "https://www.ikea.com/in/en/cat/bookcases-10382/": {
+  "file": "ikea_bookcases.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.nilkamalfurniture.com/collections/book-cases/products.json?limit=50": {
+  "file": "nilkamal_bookcases.json",
+  "status": 200,
+  "type": "application/json"
+ },
+ "https://www.urbanladder.com/collection/bookshelves": {
+  "file": "urbanladder_bookshelves.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.urbanladder.com/product/megan-engineered-wood-bookshelf-in-classic-walnut-finish-7518821-9420652": {
+  "file": "urbanladder_product_0.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.urbanladder.com/product/paleo-solid-wood-corner-bookshelf-in-danish-walnut-finish-9746369": {
+  "file": "urbanladder_product_1.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.urbanladder.com/product/brisa-solid-wood-and-cane-corner-bookshelf-in-danish-walnut-finish-9896447": {
+  "file": "urbanladder_product_2.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.urbanladder.com/product/miles-engineered-wood-bookshelf-in-classic-walnut-finish-7518825-9420656": {
+  "file": "urbanladder_product_3.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.urbanladder.com/product/paxton-bookshelf-finish-amber-walnut-8340141": {
+  "file": "urbanladder_product_4.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.urbanladder.com/product/malabar-bookshelf-display-cabinet-55-book-capacity-amber-walnut-metal-channel-8602675": {
+  "file": "urbanladder_product_5.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.urbanladder.com/product/takai-solid-wood-and-cane-bookshelf-table-in-red-cedar-finish-8861197": {
+  "file": "urbanladder_product_6.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.urbanladder.com/product/torin-solid-wood-bookshelf-in-danish-walnut-finish-9275532": {
+  "file": "urbanladder_product_7.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.urbanladder.com/product/murano-bookshelf-cum-display-unit-finish-mango-walnut-8115710": {
+  "file": "urbanladder_product_8.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.urbanladder.com/product/paige-engineered-wood-bookshelf-in-frosty-white-finish-7518830": {
+  "file": "urbanladder_product_9.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.urbanladder.com/product/elliot-engineered-wood-bookshelf-in-classic-walnut-finish-7518824": {
+  "file": "urbanladder_product_10.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://www.urbanladder.com/product/austen-bookshelf-display-unit-45-book-capacity-finish-amber-walnut-8503645": {
+  "file": "urbanladder_product_11.html",
+  "status": 200,
+  "type": "text/html; charset=utf-8"
+ },
+ "https://api.frankfurter.dev/v2/rates?base=GBP&quotes=INR&providers=ECB&date=2026-10-23": {
+  "file": "fx_gbp_inr.json",
+  "status": 200,
+  "type": "application/json"
+ }
+}

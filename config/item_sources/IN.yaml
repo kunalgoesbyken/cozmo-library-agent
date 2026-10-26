@@ -1,0 +1,33 @@
+categories:
+  bookshelf:
+    must: [bookcase, bookshelf, bookshelves, shelving unit, shelf unit]
+    exclude: []
+    listings:
+      - kind: ikea_cards
+        url: https://www.ikea.com/in/en/cat/bookcases-10382/
+      - kind: itemlist
+        url: https://www.urbanladder.com/collection/bookshelves
+      - kind: shopify
+        url: https://www.nilkamalfurniture.com/collections/book-cases/products.json?limit=50
+  table lamp:
+    must: [table lamp, desk lamp, table light]
+    exclude: []
+    listings:
+      - kind: ikea_cards
+        url: https://www.ikea.com/in/en/cat/table-lamps-10732/
+      - kind: itemlist
+        url: https://www.urbanladder.com/collection/table-lamps
+  drip coffee maker:
+    must: [drip, filter coffee]
+    exclude: [drip tray]
+    listings:
+      - kind: itemlist
+        url: https://www.vijaysales.com/c/coffee-machines
+  framed wall art print:
+    must: [picture, wall art, painting, art print, poster, canvas]
+    exclude: [picture ledge, " frame,"]
+    listings:
+      - kind: ikea_cards
+        url: https://www.ikea.com/in/en/cat/wall-decor-10757/
+      - kind: itemlist
+        url: https://www.urbanladder.com/collection/wall-art

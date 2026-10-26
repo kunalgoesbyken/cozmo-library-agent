@@ -1,0 +1,18 @@
+User-agent: *
+Disallow: /cart*
+Disallow: /profile*
+Disallow: /auth*
+Disallow: /wishlist
+Disallow: /c/policies?page=grievance-nodal-officer
+Disallow: /products?q=
+Disallow: */sitemap/brand.sitemap.xml
+Disallow: */sitemap/category_l1.sitemap.xml
+Disallow: */sitemap/category_l2.sitemap.xml
+Disallow: */sitemap/category_l3.sitemap.xml
+Disallow: */sitemap/custom.sitemap.xml
+Allow: *.js
+Allow: *.css
+
+Sitemap: https://www.urbanladder.com/sitemap.xml
+Sitemap: https://www.urbanladder.com/sitemap/collections.sitemap.xml
+Sitemap: https://www.urbanladder.com/sitemap/sections.sitemap.xml
