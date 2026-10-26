@@ -61,6 +61,7 @@ class ListingRow(BaseModel):
     currency: str
     url: str
     cache_ref: str
+    retrieved_at: datetime
 
 
 class ItemRange(BaseModel):

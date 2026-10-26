@@ -33,7 +33,7 @@
 <h1>Claim report</h1>
 <p class="meta">
   Sweep {{ packet.sweep.id }} &middot; {{ packet.sweep.captured_at }} &middot; {{ packet.sweep.device }}
-  &middot; {{ packet.sweep.country }} ({{ packet.sweep.currency }}){% if packet.second_country %} &middot; second country {{ packet.second_country }}{% endif %}
+  &middot; {{ packet.sweep.country }} ({{ packet.sweep.currency }}){% if packet.second_country %} &middot; second country {{ packet.second_country.country }} ({{ packet.second_country.currency }}){% endif %}
 </p>
 
 <h2>Totals</h2>
@@ -103,6 +103,25 @@
   </tbody>
 </table>
 
+{% if packet.second_country %}
+<h2>Second country: {{ packet.second_country.country }} ({{ packet.second_country.currency }})</h2>
+<table>
+  <thead><tr><th>Book</th><th>ISBN</th><th>Source type</th><th class="num">{{ packet.second_country.currency }}</th><th class="num">Original</th><th>FX</th></tr></thead>
+  <tbody>
+  {% for row in packet.second_country.books %}
+    <tr>
+      <td>{{ row.title or row.book_id }}</td>
+      <td>{{ row.isbn }}</td>
+      <td>{% if row.source_type %}<span class="badge">{{ row.source_type }}</span>{% else %}<span class="unknown">{{ row.status }}</span>{% endif %}</td>
+      <td class="num">{{ money(row.replacement_cost.amount) }} {{ link(row.replacement_cost.url, row.replacement_cost.source or "source") }}</td>
+      <td class="num">{{ money(row.original_amount) }} {{ row.original_currency }}</td>
+      <td>{% if row.fx %}{{ row.fx.base }}/{{ row.fx.quote }} {{ row.fx.rate }} on {{ row.fx.rate_date }} {{ link(row.fx.url, row.fx.provider) }}{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
 <h2>Items ({{ packet.items|length }})</h2>
 <table>
   <thead>
@@ -118,8 +137,8 @@
       <td>{{ item.brand_model }}</td>
       <td>{{ item.status }}</td>
       <td class="num">{{ num(item.dimensions_cm.w) }} x {{ num(item.dimensions_cm.h) }} x {{ num(item.dimensions_cm.d) }}</td>
-      <td class="num">{{ money(item.replacement_cost.low) }}</td>
-      <td class="num">{{ money(item.replacement_cost.high) }} {{ link(item.replacement_cost.url, item.replacement_cost.source or "source") }}</td>
+      <td class="num">{{ money(item.replacement_cost.low) }} {{ link(item.replacement_cost.url, item.replacement_cost.source or "source") }}</td>
+      <td class="num">{{ money(item.replacement_cost.high) }} {{ link(item.replacement_cost.url_high, item.replacement_cost.source or "source") }}</td>
     </tr>
   {% endfor %}
   </tbody>

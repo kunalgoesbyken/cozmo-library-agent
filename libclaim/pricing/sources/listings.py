@@ -71,6 +71,7 @@ class Listings:
                     currency=card.get(cfg.currency_attr, ""),
                     url=link,
                     cache_ref=response.cache_ref,
+                    retrieved_at=response.retrieved_at,
                 )
             )
         return rows
@@ -86,7 +87,8 @@ class Listings:
                 url = urljoin(response.final_url, path + product["handle"])
                 rows.append(
                     ListingRow(
-                        source=host_of(url), name=product["title"], amount=amount, currency=currency, url=url, cache_ref=response.cache_ref
+                        source=host_of(url), name=product["title"], amount=amount, currency=currency, url=url, cache_ref=response.cache_ref,
+                        retrieved_at=response.retrieved_at,
                     )
                 )
         return rows
@@ -140,6 +142,7 @@ class Listings:
                         currency=offer[2],
                         url=url,
                         cache_ref=product.cache_ref,
+                        retrieved_at=product.retrieved_at,
                     )
                 )
         return rows

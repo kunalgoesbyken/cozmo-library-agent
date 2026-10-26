@@ -1,6 +1,7 @@
 import json
 
-from libclaim.packet.models import ClaimPacket
+from libclaim.models import FxRecord
+from libclaim.packet.models import BookReplacementCost, ClaimPacket, SecondCountry, SecondCountryBook
 from libclaim.packet.report import render_report
 from libclaim.packet.review import build_review_queue
 from libclaim.packet.totals import compute_totals
@@ -38,6 +39,7 @@ ADDED = {
     "books[]": ["scale_method", "evidence"],
     "books[].used_value": ["method", "source_type"],
     "items[]": ["dimensions_method"],
+    "items[].replacement_cost": ["url_high"],
     "totals": ["books_used_value_observed", "books_used_value_derived"],
     "": ["second_country", "costs", "latency_s"],
 }
@@ -141,3 +143,28 @@ def test_report_does_not_link_non_http_urls(tmp_path):
     built.books[0].replacement_cost.url = "javascript:alert(1)"
     html = render_report(built, SweepDir(tmp_path)).read_text(encoding="utf-8")
     assert "javascript:" not in html
+
+
+def test_report_renders_second_country_table_and_item_bound_links(tmp_path):
+    built = packet()
+    built.items[0].replacement_cost.url_high = "https://shop.example/lamp-high"
+    built.second_country = SecondCountry(
+        country="GB",
+        currency="GBP",
+        books=[
+            SecondCountryBook(
+                book_id="b1", title="Dune", isbn="9780000000001", status="identified", source_type="converted",
+                replacement_cost=BookReplacementCost(amount="5.99", source="Penguin UK", url="https://uk.example/dune", converted=True),
+                original_amount="499.00", original_currency="INR",
+                fx=FxRecord(
+                    base="INR", quote="GBP", rate="0.0095", rate_date="2026-10-23", provider="ECB",
+                    url="https://fx.example/rate", retrieved_at="2026-10-23T09:00:00Z", cache_ref="fx",
+                ),
+            )
+        ],
+    )
+    html = render_report(built, SweepDir(tmp_path)).read_text(encoding="utf-8")
+    assert "Second country: GB (GBP)" in html and "SecondCountry(" not in html
+    assert "converted" in html and "Dune" in html and "5.99" in html
+    assert 'href="https://fx.example/rate"' in html and 'href="https://uk.example/dune"' in html
+    assert 'href="https://shop.example/lamp"' in html and 'href="https://shop.example/lamp-high"' in html

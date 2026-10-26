@@ -3,7 +3,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from libclaim.models import ItemRange, ListingRow
-from libclaim.packet.models import Item, ItemReplacementCost, SecondCountry, SecondCountryBook, ClaimPacket
+from libclaim.packet.models import ClaimPacket, Item, ItemReplacementCost, SecondCountry, SecondCountryBook
 from libclaim.pricing.books import Market, price_book
 from libclaim.pricing.sources.fx import Fx
 from libclaim.pricing.sources.listings import Listings
@@ -38,6 +38,8 @@ async def price_item(item: Item, locale: Locale, *, listings: Listings) -> ItemP
             high=found.high.amount,
             source=", ".join(dict.fromkeys(row.source for row in (found.low, found.high))),
             url=found.low.url,
+            url_high=found.high.url,
+            retrieved_at=max(found.low.retrieved_at, found.high.retrieved_at).isoformat(),
         ),
         range=found,
         evidence=found.rows,
@@ -50,7 +52,7 @@ def sample(packet: ClaimPacket, n: int):
 
 
 async def second_country(
-    packet: ClaimPacket, cc: str = "GB", n: int = 10, *, market: Market, other: Market, fx: Fx
+    packet: ClaimPacket, n: int = 10, *, market: Market, other: Market, fx: Fx
 ) -> SecondCountry:
     rows = []
     for book in sample(packet, n):
@@ -63,18 +65,21 @@ async def second_country(
         rows.append(
             SecondCountryBook(
                 book_id=book.id,
+                title=book.title,
+                author=book.author,
+                edition=book.edition,
                 isbn=book.isbn,
                 status="needs_appraisal" if priced.status == "needs_appraisal" else "identified",
                 source_type=(CONVERTED if converted else LOCAL) if has_price else None,
                 replacement_cost=priced.replacement_cost,
                 used_value=priced.used_value,
                 original_amount=priced.original.amount if priced.original else book.replacement_cost.amount,
-                original_currency=other.locale.currency,
+                original_currency=packet.sweep.currency or other.locale.currency,
                 fx=priced.fx,
                 review=priced.review,
                 evidence=priced.evidence,
             )
         )
-    result = SecondCountry(country=cc, currency=market.locale.currency, books=rows)
+    result = SecondCountry(country=market.locale.country, currency=market.locale.currency, books=rows)
     packet.second_country = result
     return result

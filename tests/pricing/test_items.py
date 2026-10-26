@@ -51,6 +51,8 @@ async def test_seven_rows_give_nearest_rank_p25_p75_with_urls(tmp_path, online):
     assert result.range.low.url == "https://www.nilkamalfurniture.com/products/shelf-4"
     assert result.range.high.url == "https://www.nilkamalfurniture.com/products/shelf-5"
     assert result.replacement_cost.url == result.range.low.url
+    assert result.replacement_cost.url_high == result.range.high.url
+    assert result.replacement_cost.retrieved_at == max(result.range.low.retrieved_at, result.range.high.retrieved_at).isoformat()
     assert result.replacement_cost.source == "www.nilkamalfurniture.com"
     assert len(result.evidence) == 7 and all(row.url for row in result.evidence)
 
@@ -84,6 +86,7 @@ def book(index, amount, isbn=None, **changes):
     fields = {
         "id": f"b{index}",
         "status": "identified",
+        "title": f"T{index}",
         "isbn": isbn if isbn is not None else f"97800000000{index:02d}",
         "replacement_cost": BookReplacementCost(amount=Decimal(amount) if amount is not None else None),
     }
@@ -121,11 +124,12 @@ async def test_local_gb_listing_and_converted_are_labelled(tmp_path, online):
     gb, india = markets(ByIsbn({local_isbn: "12.99"}))
     packet = packet_of(book(1, 900, local_isbn), book(2, 800, other_isbn))
     fx = Fx(make_http(tmp_path, site_with()))
-    result = await second_country(packet, "GB", 10, market=gb, other=india, fx=fx)
+    result = await second_country(packet, 10, market=gb, other=india, fx=fx)
     assert packet.second_country is result and result.country == "GB" and result.currency == "GBP"
     local, converted = result.books
     assert local.source_type == "local_listing" and local.fx is None
     assert local.replacement_cost.amount == Decimal("12.99") and not local.replacement_cost.converted
+    assert local.title == "T1" and local.original_currency == "INR"
     assert local.original_amount == Decimal(900) and local.original_currency == "INR"
     assert converted.source_type == "converted" and converted.replacement_cost.converted
     assert converted.replacement_cost.amount == Decimal("10.00")
@@ -146,8 +150,8 @@ async def test_sampling_is_highest_value_first_then_isbn_and_stable(tmp_path, on
         book(7, 700, "", status="identified"),
     ]
     fx = Fx(make_http(tmp_path, site_with()))
-    first = await second_country(packet_of(*books), "GB", 3, market=gb, other=india, fx=fx)
-    again = await second_country(packet_of(*reversed(books)), "GB", 3, market=gb, other=india, fx=fx)
+    first = await second_country(packet_of(*books), 3, market=gb, other=india, fx=fx)
+    again = await second_country(packet_of(*reversed(books)), 3, market=gb, other=india, fx=fx)
     assert [b.isbn for b in first.books] == ["9780000000003", "9780000000009", "9780000000004"]
     assert [b.book_id for b in first.books] == ["b3", "b2", "b4"]
     assert first == again
@@ -157,5 +161,5 @@ async def test_limit_n_is_respected(tmp_path, online):
     gb, india = markets(ByIsbn({}))
     packet = packet_of(*[book(i, 100 + i) for i in range(1, 6)])
     fx = Fx(make_http(tmp_path, site_with()))
-    result = await second_country(packet, "GB", 2, market=gb, other=india, fx=fx)
+    result = await second_country(packet, 2, market=gb, other=india, fx=fx)
     assert [b.book_id for b in result.books] == ["b5", "b4"]

@@ -94,6 +94,7 @@ class ItemReplacementCost(BaseModel):
     high: Money | None = None
     source: str = ""
     url: str = ""
+    url_high: str = ""
     retrieved_at: str = ""
 
 
@@ -113,6 +114,9 @@ class Item(BaseModel):
 
 class SecondCountryBook(BaseModel):
     book_id: str
+    title: str = ""
+    author: str = ""
+    edition: str = ""
     isbn: str
     status: Literal["identified", "needs_appraisal"]
     source_type: Literal["local_listing", "converted"] | None = None
