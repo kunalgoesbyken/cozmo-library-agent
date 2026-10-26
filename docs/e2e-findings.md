@@ -128,3 +128,31 @@ Projected for a live run of these photos, not measured: OCR 12 s, Gemini reading
 - Replay: `--from scale` reuses recorded (non-failed) reads, so changed crop images no longer discard them; `--from reading` still re-reads.
 - Packet book lines carry `edition_unverified`, `equivalent_edition`, `corroboration`.
 - Security: SSRF guard rejects 64:ff9b::/96, 64:ff9b:1::/48, ::ffff:0:0/96 and ::/96 outright and checks the embedded IPv4 of 6to4 and Teredo; the price client has `trust_env=False`; `requires-python` is `>=3.12.4`. Pre-auth identity uses only a valid `CF-Connecting-IP`.
+
+## F3 live re-run (`runs/f3-live`)
+
+Run on 2026-10-26 after wave F3, with `tools/e2e_images.py` on the same three photos, base venv (no `[ml]` extra), live Gemini (9 calls: 3 spine, 5 reading, 1 items), live Google Books and retailer pages. Not in git (`runs/` is ignored). The live voice session was not part of this run.
+
+| | E2E-A before fixes (`e2e-a-base3`) | After F1 (hybrid replay) | F3 live re-run |
+|---|---|---|---|
+| Counted (hand count) | 52 (55), 22 (22), 19 (19) | same | 52 (55), 22 (22), 19 (19) |
+| identified | 4 | 9 | 14 |
+| needs_appraisal | 12 | 9 | 10 |
+| unidentified | 77 | 75 | 69 (41 no_catalogue_match, 15 illegible, 7 not_corroborated, 6 not_confident) |
+| Books with an ISBN | 4 | 9 | 19 |
+| Books with a price | 0 | 0 | 1 (used, INR 135, The Wishing Chair Collection, equivalent edition via Bookchor) |
+| `spine_height_cm` filled | 93 | 0 | 0 (all `book_format_prior`) |
+| Review queue entries | 282 | 192 | 216 |
+| Time after the sweep | 307 s | 23 s (reading replay, partly cached) | 106 s |
+| Gemini USD at paid rates | 0.0151 | none (replay) | 0.0152 |
+
+The columns are not a controlled comparison: the reads, the OCR settings and the catalogue source changed between them, and the F1 column is a replay. The 14 identified titles of the F3 run were not checked against the photos by hand. Totals: replacement cost 0.0, used value 135.0 (observed), 14 lines excluded from totals.
+
+What the run showed:
+
+- The streaming pipeline now finishes inside the 5-minute bar on these photos (106 s). Resolution (78.9 s, one catalogue request per second) is the longest post-sweep stage, then reading (27.5 s).
+- Identification doubled again once OCR no longer starves the gate, but still misses most books: 41 end as `no_catalogue_match` with Google Books as the only title search, since Open Library's `/search` is disallowed by its robots.txt.
+- Price coverage did not improve with identification: Bookchor and Pustakkosh list almost none of the editions found. This is a limit of free sources, not a code defect, and the packet says so per line (`not_found` with the page as evidence).
+- Cost and latency per stage are in [failure-log.md](failure-log.md).
+
+Still unverified: iPhone behaviour, marker-calibrated dimensions, a real GoAway reconnect, compression firing, and every pass bar that needs a ground-truth sheet.
