@@ -42,3 +42,37 @@ tracks:
   det_max: 2.0
   area_ratio_min: 0.5
   area_ratio_max: 2.0
+scale:
+  aruco_dictionary: DICT_4X4_50
+  corner_refinement: CORNER_REFINE_SUBPIX
+  min_marker_px: 100
+  aruco_confidence: 0.85
+  chained_confidence_factor: 0.8
+  prior_confidence: 0.3
+  spine_recess_cm: 0.0
+  focal_key: fx
+  fallback_hfov_deg: 69.0
+  shared_gap_factor: 0.5
+  cross_check_tolerance: 0.10
+  length_units_cm:
+    centimeters: 1.0
+    centimetres: 1.0
+    cm: 1.0
+    millimeters: 0.1
+    millimetres: 0.1
+    mm: 0.1
+    inches: 2.54
+    inch: 2.54
+    in: 2.54
+masks:
+  model_id: facebook/sam2.1-hiera-small
+  band: 0.5
+markers:
+  print_size_cm: 16.0
+  check_line_cm: 10.0
+  line_width_cm: 0.05
+  page_cm: [21.0, 29.7]
+  margin_cm: 2.0
+  gap_cm: 1.5
+  label_height_cm: 0.4
+  dpi: 300

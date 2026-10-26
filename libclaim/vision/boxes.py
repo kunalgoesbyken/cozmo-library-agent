@@ -3,9 +3,11 @@ from functools import cache
 import cv2
 import numpy as np
 import yaml
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from libclaim.settings import CONFIG_DIR
+
+PRIOR_CONFIDENCE_CAP = 0.4
 
 
 class Box(BaseModel):
@@ -68,6 +70,37 @@ class TrackConfig(BaseModel):
     area_ratio_max: float
 
 
+class ScaleConfig(BaseModel):
+    aruco_dictionary: str
+    corner_refinement: str
+    min_marker_px: float
+    aruco_confidence: float
+    chained_confidence_factor: float
+    prior_confidence: float = Field(le=PRIOR_CONFIDENCE_CAP)
+    spine_recess_cm: float
+    focal_key: str
+    fallback_hfov_deg: float
+    shared_gap_factor: float
+    cross_check_tolerance: float
+    length_units_cm: dict[str, float]
+
+
+class MaskConfig(BaseModel):
+    model_id: str
+    band: float
+
+
+class MarkerConfig(BaseModel):
+    print_size_cm: float
+    check_line_cm: float
+    line_width_cm: float
+    page_cm: tuple[float, float]
+    margin_cm: float
+    gap_cm: float
+    label_height_cm: float
+    dpi: int
+
+
 class VisionConfig(BaseModel):
     tiles: TileConfig
     jpeg_quality: int
@@ -79,6 +112,9 @@ class VisionConfig(BaseModel):
     rfdetr: RfdetrConfig
     reconcile: ReconcileConfig
     tracks: TrackConfig
+    scale: ScaleConfig
+    masks: MaskConfig
+    markers: MarkerConfig
 
 
 class ImageUnreadable(ValueError):
