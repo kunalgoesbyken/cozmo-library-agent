@@ -78,8 +78,9 @@ class ScaleConfig(BaseModel):
     chained_confidence_factor: float
     prior_confidence: float = Field(le=PRIOR_CONFIDENCE_CAP)
     spine_recess_cm: float
+    box_height_trim: float
     focal_key: str
-    fallback_hfov_deg: float
+    fallback_long_side_fov_deg: float
     shared_gap_factor: float
     cross_check_tolerance: float
     length_units_cm: dict[str, float]

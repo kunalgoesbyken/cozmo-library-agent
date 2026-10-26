@@ -49,9 +49,10 @@ scale:
   aruco_confidence: 0.85
   chained_confidence_factor: 0.8
   prior_confidence: 0.3
-  spine_recess_cm: 0.0
+  spine_recess_cm: 2.5
+  box_height_trim: 0.0
   focal_key: fx
-  fallback_hfov_deg: 69.0
+  fallback_long_side_fov_deg: 69.0
   shared_gap_factor: 0.5
   cross_check_tolerance: 0.10
   length_units_cm:

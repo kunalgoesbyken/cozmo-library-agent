@@ -28,9 +28,15 @@ def no_ml_extra(monkeypatch):
     monkeypatch.setattr(masks, "find_spec", lambda name: None)
 
 
+def configured(recess=0.0, trim=0.0, marker=MARKER_CM):
+    cfg = load_measure_config(Settings(aruco_marker_size_cm=marker))
+    scale = cfg.scale.model_copy(update={"spine_recess_cm": recess, "box_height_trim": trim})
+    return cfg.model_copy(update={"scale": scale})
+
+
 @pytest.fixture
 def cfg():
-    return load_measure_config(Settings(aruco_marker_size_cm=MARKER_CM))
+    return configured()
 
 
 def dictionary():
@@ -60,11 +66,11 @@ def scene(width_cm, height_cm, px_per_cm, books, marker=None, textured=False):
     return canvas, boxes
 
 
-def still(tmp_path, img, seq=0, blur=1.0):
+def still(tmp_path, img, seq=0, blur=1.0, intrinsics=None):
     path = tmp_path / f"{seq}.png"
     cv2.imwrite(str(path), img)
     return Still(seq=seq, t_ms=seq * 500, path=str(path), w=img.shape[1], h=img.shape[0], blur=blur,
-                 glare=0.0, motion_dps=0.0)
+                 glare=0.0, motion_dps=0.0, intrinsics=intrinsics)
 
 
 def track(track_id, refs, stills):
@@ -75,6 +81,10 @@ def track(track_id, refs, stills):
         best_frame=stills[best[0]],
         best_box=best[1],
     )
+
+
+def shifted(box, dx):
+    return box.model_copy(update={"x1": box.x1 + dx, "x2": box.x2 + dx})
 
 
 def rotation_warp(img, boxes, degrees):
@@ -97,6 +107,37 @@ def rotation_warp(img, boxes, degrees):
     return warped, moved
 
 
+FOCAL = 1500.0
+SIZE = (1600, 1200)
+
+
+def pinhole(yaw_deg, distance_cm, recess_cm):
+    w, h = SIZE
+    k = np.array([[FOCAL, 0, w / 2], [0, FOCAL, h / 2], [0, 0, 1]])
+    a = math.radians(yaw_deg)
+    r = np.array([[math.cos(a), 0, math.sin(a)], [0, 1, 0], [-math.sin(a), 0, math.cos(a)]])
+    t = np.array([0, 0, distance_cm]) - r @ np.array([22.0, 14.0, 0])
+
+    def plane(depth):
+        return k @ np.column_stack([r[:, 0], r[:, 1], r[:, 2] * depth + t])
+
+    texture_px = 20
+    sheet = np.full((18 * texture_px, 18 * texture_px), 255, np.uint8)
+    sheet[texture_px : 17 * texture_px, texture_px : 17 * texture_px] = cv2.aruco.generateImageMarker(
+        dictionary(), 0, 16 * texture_px)
+    to_plane = np.array([[1 / texture_px, 0, -1.0], [0, 1 / texture_px, 4.0 - 1.0], [0, 0, 1]])
+    img = np.full((h, w), 200, np.uint8)
+    warped = cv2.warpPerspective(sheet, plane(0) @ to_plane, (w, h), borderValue=0)
+    cover = cv2.warpPerspective(np.full(sheet.shape, 255, np.uint8), plane(0) @ to_plane, (w, h)) > 0
+    img[cover] = warped[cover]
+    corners = np.float64([[30, 4, 1], [33, 4, 1], [33, 24, 1], [30, 24, 1]])
+    projected = (plane(recess_cm) @ corners.T).T
+    projected = projected[:, :2] / projected[:, 2:]
+    cv2.fillConvexPoly(img, np.round(projected).astype(np.int32), 50)
+    box = Box(x1=projected[:, 0].min(), y1=projected[:, 1].min(), x2=projected[:, 0].max(), y2=projected[:, 1].max())
+    return img, box
+
+
 def close(value, expected, fraction):
     return abs(value - expected) <= fraction * expected
 
@@ -111,6 +152,23 @@ def test_marker_and_book_measure_within_three_percent(tmp_path, cfg):
     assert close(dims.thickness_cm, 3.0, 0.03)
     assert dims.review == []
     assert dims.frame_seq == 0
+
+
+@pytest.mark.parametrize("yaw", [0, 30])
+def test_pinhole_recess_behind_marker_plane_within_three_percent(tmp_path, yaw):
+    recess, distance = 4.0, 70.0
+    img, box = pinhole(yaw, distance, recess)
+    frames = [still(tmp_path, img, intrinsics={"fx": FOCAL})]
+    corrected, plain = configured(recess=recess), configured(recess=0.0)
+    unit = unit_scale(0, frames, corrected)
+    assert close(unit.planes[0].plane_distance_cm, distance * math.cos(math.radians(yaw)), 0.02)
+    book = track(0, [(0, box)], frames)
+    assert close(measure(book, frames, corrected, unit).height_cm, 20.0, 0.03)
+    assert not close(measure(book, frames, plain, unit_scale(0, frames, plain)).height_cm, 20.0, 0.04)
+
+
+def test_default_recess_comes_from_config():
+    assert load_measure_config(Settings()).scale.spine_recess_cm == 2.5
 
 
 def test_no_marker_falls_back_to_format_prior_with_review(tmp_path, cfg):
@@ -155,11 +213,10 @@ def test_two_units_with_different_scales_are_not_mixed(tmp_path, cfg):
     canvas = np.full((near.shape[0], near.shape[1] + far.shape[1]), 230, np.uint8)
     canvas[:, : near.shape[1]] = near
     canvas[: far.shape[0], near.shape[1] :] = far
-    offset = near.shape[1]
-    far_box = far_boxes[0].model_copy(update={"x1": far_boxes[0].x1 + offset, "x2": far_boxes[0].x2 + offset})
     frames = [still(tmp_path, canvas)]
     unit_a, unit_b = unit_scale(0, frames, cfg), unit_scale(1, frames, cfg)
-    book_a, book_b = track(0, [(0, near_boxes[0])], frames), track(1, [(0, far_box)], frames)
+    book_a = track(0, [(0, near_boxes[0])], frames)
+    book_b = track(1, [(0, shifted(far_boxes[0], near.shape[1]))], frames)
     assert close(measure(book_a, frames, cfg, unit_a).height_cm, 20.0, 0.03)
     assert close(measure(book_b, frames, cfg, unit_b).height_cm, 20.0, 0.03)
     assert not close(measure(book_b, frames, cfg, unit_a).height_cm, 20.0, 0.2)
@@ -173,8 +230,7 @@ def test_marker_in_overlapping_frame_is_chained(tmp_path, cfg):
     frames = [first, second]
     unit = unit_scale(0, frames, cfg)
     assert list(unit.planes) == [0]
-    box = boxes[0].model_copy(update={"x1": boxes[0].x1 - shift, "x2": boxes[0].x2 - shift})
-    dims = measure(track(0, [(1, box)], frames), frames, cfg, unit)
+    dims = measure(track(0, [(1, shifted(boxes[0], -shift))], frames), frames, cfg, unit)
     direct = measure(track(0, [(0, boxes[0])], frames), frames, cfg, unit)
     assert dims.scale_method == ScaleMethod.aruco_homography
     assert dims.frame_seq == 1
@@ -186,20 +242,24 @@ ROW = [2.0, 3.5, 1.5, 4.0, 2.5]
 LOOSE = [(3, 3), (2, 4), (3, 2), (4, 3), (2, 2)]
 
 
-def row_scene(tmp_path):
-    books, x = [], 22.0
-    for thickness in ROW:
-        books.append((x, 6, thickness, 20))
-        x += thickness
+def row_scene(tmp_path, books=None):
+    books = books or []
+    if not books:
+        x = 22.0
+        for thickness in ROW:
+            books.append((x, 6, thickness, 20))
+            x += thickness
     img, boxes = scene(60, 32, PX_PER_CM, books, marker=(0, 2, 8))
-    loose = [b.model_copy(update={"x1": b.x1 - out, "x2": b.x2 + back}) for b, (out, back) in zip(boxes, LOOSE)]
-    frames = [still(tmp_path, img)]
-    tracks = [track(i, [(0, b)], frames) for i, b in enumerate(loose)]
-    return frames, tracks, loose
+    return [still(tmp_path, img)], boxes
+
+
+def loosened(boxes):
+    return [b.model_copy(update={"x1": b.x1 - out, "x2": b.x2 + back}) for b, (out, back) in zip(boxes, LOOSE)]
 
 
 def test_shared_boundaries_beat_box_widths(tmp_path, cfg):
-    frames, tracks, loose = row_scene(tmp_path)
+    frames, boxes = row_scene(tmp_path)
+    tracks = [track(i, [(0, b)], frames) for i, b in enumerate(loosened(boxes))]
     unit = unit_scale(0, frames, cfg)
     row = measure_row(tracks, frames, cfg, unit)
     single = [measure(t, frames, cfg, unit) for t in tracks]
@@ -210,36 +270,94 @@ def test_shared_boundaries_beat_box_widths(tmp_path, cfg):
     assert close(sum(d.thickness_cm for d in row), sum(ROW), 0.03)
 
 
-def test_row_sum_is_constrained_to_the_measured_run(tmp_path, cfg):
-    frames, tracks, _ = row_scene(tmp_path)
+def test_adjacent_books_with_different_sharpest_frames_share_one_reference_frame(tmp_path, cfg):
+    frames, boxes = row_scene(tmp_path)
+    img = cv2.imread(frames[0].path, cv2.IMREAD_GRAYSCALE)
+    frames += [still(tmp_path, img, seq=1, blur=2.0), still(tmp_path, img, seq=2, blur=3.0)]
+    first, second = loosened(boxes)[:2]
+    tracks = [track(0, [(0, first), (1, first)], frames), track(1, [(0, second), (2, second)], frames)]
     unit = unit_scale(0, frames, cfg)
-    run = 13.0
-    row = measure_row(tracks, frames, cfg, unit, run_cm=run)
-    assert sum(d.thickness_cm for d in row) == pytest.approx(run)
-    free = measure_row(tracks, frames, cfg, unit)
-    ratios = [r.thickness_cm / f.thickness_cm for r, f in zip(row, free)]
-    assert max(ratios) == pytest.approx(min(ratios))
+    row = measure_row(tracks, frames, cfg, unit)
+    assert [d.frame_seq for d in row] == [0, 0]
+    assert all(d.review == [] for d in row)
+    single = [measure(t, frames, cfg, unit) for t in tracks]
+    assert [d.frame_seq for d in single] == [1, 2]
+    shared_error = sum(abs(d.thickness_cm - t) for d, t in zip(row, ROW))
+    box_error = sum(abs(d.thickness_cm - t) for d, t in zip(single, ROW))
+    assert shared_error < box_error
 
 
-def test_large_gap_is_not_absorbed_by_neighbours(tmp_path, cfg):
-    img, boxes = scene(60, 32, PX_PER_CM, [(22, 6, 2, 20), (24, 6, 3, 20), (33, 6, 3, 20)], marker=(0, 2, 8))
+def test_track_missing_from_the_reference_frame_is_flagged(tmp_path, cfg):
+    frames, boxes = row_scene(tmp_path)
+    img = cv2.imread(frames[0].path, cv2.IMREAD_GRAYSCALE)
+    frames.append(still(tmp_path, img, seq=1, blur=0.5))
+    tracks = [track(0, [(0, boxes[0])], frames), track(1, [(0, boxes[1])], frames), track(2, [(1, boxes[2])], frames)]
+    row = measure_row(tracks, frames, cfg, unit_scale(0, frames, cfg))
+    assert [d.frame_seq for d in row] == [0, 0, 1]
+    assert row[0].review == [] and row[1].review == []
+    assert any("reference frame" in reason for reason in row[2].review)
+    assert close(row[2].thickness_cm, ROW[2], 0.03)
+
+
+def test_tracks_from_two_rows_are_rejected(tmp_path, cfg):
+    img, boxes = scene(60, 60, 10, [(20, 2, 3, 20), (24, 30, 3, 20)], marker=(0, 2, 2))
     frames = [still(tmp_path, img)]
     tracks = [track(i, [(0, b)], frames) for i, b in enumerate(boxes)]
-    row = measure_row(tracks, frames, cfg, unit_scale(0, frames, cfg))
-    assert [round(d.thickness_cm, 1) for d in row] == [2.0, 3.0, 3.0]
+    with pytest.raises(ValueError, match="one shelf row"):
+        measure_row(tracks, frames, cfg, unit_scale(0, frames, cfg))
+
+
+def test_measured_run_scales_the_whole_span_including_gaps(tmp_path, cfg):
+    books = [(22, 6, 2, 20), (24, 6, 3, 20), (33, 6, 3, 20)]
+    frames, boxes = row_scene(tmp_path, books)
+    tracks = [track(i, [(0, b)], frames) for i, b in enumerate(boxes)]
+    unit = unit_scale(0, frames, cfg)
+    free = measure_row(tracks, frames, cfg, unit)
+    assert [round(d.thickness_cm, 1) for d in free] == [2.0, 3.0, 3.0]
+    exact = measure_row(tracks, frames, cfg, unit, run_cm=14.0)
+    assert [round(d.thickness_cm, 2) for d in exact] == [round(d.thickness_cm, 2) for d in free]
+    assert sum(d.thickness_cm for d in exact) == pytest.approx(8.0, abs=0.05)
+    longer = measure_row(tracks, frames, cfg, unit, run_cm=15.4)
+    for scaled, base in zip(longer, free):
+        assert scaled.thickness_cm == pytest.approx(base.thickness_cm * 1.1, rel=0.01)
+        assert scaled.height_cm == pytest.approx(base.height_cm * 1.1, rel=0.01)
+
+
+def test_loose_box_heights_are_trimmed_by_the_configured_fraction(tmp_path):
+    loose = 0.04
+    img, boxes = scene(60, 32, PX_PER_CM, [(30, 6, 3, 20)], marker=(0, 4, 8))
+    box = boxes[0]
+    grown = box.model_copy(update={"y1": box.y1 - loose * box.height, "y2": box.y2 + loose * box.height})
+    frames = [still(tmp_path, img)]
+    book = track(0, [(0, grown)], frames)
+    raw = configured()
+    trimmed = configured(trim=2 * loose / (1 + 2 * loose))
+    assert close(measure(book, frames, raw, unit_scale(0, frames, raw)).height_cm, 20.0 * (1 + 2 * loose), 0.01)
+    assert close(measure(book, frames, trimmed, unit_scale(0, frames, trimmed)).height_cm, 20.0, 0.01)
 
 
 def test_mask_adapter_is_none_without_ml_extra(tmp_path):
     img, boxes = scene(20, 20, PX_PER_CM, [(5, 2, 3, 15)])
-    assert masks.spine_edges(still(tmp_path, img).path, boxes) is None
+    assert masks.spine_boxes(still(tmp_path, img).path, boxes) is None
 
 
-def test_mask_edges_use_the_middle_band():
+def test_mask_adapter_is_none_when_model_is_missing(tmp_path, monkeypatch):
+    img, boxes = scene(20, 20, PX_PER_CM, [(5, 2, 3, 15)])
+    monkeypatch.setattr(masks, "find_spec", lambda name: object())
+
+    def missing(model_id):
+        raise OSError(model_id)
+
+    monkeypatch.setattr(masks, "sam_model", missing)
+    assert masks.spine_boxes(still(tmp_path, img).path, boxes) is None
+
+
+def test_mask_box_uses_the_middle_bands():
     mask = np.zeros((100, 60), bool)
-    mask[10:90, 20:35] = True
-    mask[10:20, 5:50] = True
-    left, right = masks.mask_edges(mask, Box(x1=15, y1=10, x2=40, y2=90), 0.5)
-    assert (left, right) == (20.0, 35.0)
+    mask[12:88, 20:35] = True
+    mask[12:20, 5:50] = True
+    tight = masks.mask_box(mask, Box(x1=15, y1=8, x2=40, y2=92), 0.5)
+    assert (tight.x1, tight.x2, tight.y1, tight.y2) == (20.0, 35.0, 12.0, 88.0)
 
 
 def dims_of(height, thickness):
@@ -252,5 +370,7 @@ def test_open_library_cross_check_flags_large_differences():
     reasons = cross_check(dims_of(24.0, 3.0), "20 x 13 x 3 centimeters")
     assert len(reasons) == 1 and "height" in reasons[0]
     assert len(cross_check(dims_of(20.0, 1.0), "7.9 x 5.1 x 1.2 inches")) == 1
+    assert cross_check(dims_of(20.0, 3.0), "7,9 X 5,1 X 1,2 In.") == []
+    assert cross_check(dims_of(20.0, 3.0), "20 × 13 × 3 CM") == []
     assert cross_check(dims_of(20.0, 3.0), "") == []
     assert cross_check(dims_of(20.0, 3.0), "about a hand tall") == []

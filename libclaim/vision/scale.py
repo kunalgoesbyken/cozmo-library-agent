@@ -39,7 +39,7 @@ class PlaneScale(BaseModel):
     path: str
     matrix: list[list[float]]
     side_px: float
-    distance_cm: float
+    plane_distance_cm: float
 
 
 class UnitScale(BaseModel):
@@ -58,7 +58,6 @@ class SpineDims(BaseModel):
 
 @dataclass
 class Placement:
-    frame: int
     box: Box
     matrix: np.ndarray
     method: ScaleMethod
@@ -84,81 +83,95 @@ def aruco_detector(cfg: ScaleConfig) -> cv2.aruco.ArucoDetector:
     return cv2.aruco.ArucoDetector(dictionary, params)
 
 
-def find_marker(gray: np.ndarray, marker_id: int, cfg: ScaleConfig) -> np.ndarray | None:
-    corners, ids, _ = aruco_detector(cfg).detectMarkers(gray)
+def find_marker(detector: cv2.aruco.ArucoDetector, gray: np.ndarray, marker_id: int) -> np.ndarray | None:
+    corners, ids, _ = detector.detectMarkers(gray)
     if ids is None:
         return None
     return next((c.reshape(4, 2) for c, found in zip(corners, ids.flatten()) if found == marker_id), None)
 
 
-def focal_px(still: Still, cfg: ScaleConfig) -> float:
+def camera_matrix(still: Still, cfg: ScaleConfig) -> np.ndarray:
     if still.intrinsics and cfg.focal_key in still.intrinsics:
-        return still.intrinsics[cfg.focal_key]
-    return still.w / 2 / math.tan(math.radians(cfg.fallback_hfov_deg) / 2)
+        focal = still.intrinsics[cfg.focal_key]
+    else:
+        focal = max(still.w, still.h) / 2 / math.tan(math.radians(cfg.fallback_long_side_fov_deg) / 2)
+    return np.array([[focal, 0, still.w / 2], [0, focal, still.h / 2], [0, 0, 1]])
+
+
+def plane_distance_cm(corners: np.ndarray, size: float, still: Still, cfg: ScaleConfig) -> float:
+    square = np.float64([[0, 0, 0], [size, 0, 0], [size, size, 0], [0, size, 0]])
+    _, rvec, tvec = cv2.solvePnP(square, corners.astype(np.float64), camera_matrix(still, cfg), None,
+                                 flags=cv2.SOLVEPNP_IPPE)
+    rotation, _ = cv2.Rodrigues(rvec)
+    return float(abs(rotation[:, 2] @ tvec.ravel()))
 
 
 def unit_scale(marker_id: int, stills: list[Still], cfg: MeasureConfig) -> UnitScale:
     planes: dict[int, PlaneScale] = {}
     size = cfg.marker_size_cm
     if size is not None:
+        detector = aruco_detector(cfg.scale)
         world = np.float32([[0, 0], [size, 0], [size, size], [0, size]])
         for still in stills:
-            corners = find_marker(read_image(still.path, cv2.IMREAD_GRAYSCALE), marker_id, cfg.scale)
+            corners = find_marker(detector, read_image(still.path, cv2.IMREAD_GRAYSCALE), marker_id)
             if corners is None:
                 continue
-            side_px = float(np.mean(np.linalg.norm(corners - np.roll(corners, 1, axis=0), axis=1)))
+            distance = plane_distance_cm(corners, size, still, cfg.scale)
+            recess = (distance + cfg.scale.spine_recess_cm) / distance
+            homography = cv2.getPerspectiveTransform(corners.astype(np.float32), world)
             planes[still.seq] = PlaneScale(
                 seq=still.seq,
                 path=still.path,
-                matrix=cv2.getPerspectiveTransform(corners.astype(np.float32), world).tolist(),
-                side_px=side_px,
-                distance_cm=focal_px(still, cfg.scale) * size / side_px,
+                matrix=(np.diag([recess, recess, 1.0]) @ homography).tolist(),
+                side_px=float(np.mean(np.linalg.norm(corners - np.roll(corners, 1, axis=0), axis=1))),
+                plane_distance_cm=distance,
             )
     return UnitScale(marker_id=marker_id, planes=planes)
 
 
-def aruco_placement(frame: int, box: Box, plane: PlaneScale, step: np.ndarray, factor: float,
-                    cfg: MeasureConfig) -> Placement:
-    recess = (plane.distance_cm + cfg.scale.spine_recess_cm) / plane.distance_cm
-    matrix = np.diag([recess, recess, 1.0]) @ np.array(plane.matrix) @ step
-    confidence = cfg.scale.aruco_confidence * min(1.0, plane.side_px / cfg.scale.min_marker_px) * factor
-    return Placement(frame, box, matrix, ScaleMethod.aruco_homography, confidence, [])
+def plane_confidence(plane: PlaneScale, factor: float, cfg: ScaleConfig) -> float:
+    return cfg.aruco_confidence * min(1.0, plane.side_px / cfg.min_marker_px) * factor
 
 
-def prior_placement(frame: int, box: Box, cfg: MeasureConfig, why: str) -> Placement:
+def frame_scale(still: Still, cfg: MeasureConfig, unit: UnitScale | None) -> tuple[np.ndarray, float] | None:
+    planes = unit.planes if unit else {}
+    plane = planes.get(still.seq)
+    if plane is not None:
+        return np.array(plane.matrix), plane_confidence(plane, 1.0, cfg.scale)
+    if not planes:
+        return None
+    gray = read_image(still.path, cv2.IMREAD_GRAYSCALE)
+    for plane in sorted(planes.values(), key=lambda p: abs(p.seq - still.seq)):
+        step = pair_homography(read_image(plane.path, cv2.IMREAD_GRAYSCALE), gray, cfg.tracks)
+        if step is not None:
+            return np.array(plane.matrix) @ step, plane_confidence(plane, cfg.scale.chained_confidence_factor, cfg.scale)
+    return None
+
+
+def fallback_reason(cfg: MeasureConfig, unit: UnitScale | None) -> str:
+    if cfg.marker_size_cm is None:
+        return "ARUCO_MARKER_SIZE_CM is not set"
+    if unit is None or not unit.planes:
+        return "no ArUco marker of this shelf unit was visible"
+    return "the measuring frame does not overlap a frame with the shelf-unit marker"
+
+
+def prior_placement(box: Box, cfg: MeasureConfig, why: str) -> Placement:
     aspect = box.height / box.width
     name, fmt = min(
         cfg.formats.items(), key=lambda item: abs(math.log(aspect * item[1].thickness_cm / item[1].height_cm))
     )
     k = fmt.height_cm / box.height
     review = [f"{ScaleMethod.book_format_prior} {name}: {why}"]
-    return Placement(frame, box, np.diag([k, k, 1.0]), ScaleMethod.book_format_prior, cfg.scale.prior_confidence, review)
+    return Placement(box, np.diag([k, k, 1.0]), ScaleMethod.book_format_prior, cfg.scale.prior_confidence, review)
 
 
-def fallback_reason(cfg: MeasureConfig, planes: dict[int, PlaneScale]) -> str:
-    if cfg.marker_size_cm is None:
-        return "ARUCO_MARKER_SIZE_CM is not set"
-    if not planes:
-        return "no ArUco marker of this shelf unit was visible"
-    return "no frame of this book overlaps a frame with the shelf-unit marker"
-
-
-def place(track: BookTrack, stills: list[Still], cfg: MeasureConfig, unit: UnitScale | None) -> Placement:
-    refs = sorted(track.refs, key=lambda ref: stills[ref.frame].blur, reverse=True)
-    planes = unit.planes if unit else {}
-    for ref in refs:
-        plane = planes.get(stills[ref.frame].seq)
-        if plane is not None:
-            return aruco_placement(ref.frame, ref.box, plane, np.eye(3), 1.0, cfg)
-    best = refs[0]
-    if planes:
-        seq = stills[best.frame].seq
-        gray = read_image(stills[best.frame].path, cv2.IMREAD_GRAYSCALE)
-        for plane in sorted(planes.values(), key=lambda p: abs(p.seq - seq)):
-            step = pair_homography(read_image(plane.path, cv2.IMREAD_GRAYSCALE), gray, cfg.tracks)
-            if step is not None:
-                return aruco_placement(best.frame, best.box, plane, step, cfg.scale.chained_confidence_factor, cfg)
-    return prior_placement(best.frame, best.box, cfg, fallback_reason(cfg, planes))
+def tight_boxes(path: str, boxes: list[Box], cfg: ScaleConfig) -> list[Box]:
+    found = masks.spine_boxes(path, boxes)
+    if found is not None:
+        return found
+    trim = cfg.box_height_trim / 2
+    return [b.model_copy(update={"y1": b.y1 + trim * b.height, "y2": b.y2 - trim * b.height}) for b in boxes]
 
 
 def length_cm(matrix: np.ndarray, start: tuple[float, float], end: tuple[float, float]) -> float:
@@ -170,66 +183,85 @@ def middle(box: Box) -> float:
     return (box.y1 + box.y2) / 2
 
 
-def clusters(edges: list[tuple[float, float]], factor: float) -> list[list[int]]:
-    typical = median(right - left for left, right in edges)
+def clusters(boxes: list[Box], factor: float) -> list[list[int]]:
+    typical = median(b.width for b in boxes)
     groups = [[0]]
-    for index in range(1, len(edges)):
-        if edges[index][0] - edges[index - 1][1] > factor * typical:
+    for index in range(1, len(boxes)):
+        if boxes[index].x1 - boxes[index - 1].x2 > factor * typical:
             groups.append([])
         groups[-1].append(index)
     return groups
 
 
-def shared_bounds(edges: list[tuple[float, float]]) -> list[tuple[float, float]]:
-    cuts = [edges[0][0]] + [(edges[i - 1][1] + edges[i][0]) / 2 for i in range(1, len(edges))] + [edges[-1][1]]
+def shared_bounds(boxes: list[Box]) -> list[tuple[float, float]]:
+    cuts = [boxes[0].x1] + [(boxes[i - 1].x2 + boxes[i].x1) / 2 for i in range(1, len(boxes))] + [boxes[-1].x2]
     return list(zip(cuts, cuts[1:]))
 
 
-def rescale(values: list[float], indexes: list[int], total: float) -> None:
-    current = sum(values[i] for i in indexes)
-    if current > 0:
-        for i in indexes:
-            values[i] *= total / current
+def reference_frame(tracks: list[BookTrack], stills: list[Still], unit: UnitScale | None) -> int:
+    seqs = set(unit.planes) if unit else set()
+    members: dict[int, int] = {}
+    for track in tracks:
+        for ref in track.refs:
+            members[ref.frame] = members.get(ref.frame, 0) + 1
+    return max(members, key=lambda f: (members[f], stills[f].seq in seqs, stills[f].blur))
+
+
+def check_one_row(boxes: list[Box]) -> None:
+    band = median(middle(b) for b in boxes)
+    if any(not b.y1 <= band <= b.y2 for b in boxes):
+        raise ValueError("measure_row needs the tracks of exactly one shelf row")
+
+
+def measure_frame(boxes: list[Box], still: Still, cfg: MeasureConfig, unit: UnitScale | None,
+                  run_cm: float | None) -> list[SpineDims]:
+    order = sorted(range(len(boxes)), key=lambda i: boxes[i].x1)
+    tight = tight_boxes(still.path, [boxes[i] for i in order], cfg.scale)
+    scale = frame_scale(still, cfg, unit)
+    if scale is not None and run_cm is not None:
+        y = mean(middle(b) for b in tight)
+        ratio = run_cm / length_cm(scale[0], (tight[0].x1, y), (tight[-1].x2, y))
+        scale = np.diag([ratio, ratio, 1.0]) @ scale[0], scale[1]
+    if scale is None:
+        why = fallback_reason(cfg, unit)
+        placed = [prior_placement(box, cfg, why) for box in tight]
+    else:
+        placed = [Placement(box, scale[0], ScaleMethod.aruco_homography, scale[1], []) for box in tight]
+    thickness = [0.0] * len(tight)
+    for cluster in clusters(tight, cfg.scale.shared_gap_factor):
+        for j, (left, right) in zip(cluster, shared_bounds([tight[j] for j in cluster])):
+            y = middle(tight[j])
+            thickness[j] = length_cm(placed[j].matrix, (left, y), (right, y))
+    dims: dict[int, SpineDims] = {}
+    for j, (placement, value) in enumerate(zip(placed, thickness)):
+        box = placement.box
+        centre = (box.x1 + box.x2) / 2
+        dims[order[j]] = SpineDims(
+            height_cm=length_cm(placement.matrix, (centre, box.y1), (centre, box.y2)),
+            thickness_cm=value,
+            scale_method=placement.method,
+            confidence=placement.confidence,
+            frame_seq=still.seq,
+            review=placement.review,
+        )
+    return [dims[i] for i in range(len(boxes))]
 
 
 def measure_row(tracks: list[BookTrack], stills: list[Still], cfg: MeasureConfig, unit: UnitScale | None = None,
                 run_cm: float | None = None) -> list[SpineDims]:
-    placed = [place(track, stills, cfg, unit) for track in tracks]
-    thickness = [0.0] * len(placed)
-    by_frame: dict[int, list[int]] = {}
-    for index, placement in enumerate(placed):
-        by_frame.setdefault(placement.frame, []).append(index)
-    for frame, members in by_frame.items():
-        members.sort(key=lambda i: placed[i].box.x1)
-        boxes = [placed[i].box for i in members]
-        edges = masks.spine_edges(stills[frame].path, boxes) or [(b.x1, b.x2) for b in boxes]
-        for cluster in clusters(edges, cfg.scale.shared_gap_factor):
-            chosen = [members[j] for j in cluster]
-            bounds = shared_bounds([edges[j] for j in cluster])
-            for i, (left, right) in zip(chosen, bounds):
-                y = middle(placed[i].box)
-                thickness[i] = length_cm(placed[i].matrix, (left, y), (right, y))
-            first = placed[chosen[0]]
-            if run_cm is None and first.method == ScaleMethod.aruco_homography:
-                y = mean(middle(placed[i].box) for i in chosen)
-                rescale(thickness, chosen, length_cm(first.matrix, (bounds[0][0], y), (bounds[-1][1], y)))
-    if run_cm is not None:
-        rescale(thickness, list(range(len(placed))), run_cm)
-    dims = []
-    for placement, value in zip(placed, thickness):
-        box = placement.box
-        centre = (box.x1 + box.x2) / 2
-        dims.append(
-            SpineDims(
-                height_cm=length_cm(placement.matrix, (centre, box.y1), (centre, box.y2)),
-                thickness_cm=value,
-                scale_method=placement.method,
-                confidence=placement.confidence,
-                frame_seq=stills[placement.frame].seq,
-                review=placement.review,
-            )
-        )
-    return dims
+    if not tracks:
+        return []
+    frame = reference_frame(tracks, stills, unit)
+    inside = {i: ref.box for i, t in enumerate(tracks) for ref in t.refs if ref.frame == frame}
+    check_one_row(list(inside.values()))
+    dims: dict[int, SpineDims] = dict(zip(inside, measure_frame(list(inside.values()), stills[frame], cfg, unit, run_cm)))
+    for index, track in enumerate(tracks):
+        if index in inside:
+            continue
+        alone = measure_row([track], stills, cfg, unit)[0]
+        note = f"measured outside the row reference frame {stills[frame].seq}: no shared boundaries"
+        dims[index] = alone.model_copy(update={"review": alone.review + [note]})
+    return [dims[i] for i in range(len(tracks))]
 
 
 def measure(track: BookTrack, stills: list[Still], cfg: MeasureConfig, unit: UnitScale | None = None) -> SpineDims:
@@ -237,14 +269,17 @@ def measure(track: BookTrack, stills: list[Still], cfg: MeasureConfig, unit: Uni
 
 
 def parse_dimensions(text: str, units: dict[str, float]) -> list[float] | None:
-    tokens = text.lower().replace("x", " ").split()
-    if len(tokens) < 2 or tokens[-1] not in units:
+    tokens = text.lower().replace(",", ".").replace("×", " ").replace("x", " ").split()
+    if len(tokens) < 2:
+        return None
+    unit = tokens[-1].rstrip(".")
+    if unit not in units:
         return None
     try:
         values = [float(token) for token in tokens[:-1]]
     except ValueError:
         return None
-    return [value * units[tokens[-1]] for value in values]
+    return [value * units[unit] for value in values]
 
 
 def cross_check(dims: SpineDims, ol_dims: str) -> list[str]:
