@@ -102,7 +102,7 @@
 <h2>Books ({{ packet.books|length }})</h2>
 <table>
   <thead>
-    <tr><th>Frame</th><th>Id</th><th>Shelf</th><th class="num">Pos</th><th>Status</th><th>Title</th><th>Author</th><th>ISBN</th><th class="num">Spine h/t cm</th><th class="num">Replacement</th><th class="num">Used</th></tr>
+    <tr><th>Frame</th><th>Id</th><th>Shelf</th><th class="num">Pos</th><th>Status</th><th>Title</th><th>Author</th><th>ISBN</th><th>Edition</th><th>Corroboration</th><th class="num">Spine h/t cm</th><th class="num">Replacement</th><th class="num">Used</th></tr>
   </thead>
   <tbody>
   {% for book in packet.books %}
@@ -115,6 +115,8 @@
       <td>{{ book.title }}</td>
       <td>{{ book.author }}</td>
       <td>{{ book.isbn }}</td>
+      <td>{% if book.equivalent_edition %}<span class="badge">equivalent edition</span>{% elif book.edition_unverified %}<span class="badge">edition unverified</span>{% endif %}</td>
+      <td>{{ book.corroboration }}</td>
       <td class="num">{{ dims(book) }}</td>
       <td class="num">{{ money(book.replacement_cost.amount) }} {{ link(book.replacement_cost.url, book.replacement_cost.source or "source") }}</td>
       <td class="num">{{ money(book.used_value.amount) }} {{ link(book.used_value.url, book.used_value.source or "source") }}{% if book.used_value.source_type %} <span class="badge">{{ book.used_value.source_type }}</span>{% endif %}</td>

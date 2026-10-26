@@ -158,6 +158,7 @@ async def test_spine_without_publisher_takes_an_equivalent_edition_and_says_so(f
     packet = first[0]
     book = by_title(packet)[EQUIVALENT]
     assert book.status == "identified" and book.edition == "" and book.isbn == "9780006550686"
+    assert book.equivalent_edition and book.edition_unverified and book.corroboration == "ocr"
     reasons = [entry.reason for entry in packet.review_queue if entry.ref_id == book.id]
     assert any(reason.startswith("equivalent_edition_priced") for reason in reasons)
 
@@ -167,12 +168,14 @@ async def test_unreadable_spines_are_unidentified_with_dims(first):
     unread = [book for book in packet.books if book.status == "unidentified"]
     assert len(unread) == len(UNREADABLE)
     assert all(not b.title and not b.isbn and has_dims(b) for b in unread)
+    assert all(not b.edition_unverified and not b.equivalent_edition and not b.corroboration for b in unread)
 
 
 async def test_spine_the_ocr_missed_is_identified_from_the_catalogue_at_lower_confidence(first):
     packet = first[0]
     ulysses = by_title(packet)[CATALOGUE_ONLY]
     assert ulysses.status == "identified" and 0 < ulysses.id_confidence <= 0.5
+    assert ulysses.corroboration == "catalogue_only"
     reasons = [entry.reason for entry in packet.review_queue if entry.ref_id == ulysses.id]
     assert any(reason.startswith("identified_from_catalogue_only") for reason in reasons)
 

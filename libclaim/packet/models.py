@@ -89,6 +89,9 @@ class Book(BaseModel):
     author: str = ""
     edition: str = ""
     isbn: str = ""
+    edition_unverified: bool = False
+    equivalent_edition: bool = False
+    corroboration: str = ""
     spine_height_cm: float | None = None
     spine_thickness_cm: float | None = None
     scale_method: str = ""

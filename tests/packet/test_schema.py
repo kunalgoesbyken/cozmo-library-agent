@@ -36,7 +36,10 @@ CONTRACT = {
 
 ADDED = {
     "room": ["wall_area_net_m2", "openings", "shape", "polygon_m", "frame_refs"],
-    "books[]": ["scale_method", "evidence", "crop_ref", "box", "frame_size", "dims_estimated_from_prior"],
+    "books[]": [
+        "scale_method", "evidence", "crop_ref", "box", "frame_size", "dims_estimated_from_prior",
+        "edition_unverified", "equivalent_edition", "corroboration",
+    ],
     "books[].used_value": ["method", "source_type"],
     "items[]": ["dimensions_method", "crop_ref", "box", "frame_size"],
     "items[].replacement_cost": ["url_high"],
