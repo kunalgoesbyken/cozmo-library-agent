@@ -10,7 +10,7 @@ class ReadingConfig(BaseModel):
     batch_size: int
     jpeg_quality: int
     jpeg_mime: str
-    vertical_rotation: str
+    rotations: list[str]
     prompt: str
 
 
@@ -29,6 +29,8 @@ class GateConfig(BaseModel):
     author_match: float
     author_weight: float
     confident_score: float
+    lone_score_min: float
+    extra_token_penalty: float
     agree_score: float
     publisher_match: float
 

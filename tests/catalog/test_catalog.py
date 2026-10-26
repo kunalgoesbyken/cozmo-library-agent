@@ -5,7 +5,7 @@ import httpx
 import pytest
 
 from libclaim.catalog.googlebooks import GoogleBooks
-from libclaim.catalog.http import CatalogHttp, CatalogOffline
+from libclaim.catalog.http import CatalogBadResponse, CatalogHttp, CatalogOffline, guarded
 from libclaim.catalog.openlibrary import OpenLibrary
 
 FIXTURES = Path(__file__).resolve().parent.parent / "fixtures" / "catalog"
@@ -65,12 +65,12 @@ async def test_failures_never_leak_the_key(tmp_path, online, caplog, failure):
 
     http = http_with(tmp_path, handler)
     with caplog.at_level(logging.DEBUG):
-        google = await GoogleBooks(http, api_key=KEY).search("sapiens", "harari")
-        library = await OpenLibrary(http).search("sapiens", "harari")
+        google, google_down = await guarded(GoogleBooks(http, api_key=KEY).search("sapiens", "harari"), "google books search")
+        library, library_down = await guarded(OpenLibrary(http).search("sapiens", "harari"), "open library search")
     assert google == [] and library == []
+    assert google_down and library_down
     assert KEY not in caplog.text
     assert KEY not in cache_text(tmp_path)
-    assert all(KEY not in str(record.args) + record.getMessage() for record in caplog.records)
     assert "google books search failed" in caplog.text
 
 
@@ -92,3 +92,19 @@ async def test_offline_miss_raises_and_fixtures_replay(tmp_path):
 def test_fixtures_hold_no_credentials():
     for path in FIXTURES.glob("*.json"):
         assert "AIza" not in path.read_text(encoding="utf-8")
+
+
+async def test_html_reply_is_not_cached_and_is_reported(tmp_path, online):
+    http = http_with(tmp_path, lambda request: httpx.Response(200, content=b"<html>verify you are human</html>"))
+    found, down = await guarded(OpenLibrary(http).search("sapiens", "harari"), "open library search")
+    assert found == [] and down
+    assert not list((tmp_path / "cache").glob("*"))
+    with pytest.raises(CatalogBadResponse):
+        await http.get_json("https://openlibrary.org/search.json", {"title": "x"})
+
+
+async def test_edition_with_empty_publishers_keeps_its_isbn(tmp_path, online):
+    body = b'{"entries": [{"key": "/books/OL1M", "publishers": [], "isbn_13": ["9780000000002"]}]}'
+    http = http_with(tmp_path, lambda request: httpx.Response(200, content=body))
+    editions = await OpenLibrary(http).editions("OL1W")
+    assert [(e.publisher, e.isbn) for e in editions] == [("", "9780000000002")]

@@ -1,8 +1,10 @@
 import hashlib
 import json
+import logging
 import os
 from pathlib import Path
-from typing import Any
+from collections.abc import Awaitable
+from typing import Any, TypeVar
 
 import httpx
 from aiolimiter import AsyncLimiter
@@ -14,11 +16,26 @@ from libclaim.settings import load_settings
 
 PER_SECOND = 1.0
 
+logger = logging.getLogger(__name__)
+T = TypeVar("T")
+
 
 def describe(error: httpx.HTTPError) -> str:
     if isinstance(error, httpx.HTTPStatusError):
         return f"status {error.response.status_code}"
     return type(error).__name__
+
+
+class CatalogBadResponse(httpx.HTTPError):
+    pass
+
+
+async def guarded(call: Awaitable[list[T]], name: str) -> tuple[list[T], bool]:
+    try:
+        return await call, False
+    except httpx.HTTPError as error:
+        logger.warning("%s failed: %s", name, describe(error))
+        return [], True
 
 
 class CatalogOffline(RuntimeError):
@@ -66,7 +83,10 @@ class CatalogHttp:
         request = httpx.URL(url, params=params)
         path = self.cache_path(str(request))
         if path.is_file():
-            return json.loads(path.read_bytes())
+            try:
+                return json.loads(path.read_bytes())
+            except ValueError:
+                path.unlink()
         llm = load_llm_config()
         if os.environ.get(llm.offline_env) == llm.offline_value:
             raise CatalogOffline(f"catalogue request not cached while offline: {request}")
@@ -74,9 +94,13 @@ class CatalogHttp:
         async with limiter:
             response = await self.client.get(request, headers=headers)
         response.raise_for_status()
+        try:
+            body = json.loads(response.content)
+        except ValueError:
+            raise CatalogBadResponse("catalogue reply is not JSON") from None
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         path.write_bytes(response.content)
-        return response.json()
+        return body
 
     async def aclose(self) -> None:
         await self.client.aclose()

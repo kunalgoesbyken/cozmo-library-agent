@@ -2,7 +2,7 @@ reading:
   batch_size: 24
   jpeg_quality: 90
   jpeg_mime: image/jpeg
-  vertical_rotation: ROTATE_90_CLOCKWISE
+  rotations: [ROTATE_90_CLOCKWISE, ROTATE_90_COUNTERCLOCKWISE]
   prompt: >-
     Each image is one book spine, rotated so the text reads left to right, and is preceded by its crop_id.
     For every crop_id return the title, the author and the publisher exactly as printed on the spine.
@@ -21,6 +21,8 @@ gates:
   author_match: 80
   author_weight: 0.3
   confident_score: 95
+  lone_score_min: 97
+  extra_token_penalty: 20
   agree_score: 85
   publisher_match: 80
 catalog:

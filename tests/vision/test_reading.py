@@ -56,13 +56,69 @@ async def test_empty_title_is_not_legible(tmp_path):
     assert readings[0].legible is False
 
 
-def test_vertical_spines_rotate_upright_and_horizontal_do_not():
-    image = blank(200, 300)
-    box = Box(x1=10, y1=20, x2=50, y2=120)
-    vertical = SpineDet(box_px=box, orientation=Orientation.vertical, source=Source.gemini)
-    horizontal = SpineDet(box_px=box, orientation=Orientation.horizontal, source=Source.gemini)
-    assert crop_spine(image, vertical).shape[:2] == (40, 100)
-    assert crop_spine(image, horizontal).shape[:2] == (100, 40)
+def text_image(text="SAPIENS"):
+    image = np.full((120, 400, 3), 255, np.uint8)
+    cv2.putText(image, text, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 4)
+    return image
+
+
+def vertical_det(image):
+    box = Box(x1=0, y1=0, x2=image.shape[1], y2=image.shape[0])
+    return SpineDet(box_px=box, orientation=Orientation.vertical, source=Source.gemini)
+
+
+def test_top_to_bottom_text_is_turned_counter_clockwise():
+    shelf = cv2.rotate(text_image(), cv2.ROTATE_90_CLOCKWISE)
+    crop = crop_spine(shelf, vertical_det(shelf), 3)
+    assert crop.rotation == "ROTATE_90_COUNTERCLOCKWISE"
+    assert crop.ocr_text == "SAPIENS"
+    assert crop.image.shape[:2] == (120, 400)
+    assert crop.track_id == 3
+
+
+def test_bottom_to_top_text_is_turned_clockwise():
+    shelf = cv2.rotate(text_image(), cv2.ROTATE_90_COUNTERCLOCKWISE)
+    crop = crop_spine(shelf, vertical_det(shelf), 4)
+    assert crop.rotation == "ROTATE_90_CLOCKWISE"
+    assert crop.ocr_text == "SAPIENS"
+
+
+def test_horizontal_spines_are_not_rotated():
+    image = text_image()
+    box = Box(x1=0, y1=0, x2=400, y2=120)
+    det = SpineDet(box_px=box, orientation=Orientation.horizontal, source=Source.gemini)
+    crop = crop_spine(image, det, 5)
+    assert crop.rotation == ""
+    assert crop.image.shape[:2] == (120, 400)
+    assert crop.ocr_text == "SAPIENS"
+
+
+async def test_chosen_rotation_is_recorded_in_the_reading(tmp_path):
+    llm, _ = llm_for(tmp_path, lambda i: {"crop_id": i, "title": "T", "author": "", "publisher": "", "legible": True})
+    crop = SpineCrop(track_id=2, image=blank(), rotation="ROTATE_90_CLOCKWISE")
+    readings = await read_spines([crop], llm, ["gemini-3.5-flash-lite"])
+    assert readings[0].rotation == "ROTATE_90_CLOCKWISE"
+
+
+async def test_failed_batch_keeps_other_batches(tmp_path):
+    class Flaky:
+        def __init__(self):
+            self.calls = 0
+
+        async def generate(self, model, parts, schema):
+            self.calls += 1
+            ids = [p.removeprefix("crop_id: ") for p in parts if isinstance(p, str) and p.startswith("crop_id: ")]
+            if ids[0] != "0":
+                return LlmResponse(text="not json", input_tokens=1, output_tokens=1)
+            reads = [{"crop_id": i, "title": "T", "author": "", "publisher": "", "legible": True} for i in ids]
+            return LlmResponse(text=json.dumps({"reads": reads}), input_tokens=1, output_tokens=1)
+
+    llm = Llm(client=Flaky(), budget=Budget(tmp_path / "spend.jsonl"), quota_path=tmp_path / "q.json")
+    crops = [SpineCrop(track_id=i, image=blank()) for i in range(30)]
+    readings = await read_spines(crops, llm, ["gemini-3.5-flash-lite"])
+    assert len(readings) == 30
+    assert all(r.legible and not r.failure for r in readings[:24])
+    assert all(not r.legible and r.failure == "LlmReplyInvalid" for r in readings[24:])
 
 
 def test_ocr_reads_printed_text_and_engine_is_cached():

@@ -1,12 +1,6 @@
-import logging
-
-import httpx
-
-from libclaim.catalog.http import CatalogHttp, Candidate, describe
+from libclaim.catalog.http import CatalogHttp, Candidate
 from libclaim.resolve_config import load_resolve_config
 from libclaim.settings import load_settings
-
-logger = logging.getLogger(__name__)
 
 SOURCE = "googlebooks"
 ISBN_13 = "ISBN_13"
@@ -27,11 +21,7 @@ class GoogleBooks:
         cfg = self.config.googlebooks
         params = {"q": query_for(title, author), "maxResults": self.config.search_limit}
         headers = {cfg.key_header: self.api_key} if self.api_key else None
-        try:
-            body = await self.http.get_json(cfg.volumes_url, params, headers)
-        except httpx.HTTPError as error:
-            logger.warning("google books search failed: %s", describe(error))
-            return []
+        body = await self.http.get_json(cfg.volumes_url, params, headers)
         candidates = []
         for item in body.get("items", []):
             info = item.get("volumeInfo", {})
