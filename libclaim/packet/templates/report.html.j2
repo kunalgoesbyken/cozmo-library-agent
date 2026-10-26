@@ -1,0 +1,139 @@
+{%- macro money(value) -%}{%- if value is none -%}<span class="unknown">unknown</span>{%- else -%}{{ "%.2f"|format(value) }}{%- endif -%}{%- endmacro -%}
+{%- macro num(value) -%}{%- if value is none -%}<span class="unknown">unknown</span>{%- else -%}{{ value }}{%- endif -%}{%- endmacro -%}
+{%- macro link(url, label) -%}{%- if url.startswith("http://") or url.startswith("https://") -%}<a href="{{ url }}">{{ label }}</a>{%- endif -%}{%- endmacro -%}
+{%- macro thumb(ref) -%}{%- if ref -%}<a href="{{ ref }}"><img src="{{ ref }}" alt="{{ ref }}" loading="lazy"></a>{%- endif -%}{%- endmacro -%}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claim report {{ packet.sweep.id }}</title>
+<style>
+  body { font: 14px/1.5 system-ui, sans-serif; color: #1c1c1c; max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+  h1 { font-size: 1.6rem; margin-bottom: 0.2rem; }
+  h2 { font-size: 1.15rem; margin: 2rem 0 0.5rem; border-bottom: 1px solid #ccc; padding-bottom: 0.2rem; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid #e4e4e4; vertical-align: middle; }
+  th { background: #f4f4f4; font-weight: 600; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  img { height: 48px; width: auto; border-radius: 3px; display: block; }
+  a { color: #0b5cad; }
+  .unknown { color: #888; font-style: italic; }
+  .meta { color: #555; margin: 0; }
+  .badge { padding: 0.05rem 0.45rem; border-radius: 3px; background: #eee; font-size: 0.85em; }
+  .high { background: #f8d7da; }
+  .medium { background: #fff1cc; }
+  .low { background: #e2ecf7; }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 0.2rem 1rem; margin: 0; }
+  dt { color: #555; }
+  dd { margin: 0; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<h1>Claim report</h1>
+<p class="meta">
+  Sweep {{ packet.sweep.id }} &middot; {{ packet.sweep.captured_at }} &middot; {{ packet.sweep.device }}
+  &middot; {{ packet.sweep.country }} ({{ packet.sweep.currency }}){% if packet.second_country %} &middot; second country {{ packet.second_country }}{% endif %}
+</p>
+
+<h2>Totals</h2>
+<dl>
+  <dt>Books</dt><dd>{{ packet.totals.book_count }} ({{ packet.totals.books_identified }} identified, {{ packet.totals.books_unidentified }} unidentified, {{ packet.totals.books_needs_appraisal }} needs appraisal)</dd>
+  <dt>Shelf run</dt><dd>{{ packet.totals.shelf_run_m }} m</dd>
+  <dt>Books replacement cost</dt><dd>{{ packet.sweep.currency }} {{ money(packet.totals.books_replacement_cost) }}</dd>
+  <dt>Books used value</dt><dd>{{ packet.sweep.currency }} {{ money(packet.totals.books_used_value) }} (observed {{ money(packet.totals.books_used_value_observed) }}, derived {{ money(packet.totals.books_used_value_derived) }})</dd>
+  <dt>Items replacement cost</dt><dd>{{ packet.sweep.currency }} {{ money(packet.totals.items_replacement_cost_low) }} to {{ money(packet.totals.items_replacement_cost_high) }}</dd>
+  <dt>Excluded from totals</dt><dd>{{ packet.totals.excluded_from_totals }}</dd>
+</dl>
+
+<h2>Room</h2>
+<dl>
+  <dt>Length x width x height</dt><dd>{{ num(packet.room.length_m) }} x {{ num(packet.room.width_m) }} x {{ num(packet.room.height_m) }} m</dd>
+  <dt>Floor area</dt><dd>{{ num(packet.room.floor_area_m2) }} m&sup2;</dd>
+  <dt>Wall area (gross / net)</dt><dd>{{ num(packet.room.wall_area_m2) }} / {{ num(packet.room.wall_area_net_m2) }} m&sup2;</dd>
+  <dt>Shelved wall area</dt><dd>{{ num(packet.room.shelved_wall_area_m2) }} m&sup2;</dd>
+  <dt>Shape</dt><dd>{{ packet.room.shape or "unknown" }}</dd>
+  <dt>Scale method</dt><dd>{{ packet.room.scale_method or "unknown" }}</dd>
+  <dt>Confidence</dt><dd>{{ num(packet.room.confidence) }}</dd>
+  <dt>Openings</dt><dd>{% for opening in packet.room.openings %}{{ opening.kind }} {{ num(opening.width_m) }} x {{ num(opening.height_m) }} m{% if not loop.last %}; {% endif %}{% else %}none recorded{% endfor %}</dd>
+</dl>
+{% if packet.room.frame_refs %}
+<p>{% for ref in packet.room.frame_refs %}<a href="{{ ref }}">{{ ref }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+{% endif %}
+
+<h2>Review queue ({{ packet.review_queue|length }})</h2>
+<table>
+  <thead><tr><th>Frame</th><th>Id</th><th>Severity</th><th>Reason</th><th>Line</th></tr></thead>
+  <tbody>
+  {% for entry in packet.review_queue %}
+    <tr>
+      <td>{{ thumb(entry.frame_ref) }}</td>
+      <td>{{ entry.ref_id }}</td>
+      <td><span class="badge {{ entry.severity }}">{{ entry.severity }}</span></td>
+      <td>{{ entry.reason }}</td>
+      <td>{{ entry.line_ref }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5" class="unknown">nothing to review</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2>Books ({{ packet.books|length }})</h2>
+<table>
+  <thead>
+    <tr><th>Frame</th><th>Id</th><th>Shelf</th><th class="num">Pos</th><th>Status</th><th>Title</th><th>Author</th><th>ISBN</th><th class="num">Spine h/t cm</th><th class="num">Replacement</th><th class="num">Used</th></tr>
+  </thead>
+  <tbody>
+  {% for book in packet.books %}
+    <tr>
+      <td>{{ thumb(book.frame_ref) }}</td>
+      <td>{{ book.id }}</td>
+      <td>{{ book.shelf }}</td>
+      <td class="num">{{ book.position if book.position is not none }}</td>
+      <td>{{ book.status }}</td>
+      <td>{{ book.title }}</td>
+      <td>{{ book.author }}</td>
+      <td>{{ book.isbn }}</td>
+      <td class="num">{{ book.spine_height_cm if book.spine_height_cm is not none }} / {{ book.spine_thickness_cm if book.spine_thickness_cm is not none }}</td>
+      <td class="num">{{ money(book.replacement_cost.amount) }} {{ link(book.replacement_cost.url, book.replacement_cost.source or "source") }}</td>
+      <td class="num">{{ money(book.used_value.amount) }} {{ link(book.used_value.url, book.used_value.source or "source") }}{% if book.used_value.source_type %} <span class="badge">{{ book.used_value.source_type }}</span>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2>Items ({{ packet.items|length }})</h2>
+<table>
+  <thead>
+    <tr><th>Frame</th><th>Id</th><th>Category</th><th>Description</th><th>Brand / model</th><th>Status</th><th class="num">w x h x d cm</th><th class="num">Low</th><th class="num">High</th></tr>
+  </thead>
+  <tbody>
+  {% for item in packet.items %}
+    <tr>
+      <td>{{ thumb(item.frame_ref) }}</td>
+      <td>{{ item.id }}</td>
+      <td>{{ item.category }}</td>
+      <td>{{ item.description }}</td>
+      <td>{{ item.brand_model }}</td>
+      <td>{{ item.status }}</td>
+      <td class="num">{{ num(item.dimensions_cm.w) }} x {{ num(item.dimensions_cm.h) }} x {{ num(item.dimensions_cm.d) }}</td>
+      <td class="num">{{ money(item.replacement_cost.low) }}</td>
+      <td class="num">{{ money(item.replacement_cost.high) }} {{ link(item.replacement_cost.url, item.replacement_cost.source or "source") }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2>Costs and latency</h2>
+<dl>
+  <dt>Cost at paid rates</dt><dd>USD {{ "%.4f"|format(packet.costs.usd_at_paid_rates) }} ({{ packet.costs.tokens }} tokens)</dd>
+  {% for stage, usd in packet.costs.by_stage_usd.items() %}
+  <dt>Cost: {{ stage }}</dt><dd>USD {{ "%.4f"|format(usd) }}</dd>
+  {% endfor %}
+  {% for stage, seconds in packet.latency_s.items() %}
+  <dt>Latency: {{ stage }}</dt><dd>{{ "%.2f"|format(seconds) }} s</dd>
+  {% endfor %}
+</dl>
+</body>
+</html>

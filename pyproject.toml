@@ -35,6 +35,9 @@ ml = [
 [tool.setuptools.packages.find]
 include = ["libclaim*"]
 
+[tool.setuptools.package-data]
+"libclaim.packet" = ["templates/*.j2"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
