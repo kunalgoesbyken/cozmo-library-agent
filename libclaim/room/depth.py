@@ -43,9 +43,10 @@ class DepthSet:
 
 @cache
 def depth_model(model_id: str):
-    from transformers import AutoImageProcessor, AutoModelForDepthEstimation
+    with masks.MODEL_LOAD_LOCK:
+        from transformers import AutoImageProcessor, AutoModelForDepthEstimation
 
-    return AutoImageProcessor.from_pretrained(model_id), AutoModelForDepthEstimation.from_pretrained(model_id).eval().to(masks.device())
+        return AutoImageProcessor.from_pretrained(model_id), AutoModelForDepthEstimation.from_pretrained(model_id).eval().to(masks.device())
 
 
 def metric_depth(still: Still) -> np.ndarray:

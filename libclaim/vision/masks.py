@@ -1,3 +1,4 @@
+import threading
 from functools import cache
 from importlib.util import find_spec
 
@@ -6,6 +7,7 @@ import numpy as np
 from libclaim.vision.boxes import Box, load_vision_config, read_image
 
 ML_MODULES = ("torch", "transformers")
+MODEL_LOAD_LOCK = threading.Lock()
 
 
 def available() -> bool:
@@ -20,9 +22,10 @@ def device() -> str:
 
 @cache
 def sam_model(model_id: str):
-    from transformers import Sam2Model, Sam2Processor
+    with MODEL_LOAD_LOCK:
+        from transformers import Sam2Model, Sam2Processor
 
-    return Sam2Processor.from_pretrained(model_id), Sam2Model.from_pretrained(model_id).eval().to(device())
+        return Sam2Processor.from_pretrained(model_id), Sam2Model.from_pretrained(model_id).eval().to(device())
 
 
 def extent(lines: np.ndarray) -> tuple[float, float] | None:

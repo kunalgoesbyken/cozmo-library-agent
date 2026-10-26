@@ -1,4 +1,8 @@
 import math
+import sys
+import threading
+import time
+import types
 
 import cv2
 import numpy as np
@@ -247,3 +251,40 @@ def test_sideways_frames_report_an_orientation_mismatch(tmp_path, monkeypatch):
     _, room = panned_room(tmp_path, monkeypatch, 320, 180, camera_roll=90)
     assert room.floor_area_m2 is None
     assert any("orientation" in reason for reason in room.review)
+
+
+class SlowTransformers(types.ModuleType):
+    def __init__(self):
+        super().__init__("transformers")
+        self.guard = threading.Lock()
+        self.inside = 0
+        self.overlapped = False
+
+    def __getattr__(self, name):
+        if name.startswith("__"):
+            raise AttributeError(name)
+        with self.guard:
+            self.inside += 1
+            self.overlapped = self.overlapped or self.inside > 1
+        time.sleep(0.05)
+        with self.guard:
+            self.inside -= 1
+        loaded = types.SimpleNamespace(eval=lambda: loaded, to=lambda device: loaded)
+        return types.SimpleNamespace(from_pretrained=lambda model_id: loaded)
+
+
+def test_transformers_models_load_one_at_a_time(monkeypatch):
+    fake = SlowTransformers()
+    monkeypatch.setitem(sys.modules, "transformers", fake)
+    monkeypatch.setattr(masks, "device", lambda: "cpu")
+    depth.depth_model.cache_clear()
+    masks.sam_model.cache_clear()
+    loaders = [lambda: depth.depth_model("depth-id"), lambda: masks.sam_model("sam-id")]
+    threads = [threading.Thread(target=load) for load in loaders]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    depth.depth_model.cache_clear()
+    masks.sam_model.cache_clear()
+    assert not fake.overlapped
