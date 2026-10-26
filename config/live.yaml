@@ -14,3 +14,6 @@ statement_window_ms: 4000
 monitor_min_gap_seconds: 8.0
 monitor_region_cooldown_seconds: 30.0
 alert_ttl_seconds: 5.0
+min_healthy_seconds: 5.0
+audio_buffer_max_chunks: 100
+audio_buffer_max_age_seconds: 10.0

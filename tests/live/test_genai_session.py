@@ -1,8 +1,10 @@
+import pytest
 from google.genai import errors, types
+from websockets.exceptions import ConnectionClosed
 
 from libclaim.live import session as events
 from libclaim.live.bridge import load_live_config
-from libclaim.live.genai_session import build_config, events_from_message, load_prompt, translate
+from libclaim.live.genai_session import GenaiSession, build_config, events_from_message, load_prompt, translate, usage_totals
 
 
 def test_config_carries_compression_resumption_and_low_resolution():
@@ -71,3 +73,30 @@ def test_tool_call_is_normalised():
 def test_429_maps_to_rate_limited():
     assert isinstance(translate(errors.APIError(429, {"error": {}})), events.RateLimited)
     assert isinstance(translate(errors.APIError(500, {"error": {}})), events.SessionClosed)
+
+
+class ClosedSocket:
+    async def receive(self):
+        return
+        yield
+
+    async def send_realtime_input(self, **kwargs):
+        raise ConnectionClosed(None, None)
+
+
+async def test_receive_that_ends_without_messages_raises_instead_of_spinning():
+    session = GenaiSession(ClosedSocket(), load_live_config())
+    with pytest.raises(events.SessionClosed):
+        async for _ in session.receive():
+            pass
+
+
+async def test_send_on_closed_socket_is_translated():
+    session = GenaiSession(ClosedSocket(), load_live_config())
+    with pytest.raises(events.SessionClosed):
+        await session.send_audio(b"x")
+
+
+def test_unknown_modality_is_not_priced_as_text():
+    details = [types.ModalityTokenCount(modality=types.MediaModality.DOCUMENT, token_count=7)]
+    assert usage_totals(details) == {"document": 7}

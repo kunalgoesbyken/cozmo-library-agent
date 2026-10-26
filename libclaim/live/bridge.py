@@ -1,12 +1,13 @@
 import asyncio
 import time
+from collections import deque
 from collections.abc import Awaitable, Callable
 from typing import Any
 
 import yaml
 from pydantic import BaseModel
 
-from libclaim.budget import Budget, BudgetExceeded
+from libclaim.budget import Budget
 from libclaim.live import session as events
 from libclaim.settings import CONFIG_DIR
 from libclaim.sweep import SweepDir
@@ -27,6 +28,9 @@ class LiveConfig(BaseModel):
     backoff_max_seconds: float
     max_retries: int
     ledger_stage: str
+    min_healthy_seconds: float
+    audio_buffer_max_chunks: int
+    audio_buffer_max_age_seconds: float
     statement_window_ms: int
     monitor_min_gap_seconds: float
     monitor_region_cooldown_seconds: float
@@ -69,7 +73,8 @@ class LiveBridge:
         self.monitor_call_id: str | None = None
         self.sweep_ended = False
         self.closed = False
-        self.exceeded: BudgetExceeded | None = None
+        self.failure: Exception | None = None
+        self.pending_audio: deque[tuple[float, bytes]] = deque()
         self.last_frame_at: float | None = None
         self.last_usage_at = clock()
         self.kicked_off = False
@@ -85,6 +90,9 @@ class LiveBridge:
         except asyncio.CancelledError:
             if not self.closed:
                 raise
+        except Exception as error:
+            self.failure = error
+            raise
         finally:
             self.session = None
             self.done.set()
@@ -93,18 +101,22 @@ class LiveBridge:
         try:
             self.budget.check()
             async with self.factory(self.handle) as session:
-                self.session = session
+                started = self.clock()
+                await self.flush_audio(session)
                 await self.kickoff(session)
+                await self.flush_audio(session)
+                self.session = session
                 async for event in session.receive():
-                    self.attempts = 0
+                    if self.clock() - started >= self.config.min_healthy_seconds:
+                        self.attempts = 0
                     if isinstance(event, events.GoAway):
-                        return
+                        if self.clock() - started >= self.config.min_healthy_seconds:
+                            return
+                        raise events.SessionClosed()
                     await self.handle_event(session, event)
                 raise events.SessionClosed()
-        except BudgetExceeded as error:
-            self.exceeded = error
-            raise
-        except (events.RateLimited, events.SessionClosed):
+        except (events.RateLimited, events.SessionClosed, OSError):
+            self.session = None
             await self.back_off()
         finally:
             self.session = None
@@ -118,8 +130,19 @@ class LiveBridge:
 
     async def kickoff(self, session: events.LiveSession) -> None:
         if not self.kicked_off:
-            self.kicked_off = True
             await session.send_text(self.config.kickoff_text)
+            self.kicked_off = True
+
+    def buffer_audio(self, data: bytes) -> None:
+        self.pending_audio.append((self.clock(), data))
+        while len(self.pending_audio) > self.config.audio_buffer_max_chunks:
+            self.pending_audio.popleft()
+
+    async def flush_audio(self, session: events.LiveSession) -> None:
+        while self.pending_audio:
+            stamp, data = self.pending_audio.popleft()
+            if self.clock() - stamp <= self.config.audio_buffer_max_age_seconds:
+                await session.send_audio(data)
 
     async def handle_event(self, session: events.LiveSession, event: events.Event) -> None:
         match event:
@@ -156,14 +179,20 @@ class LiveBridge:
             await session.send_tool_response(call.id, call.name, {"output": result}, False, events.Scheduling.WHEN_IDLE)
 
     def ready_session(self) -> events.LiveSession | None:
-        if self.exceeded:
-            raise self.exceeded
+        if self.failure:
+            raise self.failure
+        self.budget.check()
         return self.session
 
     async def send_audio(self, data: bytes) -> None:
         session = self.ready_session()
-        if session:
+        if not session:
+            self.buffer_audio(data)
+            return
+        try:
             await session.send_audio(data)
+        except events.SessionClosed:
+            self.buffer_audio(data)
 
     async def send_frame(self, data: bytes) -> None:
         session = self.ready_session()
@@ -172,8 +201,11 @@ class LiveBridge:
         now = self.clock()
         if self.last_frame_at is not None and now - self.last_frame_at < 1 / self.config.frame_max_fps:
             return
+        try:
+            await session.send_video(data)
+        except events.SessionClosed:
+            return
         self.last_frame_at = now
-        await session.send_video(data)
 
     def end_sweep(self) -> None:
         self.sweep_ended = True

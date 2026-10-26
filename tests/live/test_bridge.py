@@ -11,6 +11,7 @@ from libclaim.live.session import (
     Handle,
     Interrupted,
     RateLimited,
+    SessionClosed,
     Scheduling,
     ToolCall,
     Transcript,
@@ -30,11 +31,16 @@ class FakeSession:
         self.text = []
         self.tool_responses = []
         self.closed = asyncio.Event()
+        self.fail_sends = False
 
     async def send_audio(self, data):
+        if self.fail_sends:
+            raise SessionClosed()
         self.audio.append(data)
 
     async def send_video(self, data):
+        if self.fail_sends:
+            raise SessionClosed()
         self.video.append(data)
 
     async def send_text(self, text):
@@ -47,7 +53,12 @@ class FakeSession:
         for item in self.script:
             if isinstance(item, Exception):
                 raise item
-            yield item
+            if isinstance(item, asyncio.Event):
+                await item.wait()
+            elif callable(item):
+                item()
+            else:
+                yield item
         await self.closed.wait()
 
 
@@ -59,7 +70,16 @@ class FakeFactory:
 
     def __call__(self, handle):
         self.handles.append(handle)
-        session = FakeSession(self.scripts[len(self.sessions)])
+        script = self.scripts[len(self.handles) - 1]
+        if isinstance(script, Exception):
+
+            @asynccontextmanager
+            async def refused():
+                raise script
+                yield
+
+            return refused()
+        session = FakeSession(script)
         self.sessions.append(session)
 
         @asynccontextmanager
@@ -91,15 +111,22 @@ class Harness:
         self.audio = []
         self.transcripts = []
         self.interrupts = 0
+        self.sleep_gate = None
+        self.fail_audio = False
         self.tools = FakeTools()
         self.sweep = SweepDir(tmp_path / "sweep")
         self.budget = overrides.pop("budget", None) or Budget(tmp_path / "spend.jsonl")
+        overrides.setdefault("min_healthy_seconds", 0.0)
         config = load_live_config().model_copy(update=overrides)
 
         async def sleep(seconds):
             self.sleeps.append(seconds)
+            if self.sleep_gate:
+                await self.sleep_gate.wait()
 
         async def on_audio(data):
+            if self.fail_audio:
+                raise ValueError("sink broke")
             self.audio.append(data)
 
         async def on_transcript(speaker, text):
@@ -188,6 +215,9 @@ async def test_gives_up_after_max_retries(tmp_path):
     with pytest.raises(RateLimited):
         await harness.task
     assert harness.sleeps == [1.0, 2.0]
+    with pytest.raises(RateLimited):
+        await harness.bridge.send_audio(b"x")
+    await harness.bridge.close()
 
 
 async def test_backoff_is_capped(tmp_path):
@@ -221,7 +251,7 @@ async def test_frames_are_rate_limited_and_stop_after_end_sweep(tmp_path):
     factory = FakeFactory([])
     harness = Harness(tmp_path, factory)
     harness.start()
-    await harness.until(lambda: factory.sessions)
+    await harness.until(lambda: harness.bridge.session)
     session = factory.sessions[0]
     await harness.bridge.send_frame(b"f1")
     harness.now = 0.4
@@ -296,7 +326,7 @@ async def test_inject_streams_into_the_monitor_call(tmp_path):
     factory = FakeFactory([ToolCall("c1", "capture_monitor", {"unit": "A"}), ToolCall("c2", "lookup", {"q": 1})])
     harness = Harness(tmp_path, factory)
     harness.start()
-    await harness.until(lambda: len(factory.sessions[0].tool_responses) == 2 if factory.sessions else False)
+    await harness.until(lambda: factory.sessions and len(factory.sessions[0].tool_responses) == 2)
     await harness.bridge.inject({"note": "blur"}, Scheduling.INTERRUPT)
     await harness.stop()
     responses = factory.sessions[0].tool_responses
@@ -309,7 +339,155 @@ async def test_inject_before_monitor_call_is_an_error(tmp_path):
     factory = FakeFactory([])
     harness = Harness(tmp_path, factory)
     harness.start()
-    await harness.until(lambda: factory.sessions)
+    await harness.until(lambda: harness.bridge.session)
     with pytest.raises(LookupError):
         await harness.bridge.inject({"note": "x"}, Scheduling.SILENT)
     await harness.stop()
+
+
+async def test_goaway_straight_after_connect_is_backed_off_and_capped(tmp_path):
+    factory = FakeFactory(*[[GoAway()] for _ in range(4)])
+    harness = Harness(tmp_path, factory, min_healthy_seconds=5.0, max_retries=3)
+    harness.start()
+    with pytest.raises(SessionClosed):
+        await harness.task
+    assert harness.sleeps == [1.0, 2.0, 4.0]
+    assert len(factory.sessions) == 4
+
+
+async def test_session_that_emits_one_event_then_drops_does_not_reset_backoff(tmp_path):
+    factory = FakeFactory(*[[Audio(b"x"), RateLimited()] for _ in range(4)])
+    harness = Harness(tmp_path, factory, min_healthy_seconds=5.0, max_retries=3)
+    harness.start()
+    with pytest.raises(RateLimited):
+        await harness.task
+    assert harness.sleeps == [1.0, 2.0, 4.0]
+
+
+async def test_healthy_session_resets_backoff_and_goaway_reconnects_at_once(tmp_path):
+    def age():
+        harness.now += 10.0
+
+    factory = FakeFactory([RateLimited()], [age, Audio(b"a"), GoAway()], [Audio(b"b")])
+    harness = Harness(tmp_path, factory, min_healthy_seconds=5.0)
+    harness.start()
+    await harness.until(lambda: harness.audio == [b"a", b"b"])
+    await harness.stop()
+    assert harness.sleeps == [1.0]
+
+
+async def test_connect_errors_are_retried_under_the_same_cap(tmp_path):
+    factory = FakeFactory(TimeoutError(), ConnectionResetError(), [Audio(b"ok")])
+    harness = Harness(tmp_path, factory)
+    harness.start()
+    await harness.until(lambda: harness.audio == [b"ok"])
+    await harness.stop()
+    assert harness.sleeps == [1.0, 2.0]
+
+
+async def test_connect_errors_surface_when_retries_run_out(tmp_path):
+    factory = FakeFactory(OSError("down"), OSError("down"))
+    harness = Harness(tmp_path, factory, max_retries=1)
+    harness.start()
+    with pytest.raises(OSError):
+        await harness.task
+    await harness.bridge.close()
+
+
+async def test_callback_failure_surfaces_and_close_still_works(tmp_path):
+    factory = FakeFactory([Audio(b"x")])
+    harness = Harness(tmp_path, factory)
+    harness.fail_audio = True
+    harness.start()
+    with pytest.raises(ValueError):
+        await harness.task
+    await harness.bridge.close()
+
+
+async def test_send_racing_a_reconnect_is_buffered_not_raised(tmp_path):
+    gate = asyncio.Event()
+    factory = FakeFactory([gate, GoAway()], [])
+    harness = Harness(tmp_path, factory)
+    harness.start()
+    await harness.until(lambda: harness.bridge.session)
+    factory.sessions[0].fail_sends = True
+    await harness.bridge.send_audio(b"raced")
+    await harness.bridge.send_frame(b"frame")
+    gate.set()
+    await harness.until(lambda: len(factory.sessions) == 2 and factory.sessions[1].audio)
+    await harness.stop()
+    assert factory.sessions[1].audio == [b"raced"]
+    assert factory.sessions[1].video == []
+
+
+async def test_audio_during_backoff_is_buffered_and_flushed_but_frames_are_dropped(tmp_path):
+    factory = FakeFactory([RateLimited()], [])
+    harness = Harness(tmp_path, factory, audio_buffer_max_chunks=2)
+    harness.sleep_gate = asyncio.Event()
+    harness.start()
+    await harness.until(lambda: harness.sleeps == [1.0])
+    for chunk in (b"a", b"b", b"c"):
+        await harness.bridge.send_audio(chunk)
+    await harness.bridge.send_frame(b"f")
+    harness.sleep_gate.set()
+    await harness.until(lambda: len(factory.sessions) == 2 and factory.sessions[1].audio)
+    await harness.stop()
+    assert factory.sessions[1].audio == [b"b", b"c"]
+    assert factory.sessions[1].video == []
+
+
+async def test_stale_buffered_audio_is_discarded(tmp_path):
+    factory = FakeFactory([RateLimited()], [])
+    harness = Harness(tmp_path, factory, audio_buffer_max_age_seconds=10.0)
+    harness.sleep_gate = asyncio.Event()
+    harness.start()
+    await harness.until(lambda: harness.sleeps == [1.0])
+    await harness.bridge.send_audio(b"old")
+    harness.now = 11.0
+    await harness.bridge.send_audio(b"new")
+    harness.sleep_gate.set()
+    await harness.until(lambda: len(factory.sessions) == 2 and factory.sessions[1].audio)
+    await harness.stop()
+    assert factory.sessions[1].audio == [b"new"]
+
+
+async def test_sends_check_the_budget_each_time(tmp_path):
+    budget = Budget(tmp_path / "spend.jsonl", cap_usd=0.001)
+    factory = FakeFactory([])
+    harness = Harness(tmp_path, factory, budget=budget)
+    harness.start()
+    await harness.until(lambda: harness.bridge.session)
+    budget.record(MODEL, 10_000, 0, "audio")
+    with pytest.raises(BudgetExceeded):
+        await harness.bridge.send_audio(b"x")
+    await harness.stop()
+    assert factory.sessions[0].audio == []
+
+
+async def test_each_usage_report_is_recorded_additively(tmp_path):
+    factory = FakeFactory([Usage(input={"text": 100}), Usage(input={"text": 100})])
+    harness = Harness(tmp_path, factory)
+    harness.start()
+    await harness.until(lambda: len(harness.sweep.ledger.entries) == 2)
+    await harness.stop()
+    assert harness.budget.total_usd() == pytest.approx(2 * 100 * 0.50 / 1_000_000)
+
+
+async def test_kickoff_failure_is_retried_on_next_connection(tmp_path):
+    factory = FakeFactory([], [])
+    harness = Harness(tmp_path, factory)
+    original = FakeSession.send_text
+
+    async def failing(self, text):
+        if len(factory.sessions) == 1:
+            raise SessionClosed()
+        await original(self, text)
+
+    FakeSession.send_text = failing
+    try:
+        harness.start()
+        await harness.until(lambda: len(factory.sessions) == 2 and factory.sessions[1].text)
+        await harness.stop()
+    finally:
+        FakeSession.send_text = original
+    assert factory.sessions[1].text == ["Begin the sweep now."]

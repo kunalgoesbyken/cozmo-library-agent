@@ -1,4 +1,4 @@
-from collections.abc import AsyncIterator, Sequence
+from collections.abc import AsyncIterator, Awaitable, Sequence
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
@@ -12,7 +12,7 @@ from libclaim.live.bridge import LiveConfig
 
 PROMPT_PATH = Path(__file__).with_name("prompt.md")
 RATE_LIMITED_CODE = 429
-MODALITY_BY_MEDIA = {"AUDIO": "audio", "VIDEO": "video", "IMAGE": "image", "TEXT": "text"}
+UNSPECIFIED_MODALITY = "unspecified"
 
 
 def load_prompt() -> str:
@@ -64,7 +64,7 @@ def build_config(
 def usage_totals(details: Sequence[types.ModalityTokenCount] | None) -> dict[str, int]:
     totals: dict[str, int] = {}
     for detail in details or []:
-        modality = MODALITY_BY_MEDIA.get(detail.modality.name, "text") if detail.modality else "text"
+        modality = detail.modality.name.lower() if detail.modality else UNSPECIFIED_MODALITY
         totals[modality] = totals.get(modality, 0) + (detail.token_count or 0)
     return totals
 
@@ -115,14 +115,20 @@ class GenaiSession:
         self.session = session
         self.config = config
 
+    async def guarded(self, call: Awaitable[None]) -> None:
+        try:
+            await call
+        except (errors.APIError, ConnectionClosed) as error:
+            raise translate(error) from error
+
     async def send_audio(self, data: bytes) -> None:
-        await self.session.send_realtime_input(audio=types.Blob(data=data, mime_type=self.config.audio_mime))
+        await self.guarded(self.session.send_realtime_input(audio=types.Blob(data=data, mime_type=self.config.audio_mime)))
 
     async def send_video(self, data: bytes) -> None:
-        await self.session.send_realtime_input(video=types.Blob(data=data, mime_type=self.config.frame_mime))
+        await self.guarded(self.session.send_realtime_input(video=types.Blob(data=data, mime_type=self.config.frame_mime)))
 
     async def send_text(self, text: str) -> None:
-        await self.session.send_realtime_input(text=text)
+        await self.guarded(self.session.send_realtime_input(text=text))
 
     async def send_tool_response(
         self,
@@ -132,24 +138,30 @@ class GenaiSession:
         will_continue: bool,
         scheduling: events.Scheduling,
     ) -> None:
-        await self.session.send_tool_response(
-            function_responses=[
-                types.FunctionResponse(
-                    id=call_id,
-                    name=name,
-                    response=response,
-                    will_continue=will_continue,
-                    scheduling=types.FunctionResponseScheduling(scheduling.value),
-                )
-            ]
+        await self.guarded(
+            self.session.send_tool_response(
+                function_responses=[
+                    types.FunctionResponse(
+                        id=call_id,
+                        name=name,
+                        response=response,
+                        will_continue=will_continue,
+                        scheduling=types.FunctionResponseScheduling(scheduling.value),
+                    )
+                ]
+            )
         )
 
     async def receive(self) -> AsyncIterator[events.Event]:
         try:
             while True:
+                seen = False
                 async for message in self.session.receive():
+                    seen = True
                     for event in events_from_message(message):
                         yield event
+                if not seen:
+                    raise events.SessionClosed()
         except (errors.APIError, ConnectionClosed) as error:
             raise translate(error) from error
 
