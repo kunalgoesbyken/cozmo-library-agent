@@ -48,7 +48,7 @@ class FakeBridge:
 
 
 class Harness:
-    def __init__(self, tmp_path, script=(), end_delay=0.0, **limits):
+    def __init__(self, tmp_path, script=(), end_delay=0.0, public_origin="", **limits):
         self.bridges = []
         self.end_calls = []
         self.fail_factory = False
@@ -71,7 +71,7 @@ class Harness:
         (dist / "index.html").write_text("<html>ok</html>", encoding="utf-8")
         config = load_server_config().model_copy(update=limits)
         self.app = create_app(
-            Settings(live_model="fake-live", access_token=TOKEN),
+            Settings(live_model="fake-live", access_token=TOKEN, public_origin=public_origin),
             factory,
             on_end,
             runs_dir=self.runs,
@@ -390,9 +390,35 @@ def test_ws_rejects_hostile_origin(tmp_path, headers):
     ],
 )
 def test_ws_allows_same_suffix_forwarded_and_non_browser_origins(tmp_path, headers):
-    h = Harness(tmp_path)
+    h = Harness(tmp_path, trust_forwarded_host=True)
     with TestClient(h.app) as client, client.websocket_connect("/ws/sweep", headers=headers) as ws:
         assert hello(ws)["state"] == "connecting"
+
+
+def test_forwarded_host_is_untrusted_by_default(tmp_path):
+    h = Harness(tmp_path)
+    headers = {"origin": "https://my.tunnel.example", "host": "localhost:8000", "x-forwarded-host": "my.tunnel.example"}
+    with TestClient(h.app) as client:
+        with pytest.raises(WebSocketDisconnect):
+            with client.websocket_connect("/ws/sweep", headers=headers):
+                pass
+
+
+def test_public_origin_accepts_only_exact_origin(tmp_path):
+    h = Harness(tmp_path, public_origin="https://abc.trycloudflare.com", trust_forwarded_host=True)
+    with TestClient(h.app) as client:
+        with client.websocket_connect("/ws/sweep", headers={"origin": "https://abc.trycloudflare.com"}) as ws:
+            assert hello(ws)["state"] == "connecting"
+        client.portal.call(asyncio.sleep, 0.2)
+        for headers in (
+            {"origin": "https://other.trycloudflare.com"},
+            {"origin": "https://other.example", "x-forwarded-host": "other.example"},
+        ):
+            with pytest.raises(WebSocketDisconnect):
+                with client.websocket_connect("/ws/sweep", headers=headers):
+                    pass
+        with client.websocket_connect("/ws/sweep", headers={"origin": "http://testserver"}) as ws:
+            assert hello(ws, token=TOKEN)["state"] == "connecting"
 
 
 def test_short_access_token_is_replaced_by_random(tmp_path):
@@ -459,6 +485,60 @@ def test_unauthenticated_socket_cap(tmp_path):
                 with client.websocket_connect("/ws/sweep"):
                     pass
         client.portal.call(asyncio.sleep, 0.2)
+        with client.websocket_connect("/ws/sweep") as ws:
+            assert hello(ws)["state"] == "connecting"
+
+
+def test_per_client_preauth_limit(tmp_path):
+    h = Harness(tmp_path, max_unauthenticated=10, max_unauthenticated_per_client=1)
+    with TestClient(h.app) as client:
+        with client.websocket_connect("/ws/sweep"):
+            with pytest.raises(WebSocketDisconnect):
+                with client.websocket_connect("/ws/sweep"):
+                    pass
+
+
+def test_repeated_failed_connects_do_not_exhaust_pool(tmp_path):
+    h = Harness(tmp_path, max_unauthenticated=1, max_unauthenticated_per_client=1)
+    with TestClient(h.app) as client:
+        for _ in range(8):
+            with client.websocket_connect("/ws/sweep") as ws:
+                assert hello(ws, token="wrong")["reason"] == "unauthorized"
+            client.portal.call(asyncio.sleep, 0.05)
+        with client.websocket_connect("/ws/sweep") as ws:
+            assert hello(ws)["state"] == "connecting"
+
+
+def test_preauth_slot_released_when_constructor_raises(tmp_path, monkeypatch):
+    h = Harness(tmp_path, max_unauthenticated=1, max_unauthenticated_per_client=1)
+
+    def boom(*args, **kwargs):
+        raise RuntimeError("constructor failed")
+
+    with TestClient(h.app, raise_server_exceptions=False) as client:
+        monkeypatch.setattr("libclaim.server.Connection", boom)
+        with pytest.raises(Exception):
+            with client.websocket_connect("/ws/sweep"):
+                pass
+        monkeypatch.undo()
+        client.portal.call(asyncio.sleep, 0.1)
+        with client.websocket_connect("/ws/sweep") as ws:
+            assert hello(ws)["state"] == "connecting"
+
+
+def test_preauth_slot_released_when_accept_raises(tmp_path, monkeypatch):
+    h = Harness(tmp_path, max_unauthenticated=1, max_unauthenticated_per_client=1)
+
+    async def boom(self, *args, **kwargs):
+        raise RuntimeError("accept failed")
+
+    with TestClient(h.app, raise_server_exceptions=False) as client:
+        monkeypatch.setattr("starlette.websockets.WebSocket.accept", boom)
+        with pytest.raises(Exception):
+            with client.websocket_connect("/ws/sweep"):
+                pass
+        monkeypatch.undo()
+        client.portal.call(asyncio.sleep, 0.1)
         with client.websocket_connect("/ws/sweep") as ws:
             assert hello(ws)["state"] == "connecting"
 

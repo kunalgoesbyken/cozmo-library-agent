@@ -64,7 +64,9 @@ class ServerConfig(BaseModel):
     min_token_length: int
     max_preauth_bytes: int
     max_unauthenticated: int
+    max_unauthenticated_per_client: int
     allowed_origin_suffixes: list[str]
+    trust_forwarded_host: bool
     max_header_bytes: int
     max_mic_bytes: int
     max_frame_bytes: int
@@ -130,6 +132,26 @@ class Hooks:
 
 
 BridgeFactory = Callable[[Hooks], Bridge]
+
+
+class Preauth:
+    def __init__(self, total: int, per_client: int):
+        self.total = total
+        self.per_client = per_client
+        self.clients: dict[str, int] = {}
+
+    def acquire(self, client: str) -> bool:
+        if sum(self.clients.values()) >= self.total or self.clients.get(client, 0) >= self.per_client:
+            return False
+        self.clients[client] = self.clients.get(client, 0) + 1
+        return True
+
+    def release(self, client: str) -> None:
+        remaining = self.clients.get(client, 0) - 1
+        if remaining > 0:
+            self.clients[client] = remaining
+        else:
+            self.clients.pop(client, None)
 
 
 class Slots:
@@ -226,15 +248,17 @@ def token_matches(given: str | None, expected: str) -> bool:
     return given is not None and secrets.compare_digest(given.encode(), expected.encode())
 
 
-def allowed_origin(
-    origin: str | None, host: str | None, forwarded_host: str | None, suffixes: list[str]
-) -> bool:
+def allowed_origin(origin: str | None, host: str | None, forwarded_host: str | None, settings: Settings, config: ServerConfig) -> bool:
     if origin is None:
         return True
     parsed = urlparse(origin)
-    if parsed.netloc in (host, forwarded_host):
+    if parsed.netloc == host:
         return True
-    return parsed.hostname is not None and any(parsed.hostname.endswith(suffix) for suffix in suffixes)
+    if settings.public_origin:
+        return origin.rstrip("/") == settings.public_origin.rstrip("/")
+    if config.trust_forwarded_host and parsed.netloc == forwarded_host:
+        return True
+    return parsed.hostname is not None and any(parsed.hostname.endswith(suffix) for suffix in config.allowed_origin_suffixes)
 
 
 class Connection:
@@ -244,7 +268,7 @@ class Connection:
         settings: Settings,
         token: str,
         slots: Slots,
-        preauth: Slots,
+        on_authenticated: Callable[[], None],
         background: set[asyncio.Task],
         bridge_factory: BridgeFactory,
         on_end: EndHook,
@@ -257,8 +281,7 @@ class Connection:
         self.settings = settings
         self.token = token
         self.slots = slots
-        self.preauth = preauth
-        self.preauth_held = True
+        self.on_authenticated = on_authenticated
         self.background = background
         self.bridge_factory = bridge_factory
         self.on_end = on_end
@@ -539,9 +562,7 @@ class Connection:
             )
 
     def release_preauth(self) -> None:
-        if self.preauth_held:
-            self.preauth_held = False
-            self.preauth.release()
+        self.on_authenticated()
 
     async def shutdown(self) -> None:
         self.release_preauth()
@@ -581,23 +602,37 @@ def create_app(
             logger.warning("ACCESS_TOKEN is shorter than %d characters, using a random token", config.min_token_length)
         token = secrets.token_urlsafe(TOKEN_BYTES)
     slots = Slots(config.max_sessions)
-    preauth = Slots(config.max_unauthenticated)
+    preauth = Preauth(config.max_unauthenticated, config.max_unauthenticated_per_client)
     background: set[asyncio.Task] = set()
+    if not settings.public_origin:
+        logger.warning("PUBLIC_ORIGIN is not set, any .trycloudflare.com origin is accepted; set PUBLIC_ORIGIN to your tunnel URL")
     app = FastAPI()
     app.state.access_token = token
 
     @app.websocket("/ws/sweep")
     async def sweep_socket(websocket: WebSocket) -> None:
         headers = websocket.headers
+        client = websocket.client.host if websocket.client else ""
         if not allowed_origin(
-            headers.get("origin"), headers.get("host"), headers.get("x-forwarded-host"), config.allowed_origin_suffixes
-        ) or not preauth.acquire():
+            headers.get("origin"), headers.get("host"), headers.get("x-forwarded-host"), settings, config
+        ) or not preauth.acquire(client):
             await websocket.close(code=WS_POLICY_VIOLATION)
             return
-        await websocket.accept()
-        await Connection(
-            websocket, settings, token, slots, preauth, background, bridge_factory, on_end, runs_dir, config, capture, live
-        ).run()
+        released = False
+
+        def release() -> None:
+            nonlocal released
+            if not released:
+                released = True
+                preauth.release(client)
+
+        try:
+            await websocket.accept()
+            await Connection(
+                websocket, settings, token, slots, release, background, bridge_factory, on_end, runs_dir, config, capture, live
+            ).run()
+        finally:
+            release()
 
     @app.middleware("http")
     async def no_referrer(request: Request, call_next):
