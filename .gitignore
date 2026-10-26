@@ -12,3 +12,4 @@ runs/
 _scratch/
 .venv-ml/
 libclaim.egg-info/
+markers.pdf
