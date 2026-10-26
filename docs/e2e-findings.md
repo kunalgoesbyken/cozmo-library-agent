@@ -49,3 +49,31 @@ Open, not fixed:
 8. Latency: `after_sweep` was 240 s in the first run (deadline cut), and 307 to 393 s once the deadline was lifted. Resolution takes 160 to 207 s wall for 93 books because books are resolved one at a time inside a segment (about 3 catalogue calls each at 1 request per second) and only after that segment's reading ends. Proposed: resolve books of a segment concurrently under the catalogue rate limiter.
 9. `FREE_TIER` is unset in `.env`, so `costs.billed_usd` is `null` ("unknown billing") on every run. Not a bug; set it before recording the demo.
 10. Driver note: stills need epoch-based `t_ms`. Relative values (0, 2000, 4000) produced `captured_at: 1970-01-01`; the driver now uses the wall clock as the base. `sweep.device` is empty for batch runs because there is no hello.
+
+## Fix wave F2
+
+Replayed offline on copies of `runs/e2e-a-base3` (base venv) and `runs/e2e-a-ml2` (`.venv-ml`, SAM): the scale stage was recomputed from the recorded tracks, then the packet stage re-ran with all other stages as recorded (`runs/f2-base`, `runs/f2-ml`; no network, no Gemini). Output is under `runs/`, not in git.
+
+Findings 4, 5, 6 and 7:
+
+- **4, SAM made heights worse.** Root cause, measured on the Blyton frame with the real boxes: SAM masks match the detector height (median ratio 0.99) but the mask width covers one spine of a detector box that straddles several (for example `b01-021`: box 53 px, mask 36 px; stacked books give slivers, `b01-002` mask height 0.41 of the box). The format prior chose its class from the aspect ratio of the mask box, so a narrower box gave a larger aspect and a bigger format: 28 of the 52 Blyton books became 30 cm `large_format` (3 without SAM). Fix: priors use the detector box only (and SAM is no longer run when there is no scale); a metric measurement takes a mask only when its height is within `masks.height_tolerance` (0.1) and its width ratio within `masks.min_width_ratio`/`max_width_ratio` (0.5 to 1.15) of the detector box, else the trimmed detector box. Tests: synthetic bleeding and sliver masks, a mask that would flip the class, and an opt-in `LIBCLAIM_ML=1` test on the recorded real shelf (`LIBCLAIM_REAL_RUN`).
+- **4, priors presented as measurements.** Spine fields are empty unless a metric scale was achieved. The prior goes to `dims_estimated_from_prior {height_cm, thickness_cm, book_format}`; `dims.fill_from_prior: false` in `config/pipeline.yaml` is the owner's switch. `shelf_run_m` is measured only (`null` when nothing was measured) and `shelf_run_estimated_m` holds the prior run. The report prints "est." in italics. The review queue has one entry per shelf row (`6 books on S1.1 have no measured size (no scale marker was visible); ...`), no env var names (also removed from the room depth review text).
+- **5, `excluded_from_totals`.** Now counts identified books with no sourced replacement price (this includes books the user excluded) and items that are not `needs_appraisal` and have no price range. `needs_appraisal` and unidentified lines have their own counters. See `docs/packet-notes.md`.
+- **6, thumbnails.** Each book and item gets `crop_ref` (`frames/crops/<id>.jpg`, longest side at most `crops.max_side_px` = 256, about 4x the 64 px display height), pixel `box` and `frame_size`, written during packet assembly. The report shows the crop and opens the full frame with the box outlined. All 562 frame and crop refs of the replay exist.
+- **7, duplicate boxes.** Not a bug in track merging or NMS: the run is one still and one segment, so no track was merged. `b01-016`/`b01-017` are overlapping axis-aligned boxes of a tilted lying stack; `b01-041`/`b01-043` is a single detector box spanning two spines. Both pairs sit under the NMS thresholds (0.6 IoU, 0.8 containment; the second pair has containment 0.74) and loosening them would merge real neighbours while the count is already 3 below the hand count. Documented in `docs/packet-notes.md`, no code change.
+
+Before and after (93 books, 3 photos, no marker in any of them):
+
+| | base before | base after | ml before | ml after |
+|---|---|---|---|---|
+| Blyton books at 30 cm class | 3 | 3 | 28 | 3 |
+| All books by prior class 17.5 / 21 / 23.5 / 30 cm | 23 / 11 / 44 / 15 | 23 / 11 / 44 / 15 | 9 / 15 / 27 / 42 | 23 / 11 / 44 / 15 |
+| `spine_height_cm` filled | 93 | 0 | 93 | 0 |
+| `shelf_run_m` / `shelf_run_estimated_m` | 2.615 / - | null / 2.615 | 2.835 / - | null / 2.615 |
+| Review queue entries | 282 | 192 | 286 | 195 |
+| No-marker entries | 93 | 4 | 93 | 4 |
+| `excluded_from_totals` | 93 | 4 | 93 | 4 |
+
+The prior classes are still a poor guess (the Blyton paperbacks are about 18 to 20 cm and the aspect picks 17.5 to 23.5 cm), which is why they are only estimates now. Report check: `runs/f2-ml/report.html` rendered to PNG with headless Edge; the books table shows the crop thumbnails, "est. 23.5 / 4.5" cells, and the opened full frame with the box outlined (`runs/f2-ml/report_books.png`, `report_top.png`).
+
+Open: unidentified books still produce two per-book entries ("spine could not be identified" plus "identification: <reason>"); those are individually distinct enough to keep for now. The resolver is still given the prior height and thickness by `pipeline.resolve_book` (F3 owns `pipeline.py`), so that call should pass nothing when `scale_method` is `book_format_prior`.
