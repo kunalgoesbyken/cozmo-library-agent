@@ -1,0 +1,4 @@
+blur_floor: 0.005
+glare_pixel_level: 250
+glare_clipped_fraction: 0.08
+too_fast_dps: 60
