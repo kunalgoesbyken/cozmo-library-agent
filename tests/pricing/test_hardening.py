@@ -7,7 +7,7 @@ import httpx
 import pytest
 
 from libclaim.models import NotFound, PriceQuote
-from libclaim.pricing.http import PriceFetchError, PriceHttp, RobotsDisallowed, UnsafeTarget, normalized_host
+from libclaim.pricing.http import PriceFetchError, PriceHttp, RobotsDisallowed, UnsafeTarget, is_public, normalized_host
 from libclaim.pricing.sources.bookchor import Bookchor
 from libclaim.pricing.sources.pustakkosh import Pustakkosh
 from tests.pricing.conftest import public_resolver, Site, fast_config, make_http
@@ -312,6 +312,14 @@ def resolving(tmp_path, routes, mapping):
         "https://10.0.0.5/",
         "https://192.168.1.1/",
         "https://0.0.0.0/",
+        "https://[2002:7f00:1::1]/",
+        "https://[2002:a00:1::]/",
+        "https://[2001:0:4136:e378:8000:63bf:f5ff:fffe]/",
+        "https://[64:ff9b::7f00:1]/",
+        "https://[64:ff9b::a9fe:a9fe]/",
+        "https://[::7f00:1]/",
+        "https://[::a00:1]/",
+        "https://[::ffff:a9fe:a9fe]/",
     ],
 )
 async def test_redirect_hop_to_a_private_or_unsafe_address_is_refused(tmp_path, target):
@@ -389,3 +397,12 @@ async def test_itemlist_entries_off_origin_are_skipped_and_same_origin_relative_
     result = await Listings(http, item_sources={"IN": ItemSources(categories={"shelf": spec})}).range("shelf", "IN")
     assert sorted(row.url for row in result.rows) == sorted([GOOD, "https://www.urbanladder.com/product/relative-bookshelf-2"])
     assert not any(bad in url for url in seen for bad in ("169.254", "localhost", "evil.example", "rebind.example", "downgraded"))
+
+
+@pytest.mark.parametrize("address", ["93.184.216.34", "2606:4700:4700::1111", "64:ff9b::808:808", "::8.8.8.8"])
+def test_public_addresses_stay_allowed_including_embedded_public_ipv4(address):
+    assert is_public(address)
+
+
+def test_price_client_ignores_proxy_environment_variables(tmp_path):
+    assert PriceHttp(tmp_path / "cache").client.trust_env is False

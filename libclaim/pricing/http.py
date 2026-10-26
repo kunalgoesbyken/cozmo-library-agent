@@ -61,10 +61,22 @@ def is_literal(host: str) -> bool:
     return True
 
 
+NAT64_PREFIX = ipaddress.ip_network("64:ff9b::/96")
+IPV4_BITS = 32
+
+
+def embedded_ipv4(ip: ipaddress.IPv6Address) -> list[ipaddress.IPv4Address]:
+    low = ipaddress.IPv4Address(int(ip) & (2**IPV4_BITS - 1))
+    found = [ip.ipv4_mapped] if ip.ipv4_mapped else []
+    found += [ip.sixtofour] if ip.sixtofour else []
+    found += list(ip.teredo) if ip.teredo else []
+    return found + [low] if ip in NAT64_PREFIX or int(ip) >> IPV4_BITS == 0 else found
+
+
 def is_public(address: str) -> bool:
     ip = ipaddress.ip_address(address.split("%")[0])
-    ip = ip.ipv4_mapped or ip if isinstance(ip, ipaddress.IPv6Address) else ip
-    return ip.is_global and not ip.is_multicast
+    embedded = embedded_ipv4(ip) if isinstance(ip, ipaddress.IPv6Address) else []
+    return ip.is_global and not ip.is_multicast and all(is_public(str(inner)) for inner in embedded)
 
 
 def digest(url: str) -> str:
@@ -151,6 +163,7 @@ class PriceHttp(CatalogHttp):
                 "Accept-Language": self.pricing.http.accept_language,
             },
             timeout=self.pricing.http.timeout_seconds,
+            trust_env=False,
         )
         super().__init__(cache_dir, client=client)
         self.resolver = resolver
