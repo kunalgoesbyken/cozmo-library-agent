@@ -3,6 +3,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, PlainSerializer, model_validator
 
+from libclaim.models import FxRecord
+
 Money = Annotated[Decimal, PlainSerializer(float, return_type=float, when_used="json")]
 
 
@@ -109,6 +111,26 @@ class Item(BaseModel):
     evidence: list[str] = Field(default_factory=list)
 
 
+class SecondCountryBook(BaseModel):
+    book_id: str
+    isbn: str
+    status: Literal["identified", "needs_appraisal"]
+    source_type: Literal["local_listing", "converted"] | None = None
+    replacement_cost: BookReplacementCost = Field(default_factory=BookReplacementCost)
+    used_value: UsedValue = Field(default_factory=UsedValue)
+    original_amount: Money | None = None
+    original_currency: str = ""
+    fx: FxRecord | None = None
+    review: list[str] = Field(default_factory=list)
+    evidence: list[str] = Field(default_factory=list)
+
+
+class SecondCountry(BaseModel):
+    country: str
+    currency: str
+    books: list[SecondCountryBook] = Field(default_factory=list)
+
+
 class Totals(BaseModel):
     book_count: int = 0
     books_identified: int = 0
@@ -143,7 +165,7 @@ class Costs(BaseModel):
 
 class ClaimPacket(BaseModel):
     sweep: SweepInfo = Field(default_factory=SweepInfo)
-    second_country: str = ""
+    second_country: SecondCountry | None = None
     room: Room = Field(default_factory=Room)
     books: list[Book] = Field(default_factory=list)
     items: list[Item] = Field(default_factory=list)
