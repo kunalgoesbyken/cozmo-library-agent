@@ -321,9 +321,14 @@ def excluded_by(labels: set[str], stills: list[Still], exclusions: list[Exclusio
 
 
 def listing_category(det: ItemDet, sources: ItemSources | None) -> str:
-    text = f"{det.description} {det.brand_model}"
+    text = f"{det.description} {det.brand_model}".lower()
     categories = sources.categories.items() if sources else []
-    return next((name for name, spec in categories if matches(text, spec)), "")
+    hits = [
+        (min(text.find(term) for term in spec.must if term in text), name)
+        for name, spec in categories
+        if matches(text, spec)
+    ]
+    return min(hits)[1] if hits else ""
 
 
 def item_sources(country: str) -> ItemSources | None:
