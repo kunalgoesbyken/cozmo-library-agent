@@ -1,3 +1,4 @@
+import asyncio
 import hashlib
 import json
 import logging
@@ -87,6 +88,7 @@ class CatalogHttp:
             follow_redirects=True,
         )
         self.limiters: dict[str, AsyncLimiter] = {}
+        self.pending: dict[str, asyncio.Future] = {}
 
     def cache_path(self, url: str) -> Path:
         return self.cache_dir / f"{hashlib.sha1(url.encode('utf-8')).hexdigest()}.json"
@@ -102,6 +104,13 @@ class CatalogHttp:
         llm = load_llm_config()
         if os.environ.get(llm.offline_env) == llm.offline_value:
             raise CatalogOffline(f"catalogue request not cached while offline: {request}")
+        key = path.name
+        if key not in self.pending:
+            self.pending[key] = asyncio.ensure_future(self.download(request, path, headers))
+            self.pending[key].add_done_callback(lambda _: self.pending.pop(key, None))
+        return await asyncio.shield(self.pending[key])
+
+    async def download(self, request: httpx.URL, path: Path, headers: dict[str, str] | None) -> Any:
         limiter = self.limiters.setdefault(request.host, AsyncLimiter(self.config.requests_per_second, PER_SECOND))
         async with limiter:
             response = await self.client.get(request, headers=headers)

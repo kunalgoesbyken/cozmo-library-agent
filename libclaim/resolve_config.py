@@ -17,6 +17,13 @@ class ReadingConfig(BaseModel):
 class OcrConfig(BaseModel):
     use_dml: bool
     log_level: str
+    use_cls: bool
+    det_limit_type: str
+    det_limit_side_len: int
+    threads: int
+    inter_threads: int
+    workers: int
+    min_yield: float
 
 
 class GateConfig(BaseModel):
@@ -26,6 +33,7 @@ class GateConfig(BaseModel):
     catalogue_only_title: float
     catalogue_only_margin: float
     catalogue_only_confidence: float
+    repeat_iou: float
     token_match: float
     score_min: float
     margin_min: float

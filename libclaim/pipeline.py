@@ -87,11 +87,11 @@ from libclaim.stages import (
 )
 from libclaim.room.geometry import RoomGeometry
 from libclaim.sweep import SweepDir
-from libclaim.vision.boxes import Box, TrackConfig, load_vision_config, read_image
+from libclaim.vision.boxes import Box, TrackConfig, iou, load_vision_config, read_image
 from libclaim.vision.gate import VisionGate
 from libclaim.vision.items import ItemDet, detect_items, unmatched_statements
 from libclaim.vision.keyframes import KeyframeStream, load_keyframe_config
-from libclaim.vision.reading import Reading, SpineCrop, crop_spine, read_spines
+from libclaim.vision.reading import Reading, SpineCrop, crop_spines, read_spines
 from libclaim.vision.resolve import Catalogs, Resolution, read_text, resolve
 from libclaim.vision.resolve import SpineDims as ResolveDims
 from libclaim.vision.rfdetr import rfdetr_boxes
@@ -136,6 +136,8 @@ STAGE_TYPES: dict[str, type[BaseModel]] = {
     "pricing": PricingStage,
 }
 OPTIONAL_STAGES = {"room", "items"}
+SELF_TIMED = {"resolution"}
+REPEATED = "repeated_read"
 
 Emit = Callable[[dict[str, Any]], Awaitable[None]]
 
@@ -259,13 +261,25 @@ def build_segment(plan: SegmentPlan, carried: list[FrameSpines], frames: list[Fr
 
 def spine_crops(books: list[BookSlot]) -> list[SpineCrop]:
     images: dict[str, np.ndarray] = {}
-    crops = []
-    for index, book in enumerate(books):
+    for book in books:
         if book.frame.path not in images:
             images[book.frame.path] = read_image(book.frame.path)
-        det = SpineDet(box_px=book.box, orientation=book.orientation, source=Source.gemini)
-        crops.append(crop_spine(images[book.frame.path], det, index))
-    return crops
+    return crop_spines([(images[book.frame.path], SpineDet(box_px=book.box, orientation=book.orientation,
+                                                         source=Source.gemini)) for book in books])
+
+
+def repeated_reads(books: list[BookSlot], resolutions: dict[str, Resolution], threshold: float) -> list[str]:
+    earlier: list[BookSlot] = []
+    repeated = []
+    for book in books:
+        resolution = resolutions.get(book.id)
+        if resolution is None or resolution.status != "identified":
+            continue
+        if any(resolutions[other.id].title == resolution.title and other.frame.path == book.frame.path
+               and iou(other.box, book.box) >= threshold for other in earlier):
+            repeated.append(book.id)
+        earlier.append(book)
+    return repeated
 
 
 def subject_matches(statement: Statement, resolution: Resolution | None, threshold: float) -> bool:
@@ -335,6 +349,7 @@ class SweepRun:
         self.consumer: asyncio.Task | None = None
         self.detections: list[asyncio.Task] = []
         self.segment_tasks: list[asyncio.Task] = []
+        self.resolving: dict[str, asyncio.Future] = {}
         self.open: list[FrameSpines] = []
         self.carry: tuple[SegmentPlan, list[FrameSpines]] | None = None
         self.tails: list[tuple[SegmentPlan, list[FrameSpines]]] = []
@@ -514,8 +529,9 @@ class SweepRun:
                  "resolution": self.resolve_segment}
         for stage in SEGMENT_STAGES[SEGMENT_STAGES.index(start):]:
             self.computed.add(stage)
+            step = steps[stage](plan)
             try:
-                await self.timed(stage, steps[stage](plan))
+                await (step if stage in SELF_TIMED else self.timed(stage, step))
             except Exception as error:
                 self.fail(stage, plan.label, error)
                 if stage == SEGMENT_STAGES[0]:
@@ -557,22 +573,43 @@ class SweepRun:
     async def read_segment(self, plan: SegmentPlan) -> None:
         books = self.results.tracks.segments[plan.index].books
         crops = await asyncio.to_thread(spine_crops, books)
+
+        def store(readings: list[Reading]) -> None:
+            for reading in readings:
+                book, crop = books[reading.track_id], crops[reading.track_id]
+                self.results.reading.reads[book.id] = BookRead(reading=reading, ocr_text=crop.ocr_text,
+                                                               ocr_score=crop.ocr_score)
+                self.start_resolution(book)
+
         try:
-            readings = await read_spines(crops, self.llm.at("reading"), self.services.settings.vision_models)
+            await read_spines(crops, self.llm.at("reading"), self.services.settings.vision_models, store)
         except VISION_FAILURES as error:
-            readings = [Reading(track_id=c.track_id, rotation=c.rotation, failure=type(error).__name__) for c in crops]
-        by_id = {reading.track_id: reading for reading in readings}
-        for index, book in enumerate(books):
-            crop = crops[index]
-            self.results.reading.reads[book.id] = BookRead(reading=by_id[index], ocr_text=crop.ocr_text,
-                                                           ocr_score=crop.ocr_score)
+            store([Reading(track_id=c.track_id, rotation=c.rotation, failure=type(error).__name__) for c in crops
+                   if books[c.track_id].id not in self.results.reading.reads])
+
+    def start_resolution(self, book: BookSlot) -> None:
+        if book.id not in self.resolving:
+            self.resolving[book.id] = asyncio.ensure_future(self.timed("resolution", self.resolve_slot(book)))
+
+    async def resolve_slot(self, book: BookSlot) -> None:
+        read = self.results.reading.reads[book.id]
+        self.results.resolution.resolutions[book.id] = await self.resolve_book(read, self.results.scale.dims.get(book.id))
 
     async def resolve_segment(self, plan: SegmentPlan) -> None:
         books = self.results.tracks.segments[plan.index].books
         for book in books:
-            read = self.results.reading.reads.get(book.id)
-            if read is not None:
-                self.results.resolution.resolutions[book.id] = await self.resolve_book(read, self.results.scale.dims.get(book.id))
+            if book.id in self.results.reading.reads:
+                self.start_resolution(book)
+        pending = [self.resolving[book.id] for book in books if book.id in self.resolving]
+        for outcome in await asyncio.gather(*pending, return_exceptions=True):
+            if isinstance(outcome, Exception):
+                self.fail("resolution", plan.label, outcome)
+        resolutions = self.results.resolution.resolutions
+        for key in repeated_reads(books, resolutions, load_resolve_config().gates.repeat_iou):
+            found = resolutions[key]
+            resolutions[key] = Resolution(status="unidentified", reason=REPEATED, vlm_text=found.vlm_text,
+                                          ocr_text=found.ocr_text, dims=found.dims, match_score=found.match_score,
+                                          margin=found.margin)
         await self.upsert_books(books)
         await self.log_segment(plan, books)
 
@@ -587,11 +624,11 @@ class SweepRun:
     async def prefetch(self, plan: SegmentPlan) -> None:
         locale = self.locale()
         market, other, fx = self.market(locale), self.market(self.other_locale(locale)), Fx(self.services.http)
-        for book in self.results.tracks.segments[plan.index].books:
-            resolution = self.results.resolution.resolutions.get(book.id)
-            read = self.results.reading.reads.get(book.id)
-            if resolution is not None and resolution.status == "identified" and read is not None:
-                await price_book(resolution, market, reading=read.reading, statements=[], other=other, fx=fx)
+        resolutions, reads = self.results.resolution.resolutions, self.results.reading.reads
+        ids = [book.id for book in self.results.tracks.segments[plan.index].books
+               if book.id in resolutions and resolutions[book.id].status == "identified" and book.id in reads]
+        await asyncio.gather(*(price_book(resolutions[key], market, reading=reads[key].reading, statements=[],
+                                          other=other, fx=fx) for key in ids))
 
     def upsert_event(self, book: BookSlot) -> dict[str, Any]:
         resolution = self.results.resolution.resolutions.get(book.id)
@@ -738,8 +775,8 @@ class SweepRun:
         locale = self.locale()
         market, other, fx = self.market(locale), self.market(self.other_locale(locale)), Fx(self.services.http)
         pricing = self.results.pricing
-        for book in slots(self.results):
-            prices = await self.price_slot(book, market, other, fx)
+        books = list(slots(self.results))
+        for book, prices in zip(books, await asyncio.gather(*(self.price_slot(b, market, other, fx) for b in books))):
             if prices is not None:
                 pricing.books[book.id] = prices
         sources, listings = item_sources(locale.country), Listings(self.services.http)
@@ -785,7 +822,8 @@ class SweepRun:
             task.cancel()
 
     async def close(self) -> None:
-        tasks = [task for task in (self.consumer, *self.detections, *self.segment_tasks) if task is not None]
+        tasks = [task for task in (self.consumer, *self.detections, *self.segment_tasks, *self.resolving.values())
+                 if task is not None]
         for task in tasks:
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)

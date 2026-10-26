@@ -11,6 +11,13 @@ reading:
 ocr:
   use_dml: false
   log_level: error
+  use_cls: false
+  det_limit_type: max
+  det_limit_side_len: 960
+  threads: 2
+  inter_threads: 1
+  workers: 3
+  min_yield: 32
 gates:
   ocr_overlap_min: 0.6
   ocr_contradiction_yield: 8
@@ -18,6 +25,7 @@ gates:
   catalogue_only_title: 95
   catalogue_only_margin: 15
   catalogue_only_confidence: 0.5
+  repeat_iou: 0.25
   token_match: 80
   score_min: 90
   margin_min: 8

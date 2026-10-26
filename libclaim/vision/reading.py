@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
 
 import cv2
@@ -9,10 +10,11 @@ from pydantic import BaseModel
 from libclaim.llm import Llm, LlmReplyInvalid, QuotaExhausted, default_llm
 from libclaim.resolve_config import load_resolve_config
 from libclaim.settings import load_settings
-from libclaim.vision.ocr import ocr_text
+from libclaim.vision.ocr import ocr_pool, ocr_text
 from libclaim.vision.spines import Orientation, SpineDet
 
 logger = logging.getLogger(__name__)
+UPRIGHT = ""
 
 BATCH_FAILURES = (QuotaExhausted, LlmReplyInvalid, errors.APIError)
 
@@ -53,21 +55,26 @@ def ocr_yield(text: str, score: float) -> float:
 
 
 def crop_spine(image: np.ndarray, det: SpineDet, track_id: int) -> SpineCrop:
+    cfg = load_resolve_config()
     box = det.box_px
     height, width = image.shape[:2]
     x1, x2 = (min(max(round(v), 0), width) for v in (box.x1, box.x2))
     y1, y2 = (min(max(round(v), 0), height) for v in (box.y1, box.y2))
     area = image[y1:y2, x1:x2]
-    if det.orientation == Orientation.horizontal:
-        text, score = ocr_text(area)
-        return SpineCrop(track_id=track_id, image=area, ocr_text=text, ocr_score=score)
+    names = [UPRIGHT] if det.orientation == Orientation.horizontal else cfg.reading.rotations
     best = None
-    for name in load_resolve_config().reading.rotations:
-        turned = cv2.rotate(area, getattr(cv2, name))
+    for name in names:
+        turned = cv2.rotate(area, getattr(cv2, name)) if name else area
         text, score = ocr_text(turned)
         if best is None or ocr_yield(text, score) > ocr_yield(best.ocr_text, best.ocr_score):
             best = SpineCrop(track_id=track_id, image=turned, rotation=name, ocr_text=text, ocr_score=score)
+        if ocr_yield(best.ocr_text, best.ocr_score) >= cfg.ocr.min_yield:
+            break
     return best
+
+
+def crop_spines(jobs: list[tuple[np.ndarray, SpineDet]]) -> list[SpineCrop]:
+    return list(ocr_pool().map(lambda job: crop_spine(job[1][0], job[1][1], job[0]), enumerate(jobs)))
 
 
 def encode_crop(crop: SpineCrop) -> list[types.Part | str]:
@@ -89,24 +96,29 @@ def reading_from(crop: SpineCrop, read: SpineRead | None) -> Reading:
     )
 
 
-async def read_spines(
-    crops: list[SpineCrop], llm: Llm | None = None, models: list[str] | None = None
-) -> list[Reading]:
+async def read_batch(batch: list[SpineCrop], llm: Llm | None, models: list[str] | None) -> list[Reading]:
     cfg = load_resolve_config().reading
+    parts: list = [part for crop in batch for part in encode_crop(crop)] + [cfg.prompt]
+    try:
+        answer = await (llm or default_llm()).structured(models or load_settings().vision_models, parts, SpineReads)
+    except BATCH_FAILURES as error:
+        logger.warning("spine reading batch failed: %s", type(error).__name__)
+        return [Reading(track_id=crop.track_id, rotation=crop.rotation, failure=type(error).__name__) for crop in batch]
+    by_id = {read.crop_id: read for read in answer.reads}
+    return [reading_from(crop, by_id.get(str(crop.track_id))) for crop in batch]
+
+
+async def read_spines(
+    crops: list[SpineCrop],
+    llm: Llm | None = None,
+    models: list[str] | None = None,
+    on_batch: Callable[[list[Reading]], None] | None = None,
+) -> list[Reading]:
+    size = load_resolve_config().reading.batch_size
     readings: list[Reading] = []
-    for start in range(0, len(crops), cfg.batch_size):
-        batch = crops[start : start + cfg.batch_size]
-        parts: list = [part for crop in batch for part in encode_crop(crop)] + [cfg.prompt]
-        try:
-            answer = await (llm or default_llm()).structured(
-                models or load_settings().vision_models, parts, SpineReads
-            )
-        except BATCH_FAILURES as error:
-            logger.warning("spine reading batch failed: %s", type(error).__name__)
-            readings += [
-                Reading(track_id=crop.track_id, rotation=crop.rotation, failure=type(error).__name__) for crop in batch
-            ]
-            continue
-        by_id = {read.crop_id: read for read in answer.reads}
-        readings += [reading_from(crop, by_id.get(str(crop.track_id))) for crop in batch]
+    for start in range(0, len(crops), size):
+        batch = await read_batch(crops[start : start + size], llm, models)
+        readings += batch
+        if on_batch is not None:
+            on_batch(batch)
     return readings
