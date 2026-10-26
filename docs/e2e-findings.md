@@ -77,3 +77,45 @@ Before and after (93 books, 3 photos, no marker in any of them):
 The prior classes are still a poor guess (the Blyton paperbacks are about 18 to 20 cm and the aspect picks 17.5 to 23.5 cm), which is why they are only estimates now. Report check: `runs/f2-ml/report.html` rendered to PNG with headless Edge; the books table shows the crop thumbnails, "est. 23.5 / 4.5" cells, and the opened full frame with the box outlined (`runs/f2-ml/report_books.png`, `report_top.png`).
 
 Open: unidentified books still produce two per-book entries ("spine could not be identified" plus "identification: <reason>"); those are individually distinct enough to keep for now. The resolver is still given the prior height and thickness by `pipeline.resolve_book` (F3 owns `pipeline.py`), so that call should pass nothing when `scale_method` is `book_format_prior`.
+
+## Fix wave F1
+
+Findings 1, 2, 3 and 8. Measured offline on copies of `runs/e2e-a-base3` (`runs/f1-before`, `runs/f1-after`, `runs/f1-hybrid`, not in git). No Gemini call was made. Live HTTP: 24 requests (2 Open Library robots.txt, 1 googleapis robots.txt, 7 Google Books searches, 3 Open Library editions lists, 11 retailer pages including redirects), 4 over the planned 20 because Bookchor and Penguin UK redirect unknown ISBNs.
+
+**1, OCR throughput.** Root cause: RapidOCR's default detector setting (`limit_type: min`, `limit_side_len: 736`) scales the short side of every crop up to 736 px, so a 100 x 660 spine became about 736 x 4858 before detection, and `crop_spine` always ran both rotations. Profile on the 93 real crops (one engine, one call at a time, both rotations, 173 calls):
+
+| detector input | s per call | legible reads OCR corroborates (of 78) |
+|---|---|---|
+| default (min side 736) | 2.91 | 30 |
+| max side 960 (never upscale) | 0.15 | 42 |
+| max side 640 | 0.13 | 42 |
+| min side 128 / 160 / 256 | 0.21 / 0.27 / 0.48 | 44 / 47 / 45 |
+| max side 960, DirectML | 0.18 | - |
+| max side 960, text-direction classifier off | 0.11 | 42 |
+
+Upscaling hurts both speed and quality. DirectML does not help these small inputs. Chosen (all in `config/resolve.yaml` `ocr`): max side 960, classifier off (an upside-down line then reads as low-yield garbage, which is what tells the two rotations apart), 2 intra-op threads, one shared engine in a pool of 3 workers shared by all segments, first rotation from `reading.rotations`, the second only when the yield (score x characters) is below 32. That is 156 OCR calls for 93 crops. Wall time per crop over all 93 crops: 0.50 s (1 worker, 1 thread), 0.22 s (1 worker, 2 threads), 0.13 s (3 workers, 2 threads, the default), 0.12 s (4 x 2). Replay `--from reading` on the old code: reading busy 546 s and cut at the 240 s deadline, 0 books resolved. New code: the reading stage of all three segments takes 22.9 s, of which OCR is 12.0 s. Measured on the real reads, OCR now supports 49 of 78 legible titles (31 before) and is empty for 11 (41 before).
+
+The new rotation choice changes the image sent to Gemini for 41 of 93 crops, so the recorded reading batches no longer match their cache keys and a pure `--from reading` replay ends with `reading_failed` for all books. The identification numbers below therefore use a hybrid replay: the recorded Gemini reads, the new OCR text for the same crops, then `--from resolution` with the new code. A live reading run (5 Gemini batch calls) is needed for an end-to-end number.
+
+**2, identification gate.** `accept_identification` now returns how a read was corroborated: `ocr` (the old rule: OCR text covers at least 0.6 of the title words) or `catalogue_only` (OCR empty or weak and not contradicting the read, the author read and matched in the best catalogue record, score at least 95, title similarity at least 95, margin at least 15 to the next work, and the old lone-candidate and margin gates). `catalogue_only` lines get `id_confidence` = score x 0.5 and a review note. OCR text that shares no word with the read still rejects (`ocr_disagrees`); a read without an author and without OCR support is rejected before any catalogue call (`not_corroborated`). OCR words run together ("FAMOUSFIVE", "GemeinsameWerke1") now count as support for words of 4 letters or more. Hold-out tests: an invented title, the right title by a different author, IT and EMMA without an author, OCR that reads other words, a title whose runner-up is one word longer. A new safety rule: when the same title is identified in boxes of one frame that overlap (IoU at least 0.25), only the first keeps it and the others become `repeated_read`. On this shelf "Well Done, Secret Seven" was read from three overlapping boxes (`b01-040`, `b01-041`, `b01-043`, see F2 finding 7), and only `b01-040` keeps the title.
+
+Open Library's robots.txt has `Disallow: /search` for every agent, which covers `/search.json`. No live Open Library search was made. Of the 48 former `ocr_disagrees` books, 42 now end as `catalogue_unavailable` in the replay because their searches are not cached. Google Books (googleapis.com has no robots.txt) was queried for 7 of them: "Well Done, Secret Seven" is identified from the catalogue only. "Five Go To Smuggler's Top" and "Naughty Amelia Jane" stay unidentified at a margin of 14 (the runner-ups are "Famous Five: Five Go To Smuggler's Top" and "Amelia Jane is Naughty Again"). Google Books returned nothing for the other 4.
+
+**3, edition choice and prices.** When the printed edition is unknown (no publisher on the spine, a publisher that matches no edition with an ISBN, or several ISBNs from that publisher), the resolver takes the most recent edition with an ISBN-13 whose title matches the read (title similarity at least 95, so no translation), preferring `editions.preferred_formats` (paperback). The line keeps `edition: ""` unless the printed publisher matched, the resolution has `edition_unverified` and `equivalent_edition`, and prices from that ISBN carry the source "Bookchor (equivalent edition, ISBN ...)" plus an `equivalent_edition_priced` review note. `no_isbn` now only means that no edition with an ISBN was found. A new appraisal reason `old_work_edition_unverified` keeps an equivalent edition from being priced when the work is older than `antiquarian_year` and the spine shows no matching publisher. Second-country repricing reuses the stored resolution, so the label survives there too. Of the 12 old `no_isbn` books, 4 now have an equivalent ISBN (The Secret of the Lost Necklace, The Wishing Wand, Der Orientalist, The Cathedral and the Bazaar). Vagantenbeichte and Lateinische Gedichte deutscher Humanisten have no ISBN-13 edition with a matching title, and the rest are works from before 1950 or have no fetched editions. Live check of three equivalent ISBNs (9780596001315, 9783940731050, 9780753727041): none is listed at Bookchor or Pustakkosh (`not_found` with the page as evidence), and Penguin UK redirects to a path that robots.txt disallows. They are excluded from the totals. No other free source qualifies (research/05: Bookswagon terms, Crossword and Sapna robots.txt, Amazon and Flipkart terms), so none was added.
+
+**8, resolution latency.** Books are resolved concurrently under the per-host catalogue limiter (identical in-flight requests are shared), and a book's resolution starts as soon as its reading batch returns instead of after the whole segment. Price prefetch and final pricing also run concurrently. Test: 30 books with a 50 ms catalogue resolve in parallel, and resolution starts while the second reading batch is still pending.
+
+Before and after (93 books):
+
+| | before (`e2e-a-base3`) | after (hybrid replay) |
+|---|---|---|
+| identified | 4 | 9 |
+| needs_appraisal | 12 | 9 |
+| unidentified | 77 | 75 (42 `catalogue_unavailable`, 15 illegible, 7 not_confident, 7 no_catalogue_match, 2 not_corroborated, 2 repeated_read) |
+| books with an ISBN | 4 | 9 (5 equivalent editions) |
+| priced | 0 | 0 |
+| OCR per crop | about 5.8 s (2.9 s x 2 rotations) | 0.22 s on one worker, 0.13 s with the pool |
+| replay `--from reading`, after_sweep | 240 s, cut at the deadline, 0 resolved | 23.0 s (Gemini cache misses, see above) |
+| replay `--from resolution`, after_sweep | not run (the recorded live run spent 160.7 s in resolution, 307 s after the sweep) | 0.43 s (all requests cached) |
+
+Projected for a live run of these photos, not measured: OCR 12 s, Gemini reading about 25 s for the longest segment, catalogue requests about 95 s at 1 request per second on the Open Library host, retailers about 25 s, so about 150 s after the sweep against 307 to 393 s before.
