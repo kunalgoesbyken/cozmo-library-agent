@@ -15,14 +15,33 @@ from libclaim.llm import QuotaExhausted
 from libclaim.models import Still
 from libclaim.packet.models import ClaimPacket
 from libclaim.packet.totals import compute_totals
-from libclaim.pipeline import LiveHooks, Services, SweepRun, attach_statements, excluded_by, load_stills, run_pipeline
+from libclaim.pipeline import (
+    LiveHooks,
+    Services,
+    SweepRun,
+    attach_statements,
+    carried_slivers,
+    excluded_by,
+    load_stills,
+    run_pipeline,
+)
 from libclaim.server import KIND_STILL, create_app, pack_binary
 from libclaim.settings import Settings
-from libclaim.stages import STAGES, BookSlot, DeviceInfo, load_pipeline_config
+from libclaim.stages import (
+    STAGES,
+    BookSlot,
+    DeviceInfo,
+    Results,
+    SeenBox,
+    SegmentTracks,
+    TracksStage,
+    load_pipeline_config,
+)
 from libclaim.sweep import SweepDir
 from libclaim.vision import masks
 from libclaim.vision import reading as reading_module
-from libclaim.vision.boxes import Box
+from libclaim.vision.boxes import Box, load_vision_config
+from libclaim.vision.tracks import BookTrack, BoxRef
 from libclaim.vision.resolve import Resolution
 from libclaim.vision.spines import Orientation
 from tests import sweep12 as fx
@@ -466,6 +485,33 @@ def slot(book_id, seen, shelf="S1"):
     still = Still(seq=seen[0], t_ms=0, path="", w=1, h=1, blur=1.0, glare=0.0, motion_dps=0.0)
     return BookSlot(id=book_id, segment=0, track=0, shelf=shelf, position=1, orientation=Orientation.vertical,
                     frame=still, box=Box(x1=0, y1=0, x2=1, y2=1), seen=seen)
+
+
+def test_a_book_seen_whole_only_after_a_segment_boundary_keeps_that_view():
+    stills = [Still(seq=seq, t_ms=0, path="", w=100, h=100, blur=1.0, glare=0.0, motion_dps=0.0) for seq in (5, 6)]
+    cut, whole = Box(x1=95, y1=10, x2=100, y2=90), Box(x1=40, y1=10, x2=60, y2=90)
+    cfg = load_vision_config().tracks
+
+    def track(*refs):
+        return BookTrack(track_id=0, refs=[BoxRef(frame=f, box=b) for f, b in refs], best_frame=stills[0], best_box=refs[0][1])
+
+    assert carried_slivers(track((0, cut), (1, whole)), stills, 1, cfg) == [SeenBox(seq=5, box=cut)]
+    assert carried_slivers(track((0, whole), (1, whole)), stills, 1, cfg) == []
+    assert carried_slivers(track((0, cut), (1, cut)), stills, 1, cfg) == []
+
+
+def test_the_whole_view_supersedes_the_sliver_and_never_counts_twice():
+    sliver = slot("sliver", [5]).model_copy(update={"box": Box(x1=95, y1=10, x2=100, y2=90)})
+    whole = slot("whole", [5, 6]).model_copy(update={"segment": 1, "replaces": [SeenBox(seq=5, box=sliver.box)]})
+    orphan = slot("orphan", [5, 6]).model_copy(update={"segment": 1, "replaces": [SeenBox(seq=5, box=Box(x1=1, y1=1, x2=2, y2=2))]})
+
+    def results(*segments):
+        stage = TracksStage(segments={i: SegmentTracks(index=i, stills=[], tracks=[], rows=[], flat=[], books=books)
+                                      for i, books in enumerate(segments)})
+        return Results(tracks=stage)
+
+    assert assemble_module.superseded(results([sliver], [whole])) == {"sliver"}
+    assert assemble_module.superseded(results([sliver], [orphan])) == {"orphan"}
 
 
 def test_statement_attaches_to_the_named_book_or_else_the_whole_view():

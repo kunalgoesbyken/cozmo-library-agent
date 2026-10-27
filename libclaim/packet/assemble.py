@@ -63,8 +63,23 @@ def revisits(results: Results) -> dict[str, str]:
     return found
 
 
+def superseded(results: Results) -> set[str]:
+    books = [book for segment in results.tracks.segments.values() for book in segment.books]
+    def view(seq: int, box: Box) -> tuple:
+        return seq, box.x1, box.y1, box.x2, box.y2
+
+    views = {view(book.frame.seq, book.box): book.id for book in books if not book.replaces}
+    dropped = set()
+    for book in books:
+        if not book.replaces:
+            continue
+        slivers = {views[key] for seen in book.replaces if (key := view(seen.seq, seen.box)) in views}
+        dropped |= slivers or {book.id}
+    return dropped
+
+
 def slots(results: Results) -> Iterator[BookSlot]:
-    repeated = revisits(results)
+    repeated = revisits(results).keys() | superseded(results)
     for index in sorted(results.tracks.segments):
         yield from (book for book in results.tracks.segments[index].books if book.id not in repeated)
 

@@ -51,3 +51,16 @@ def test_persisted_across_instances(tmp_path):
     path = tmp_path / "nested" / "spend.jsonl"
     Budget(path).record("gemini-3.8-flash", 1_000_000, 0)
     assert Budget(path).total_usd() == pytest.approx(0.50)
+
+
+def test_total_follows_other_writers_and_a_reset_ledger(tmp_path):
+    path = tmp_path / "spend.jsonl"
+    reader, writer = Budget(path), Budget(path)
+    writer.record("gemini-3.8-flash", 1_000_000, 0)
+    assert reader.total_usd() == pytest.approx(0.50)
+    writer.record("gemini-3.8-flash", 1_000_000, 0)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write('{"usd": 9')
+    assert reader.total_usd() == pytest.approx(1.00)
+    path.write_text('{"usd": 0.25}\n', encoding="utf-8")
+    assert reader.total_usd() == pytest.approx(0.25)

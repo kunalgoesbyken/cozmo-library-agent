@@ -482,3 +482,19 @@ def test_shown_title_drops_an_author_name_only_when_the_spine_agrees():
     keats = cand("Selected Poems of John Keats", author="John Keats")
     assert shown_title(reading("SELECTED POEMS OF JOHN KEATS"), keats) == "Selected Poems of John Keats"
 
+
+def test_shown_title_keeps_the_printed_words_in_catalogue_casing():
+    from libclaim.vision.resolve import shown_title
+    mosella = cand("Die Mosella des Decimus Magnus Ausonius", author="Decimus Magnus Ausonius")
+    assert shown_title(reading("MOSELLA", "AUSONIUS"), mosella) == "Mosella"
+    misread = cand("Die Mosella des Decimus Magnus Ausonius", author="Decimus Magnus Ausonius")
+    assert shown_title(reading("MOSELA", "AUSONIUS"), misread) == "Die Mosella"
+
+
+async def test_catalogue_title_with_the_author_appended_is_identified_without_ocr():
+    library = [cand("Chartres, By George Henderson", author="George Henderson")]
+    result = await resolve(reading("Chartres", "George Henderson"), ("George Henderson Charea", 0.9), None, fakes(library))
+    assert result.status == "identified"
+    assert result.corroboration == "catalogue_only"
+    assert result.title == "Chartres"
+

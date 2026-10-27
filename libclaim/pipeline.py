@@ -77,6 +77,7 @@ from libclaim.stages import (
     ResolutionStage,
     Results,
     ScaleStage,
+    SeenBox,
     SegmentPlan,
     SegmentTracks,
     SpinesStage,
@@ -109,7 +110,7 @@ from libclaim.vision.rows import (
 )
 from libclaim.vision.scale import ScaleMethod, SpineDims, load_measure_config, unit_scale
 from libclaim.vision.spines import Orientation, Source, SpineDet, detect_spines, local_orientation, reconcile
-from libclaim.vision.tracks import BookTrack, Frame, merge_tracks
+from libclaim.vision.tracks import BookTrack, Frame, merge_tracks, touched_edges
 
 logger = logging.getLogger(__name__)
 
@@ -230,12 +231,28 @@ def det_of(track: BookTrack, frames: list[FrameSpines], stills: list[Still]) -> 
     return dets[[det.box_px for det in dets].index(ref.box)]
 
 
+def carried_slivers(track: BookTrack, stills: list[Still], carried: int, cfg: TrackConfig) -> list[SeenBox]:
+    def edges(ref) -> frozenset[str]:
+        return touched_edges(ref.box, stills[ref.frame].w, stills[ref.frame].h, cfg)
+
+    before = [ref for ref in track.refs if ref.frame < carried]
+    after = [ref for ref in track.refs if ref.frame >= carried]
+    if not before or not after:
+        return []
+    least = min((edges(ref) for ref in after), key=len)
+    if not all(edges(ref) > least for ref in before):
+        return []
+    return [SeenBox(seq=stills[ref.frame].seq, box=ref.box) for ref in before]
+
+
 def build_segment(plan: SegmentPlan, carried: list[FrameSpines], frames: list[FrameSpines],
                   cfg: TrackConfig) -> SegmentTracks:
     frames = carried + frames
     stills = [frame.still for frame in frames]
     merged = merge_tracks([Frame(still=f.still, boxes=[d.box_px for d in f.dets]) for f in frames])
-    tracks = [track for track in merged if min(ref.frame for ref in track.refs) >= len(carried)]
+    replaced = {track.track_id: carried_slivers(track, stills, len(carried), cfg) for track in merged}
+    tracks = [track for track in merged
+              if min(ref.frame for ref in track.refs) >= len(carried) or replaced[track.track_id]]
     if not tracks:
         return SegmentTracks(index=plan.index, stills=stills, tracks=[], rows=[], flat=[], books=[])
     orientation = [det_of(track, frames, stills).orientation for track in tracks]
@@ -256,6 +273,7 @@ def build_segment(plan: SegmentPlan, carried: list[FrameSpines], frames: list[Fr
                     frame=track.best_frame,
                     box=track.best_box,
                     seen=sorted({stills[ref.frame].seq for ref in track.refs}),
+                    replaces=replaced[track.track_id],
                 )
             )
     return SegmentTracks(index=plan.index, stills=stills, tracks=tracks, rows=rows, flat=flat, books=books)

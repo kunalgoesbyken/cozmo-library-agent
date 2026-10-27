@@ -20,6 +20,8 @@ class Budget:
         self.path = Path(path)
         self.cap_usd = cap_usd
         self.pending = 0.0
+        self.read_bytes = 0
+        self.spent = 0.0
         self.models = yaml.safe_load(PRICES_PATH.read_text(encoding="utf-8"))["models"]
         rates = [rate for table in self.models.values() for rate in table.values()]
         self.worst = {
@@ -46,10 +48,17 @@ class Budget:
         return usd
 
     def total_usd(self) -> float:
-        if not self.path.is_file():
-            return 0.0
-        lines = self.path.read_text(encoding="utf-8").splitlines()
-        return sum(json.loads(line)["usd"] for line in lines if line)
+        size = self.path.stat().st_size if self.path.is_file() else 0
+        if size < self.read_bytes:
+            self.read_bytes, self.spent = 0, 0.0
+        if size > self.read_bytes:
+            with self.path.open("rb") as handle:
+                handle.seek(self.read_bytes)
+                added = handle.read(size - self.read_bytes)
+            complete = added[: added.rfind(b"\n") + 1]
+            self.spent += sum(json.loads(line)["usd"] for line in complete.decode("utf-8").splitlines() if line)
+            self.read_bytes += len(complete)
+        return self.spent
 
     def check(self) -> None:
         total = self.total_usd() + self.pending

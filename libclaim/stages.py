@@ -150,6 +150,11 @@ class SpinesStage(BaseModel):
     segments: list[SegmentPlan] = Field(default_factory=list)
 
 
+class SeenBox(BaseModel):
+    seq: int
+    box: Box
+
+
 class BookSlot(BaseModel):
     id: str
     segment: int
@@ -160,6 +165,7 @@ class BookSlot(BaseModel):
     frame: Still
     box: Box
     seen: list[int]
+    replaces: list[SeenBox] = Field(default_factory=list)
 
 
 class SegmentTracks(BaseModel):

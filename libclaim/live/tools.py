@@ -137,7 +137,8 @@ class LiveTools:
 
     async def call(self, name: str, args: dict[str, Any]) -> dict[str, Any]:
         result = self.dispatch(name, args)
-        logger.info("live tool %s args=%s result=%s", name, args, result)
+        logger.info("live tool %s", name)
+        logger.debug("live tool %s args=%s result=%s", name, args, result)
         return result
 
     def dispatch(self, name: str, args: dict[str, Any]) -> dict[str, Any]:

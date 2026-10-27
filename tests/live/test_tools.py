@@ -197,8 +197,12 @@ def test_set_locale_schema_asks_for_iso_codes_not_names():
         assert "ISO" in spec.parameters["properties"][field]["description"]
 
 
-def test_tool_calls_are_logged_with_arguments_and_result(tmp_path, caplog):
+def test_tool_arguments_are_logged_only_at_debug(tmp_path, caplog):
     h = Harness(tmp_path)
     with caplog.at_level("INFO", logger="libclaim.live.tools"):
         h.call("set_locale", {"country": "India", "currency": "rupees"})
-    assert "set_locale" in caplog.text and "India" in caplog.text and "invalid values" in caplog.text
+    assert "set_locale" in caplog.text and "India" not in caplog.text
+    caplog.clear()
+    with caplog.at_level("DEBUG", logger="libclaim.live.tools"):
+        h.call("set_locale", {"country": "India", "currency": "rupees"})
+    assert "India" in caplog.text and "invalid values" in caplog.text

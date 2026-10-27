@@ -152,18 +152,29 @@ def display_title(candidate: Candidate) -> str:
     return WORD_SEPARATOR.join(kept).strip(" ,:;-") or candidate.title
 
 
+def title_match(text: str, candidate: Candidate) -> float:
+    bare = title_without_author(candidate)
+    return max(title_similarity(text, candidate.title), title_similarity(text, bare) if bare else 0.0)
+
+
+def printed_title(reading: Reading, title: str) -> str:
+    printed = set(tokens(reading.title_verbatim))
+    words = [w for w in title.split() if tokens(w)]
+    if not printed or not printed <= {t for w in words for t in tokens(w)}:
+        return ""
+    return WORD_SEPARATOR.join(w for w in words if set(tokens(w)) <= printed).strip(" ,:;-")
+
+
 def shown_title(reading: Reading, candidate: Candidate) -> str:
     bare = display_title(candidate)
     closer = title_similarity(reading.title_verbatim, bare) > title_similarity(reading.title_verbatim, candidate.title)
-    return bare if closer else candidate.title
+    best = bare if closer else candidate.title
+    return printed_title(reading, best) or best
 
 
 def score_candidate(reading: Reading, candidate: Candidate) -> float:
     gates = load_resolve_config().gates
-    title = title_similarity(reading.title_verbatim, candidate.title)
-    bare = title_without_author(candidate)
-    if bare:
-        title = max(title, title_similarity(reading.title_verbatim, bare))
+    title = title_match(reading.title_verbatim, candidate)
     if not tokens(reading.author_verbatim):
         return title
     author = fuzz.token_set_ratio(reading.author_verbatim, candidate.author, processor=default_process)
@@ -262,7 +273,7 @@ def catalogue_strong(reading: Reading, candidates: list[Scored]) -> bool:
     return (
         author_matches(reading, top.best)
         and top.score >= gates.catalogue_only_score
-        and title_similarity(reading.title_verbatim, top.best.title) >= gates.catalogue_only_title
+        and title_match(reading.title_verbatim, top.best) >= gates.catalogue_only_title
         and margin_of(candidates) >= gates.catalogue_only_margin
     )
 

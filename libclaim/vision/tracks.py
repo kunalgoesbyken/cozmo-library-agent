@@ -76,11 +76,17 @@ def register(grays: list[np.ndarray], cfg: TrackConfig) -> list[tuple[int, np.nd
     return placed
 
 
-def is_cut(box: Box, width: int, height: int, cfg: TrackConfig) -> bool:
-    return box.x1 <= cfg.edge_px or box.y1 <= cfg.edge_px or box.x2 >= width - cfg.edge_px or box.y2 >= height - cfg.edge_px
+def touched_edges(box: Box, width: int, height: int, cfg: TrackConfig) -> frozenset[str]:
+    hits = {
+        "left": box.x1 <= cfg.edge_px,
+        "top": box.y1 <= cfg.edge_px,
+        "right": box.x2 >= width - cfg.edge_px,
+        "bottom": box.y2 >= height - cfg.edge_px,
+    }
+    return frozenset(edge for edge, hit in hits.items() if hit)
 
 
-def track_overlap(box: Box, cut: bool, track: list[tuple[int, Box, Box, int, bool]], group: int, cfg: TrackConfig) -> float:
+def track_overlap(box: Box, cut: frozenset[str], track: list[tuple[int, Box, Box, int, frozenset[str]]], group: int, cfg: TrackConfig) -> float:
     best = 0.0
     for _, _, ref, g, ref_cut in track:
         if g != group:
@@ -92,7 +98,7 @@ def track_overlap(box: Box, cut: bool, track: list[tuple[int, Box, Box, int, boo
     return best
 
 
-def views_of(track: list[tuple[int, Box, Box, int, bool]], frames: list[Frame], placed: list[tuple[int, np.ndarray]], cfg: TrackConfig) -> int:
+def views_of(track: list[tuple[int, Box, Box, int, frozenset[str]]], frames: list[Frame], placed: list[tuple[int, np.ndarray]], cfg: TrackConfig) -> int:
     group = track[0][3]
     cx = float(np.mean([(m[2].x1 + m[2].x2) / 2 for m in track]))
     cy = float(np.mean([(m[2].y1 + m[2].y2) / 2 for m in track]))
@@ -105,7 +111,7 @@ def views_of(track: list[tuple[int, Box, Box, int, bool]], frames: list[Frame], 
     return views
 
 
-def is_noise(track: list[tuple[int, Box, Box, int, bool]], frames: list[Frame], placed: list[tuple[int, np.ndarray]], cfg: TrackConfig) -> bool:
+def is_noise(track: list[tuple[int, Box, Box, int, frozenset[str]]], frames: list[Frame], placed: list[tuple[int, np.ndarray]], cfg: TrackConfig) -> bool:
     views = views_of(track, frames, placed, cfg)
     return views >= cfg.noise_min_views and len(track) / views <= cfg.noise_max_rate
 
@@ -114,11 +120,11 @@ def merge_tracks(frames: list[Frame]) -> list[BookTrack]:
     cfg = load_vision_config().tracks
     grays = [read_image(f.still.path, cv2.IMREAD_GRAYSCALE) for f in frames]
     placed = register(grays, cfg)
-    members: list[list[tuple[int, Box, Box, int, bool]]] = []
+    members: list[list[tuple[int, Box, Box, int, frozenset[str]]]] = []
     for index, frame in enumerate(frames):
         group, matrix = placed[index]
         moved = [project(box, matrix) for box in frame.boxes]
-        cuts = [is_cut(box, frame.still.w, frame.still.h, cfg) for box in frame.boxes]
+        cuts = [touched_edges(box, frame.still.w, frame.still.h, cfg) for box in frame.boxes]
         candidates = sorted(
             (overlap, bi, ti)
             for bi, box in enumerate(moved)
@@ -140,7 +146,7 @@ def merge_tracks(frames: list[Frame]) -> list[BookTrack]:
     members = [track for track in members if not is_noise(track, frames, placed, cfg)]
     tracks = []
     for track_id, track in enumerate(members):
-        sharpest = max(track, key=lambda m: (not m[4], frames[m[0]].still.blur))
+        sharpest = max(track, key=lambda m: (-len(m[4]), frames[m[0]].still.blur))
         tracks.append(
             BookTrack(
                 track_id=track_id,

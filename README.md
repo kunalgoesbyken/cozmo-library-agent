@@ -275,7 +275,7 @@ Three small, pure, config-driven functions hold the judgement calls. They are re
 
 - iPhone: everything on the phone is unverified (microphone, AudioWorklet playback, flush on interrupt, wake lock, camera permission, cookies over https, a real GoAway). Needs a human with the phone.
 - Marker: print the sheet, check the 10 cm line, set `ARUCO_MARKER_SIZE_CM`, tape it on the shelf front edge. Until then all spine dimensions are empty or estimates, and `box_height_trim` and the 2.5 cm recess are uncalibrated.
-- Ground truth: `books.csv`, `spines20.csv`, `prices15.csv`, `items.csv` and `room.json` do not exist yet, so only time and cost are evaluated.
+- Ground truth: `books.csv` (60 books from the two demo photos), `prices15.csv` (2 rows) and `items.csv` (2 items) exist; `spines20.csv` and `room.json` do not, so spine, price, item and room bars are not evaluated.
 - Task 17 tuning: gates, vision cutoff, row detection and window sizes are tuned on three public photos only, not on real sweeps.
 - Long runs: compression at 12K/6K never fired in the soak tests, so behaviour past about 10 minutes of live context is unverified.
 - Identification and price coverage are low on the test photos (see [failure log](docs/failure-log.md)); free sources do not list most editions.
