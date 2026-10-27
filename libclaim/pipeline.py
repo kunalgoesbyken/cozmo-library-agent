@@ -351,7 +351,7 @@ class SweepRun:
         self.llm = VisionGate(services.llm, load_llm_config().retry_delay_cap_seconds, services.clock, cache)
         self.measure_cfg = load_measure_config(services.settings)
         self.tracks_cfg = load_vision_config().tracks
-        self.stream = KeyframeStream(load_keyframe_config())
+        self.stream = KeyframeStream(load_keyframe_config(), load_capture_config().blur_floor)
         self.queue: asyncio.Queue[asyncio.Task | None] = asyncio.Queue()
         self.consumer: asyncio.Task | None = None
         self.detections: list[asyncio.Task] = []

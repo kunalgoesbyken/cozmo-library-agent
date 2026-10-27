@@ -26,6 +26,7 @@ class Keyframes(BaseModel):
 
 class KeyframeConfig(BaseModel):
     window_ms: int
+    blur_relative: float
     max_hamming: int
     hash_size: int
     dct_size: int
@@ -54,8 +55,10 @@ def phase_at(t_ms: int, markers: list[PhaseMarker]) -> Phase | None:
 
 
 class KeyframeStream:
-    def __init__(self, cfg: KeyframeConfig):
+    def __init__(self, cfg: KeyframeConfig, blur_floor: float = 0.0):
         self.cfg = cfg
+        self.blur_floor = blur_floor
+        self.sharpness: list[float] = []
         self.window: int | None = None
         self.best: Still | None = None
         self.digests: list[np.ndarray] = []
@@ -70,18 +73,24 @@ class KeyframeStream:
 
     def flush(self) -> list[Still]:
         best, self.best, self.window = self.best, None, None
-        if best is None:
+        if best is None or self.blurred(best):
             return []
         digest = phash(best.path, self.cfg)
         if any(np.count_nonzero(digest != other) <= self.cfg.max_hamming for other in self.digests):
             return []
         self.digests.append(digest)
+        self.sharpness.append(best.blur)
         return [best]
 
+    def blurred(self, still: Still) -> bool:
+        if still.blur >= self.blur_floor or not self.sharpness:
+            return False
+        return still.blur < self.cfg.blur_relative * float(np.median(self.sharpness))
 
-def select_keyframes(stills: list[Still], events: list[PhaseMarker]) -> Keyframes:
+
+def select_keyframes(stills: list[Still], events: list[PhaseMarker], blur_floor: float = 0.0) -> Keyframes:
     cfg = load_keyframe_config()
-    streams = {phase: KeyframeStream(cfg) for phase in Phase}
+    streams = {phase: KeyframeStream(cfg, blur_floor) for phase in Phase}
     kept: dict[Phase, list[Still]] = {phase: [] for phase in Phase}
     for still in sorted(stills, key=lambda s: s.t_ms):
         phase = phase_at(still.t_ms, events)

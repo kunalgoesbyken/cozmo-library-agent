@@ -140,6 +140,8 @@ async def price_book(
     reasons = appraisal_reasons(resolution, reading, statements, [], locale)
     if reasons:
         return BookPrices(status="needs_appraisal", review=basis + reasons)
+    if not resolution.isbn:
+        return BookPrices(status="identified", review=basis + ["no_isbn"], excluded=True)
     new_found = await market.quotes(locale.new_sources, resolution.isbn, NEW)
     used_found = await market.quotes(locale.used_sources, resolution.isbn, USED)
     review = basis + list(dict.fromkeys(notes_of(new_found + used_found))) + (["year_unknown"] if resolution.year is None else [])

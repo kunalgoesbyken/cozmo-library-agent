@@ -73,8 +73,8 @@ def test_year_before_antiquarian_year():
     assert reasons(res=resolution(year=None)) == []
 
 
-def test_missing_isbn():
-    assert reasons(res=resolution(isbn="")) == ["no_isbn"]
+def test_missing_isbn_is_not_a_reason_for_appraisal():
+    assert reasons(res=resolution(isbn="")) == []
 
 
 def test_equivalent_edition_of_a_modern_work_needs_no_appraisal():
@@ -103,4 +103,4 @@ def test_used_at_one_and_a_half_times_new():
 
 
 def test_reasons_accumulate():
-    assert reasons(res=resolution(isbn="", year=1900), statements=[statement()]) == ["user_statement", "antiquarian_year", "no_isbn"]
+    assert reasons(res=resolution(isbn="", year=1900), statements=[statement()]) == ["user_statement", "antiquarian_year"]

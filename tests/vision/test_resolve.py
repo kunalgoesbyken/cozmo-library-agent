@@ -93,7 +93,22 @@ async def test_accept_gates_are_individually_enforced(catalogs):
     assert accept_identification(sapiens, ("SAPIENS HARARI", 0.9), ranked)
     assert not accept_identification(sapiens, ("OTHER WORDS", 0.9), ranked)
     assert not accept_identification(sapiens, ("SAPIENS HARARI", 0.9), [])
-    assert not accept_identification(sapiens, ("SAPIENS HARARI", 0.9), ranked[:1] + [ranked[0]])
+    rival = ranked[0].model_copy(update={"best": ranked[0].best.model_copy(update={"title": "Homo Deus"})})
+    assert not accept_identification(sapiens, ("SAPIENS HARARI", 0.9), ranked[:1] + [rival])
+
+
+async def test_same_title_from_another_catalogue_author_is_not_a_rival():
+    merin = cand("Modern German Art", author="Peter Merin")
+    thoene = cand("Modern German Art", author="Peter Thoene")
+    read = reading("MODERN GERMAN ART", "PETER")
+    ranked = rank(read, [merin, thoene])
+    assert accept_identification(read, ("PETER PELICAN MODERN GERMAN ART", 0.9), ranked)
+
+
+async def test_author_inside_a_catalogue_title_does_not_lower_the_score():
+    read = reading("CHARTRES", "GEORGE HENDERSON")
+    ranked = rank(read, [cand("Chartres, By George Henderson", author="George Henderson")])
+    assert ranked[0].score >= 95
 
 
 def cand(title, author="Yuval Noah Harari", source="googlebooks", isbn="9780000000000", **fields):
@@ -458,3 +473,12 @@ async def test_no_request_goes_to_a_disallowed_open_library_search_path(tmp_path
     assert result.status == "identified"
     assert any(url.host == "openlibrary.org" for url in seen)
     assert not any(url.host == "openlibrary.org" and url.path.startswith("/search") for url in seen)
+
+
+def test_shown_title_drops_an_author_name_only_when_the_spine_agrees():
+    from libclaim.vision.resolve import shown_title
+    by = cand("Chartres, By George Henderson", author="George Henderson")
+    assert shown_title(reading("CHARTRES", "GEORGE HENDERSON"), by) == "Chartres"
+    keats = cand("Selected Poems of John Keats", author="John Keats")
+    assert shown_title(reading("SELECTED POEMS OF JOHN KEATS"), keats) == "Selected Poems of John Keats"
+

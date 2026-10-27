@@ -1,9 +1,11 @@
 # Results against ground truth
 
 > Ground truth for this run comes from the two public shelf photos the demo camera panned over, because no physical shelf was available: books counted and titles read by hand from the full-resolution photos ([ground_truth/SOURCE.md](../ground_truth/SOURCE.md)). Spine rulers, room tape measurements and eight non-book items do not exist for photos, so those bars are NOT EVALUATED rather than filled with guesses. Two prices were hand-checked on the cited retailer page (Penguin UK, GBP); the packet reports INR, so they are listed but not comparable.
+>
+> The one confidently wrong book is "Die Mosella" against the hand-read "Mosella": the spine prints "AUSONIUS · MOSELLA" and the catalogue edition is titled "Die Mosella", so it is arguably right, but it is counted as wrong here rather than editing the ground truth after the fact.
 
 
-Run: `2cfa238aa7524fbeaebaf3f84598bf3b`
+Run: `e5bee844d3f74a4b836be8b350e71d93`
 
 How the bars are read in this project (the brief gives tolerances, not how to aggregate them):
 
@@ -34,34 +36,36 @@ Could not be evaluated: Spine dimensions, Book prices, Non-book items, Floor are
 
 | True count | Packet count | Error | Aligned misses | Aligned insertions | Bar (within 5.0%) |
 |---|---|---|---|---|---|
-| 60 | 61 | 1.7% | 0 | 1 | PASS |
+| 60 | 62 | 3.3% | 0 | 2 | PASS |
 
 ## Title identification
 
 | Measure | Value | Bar |
 |---|---|---|
 | Legible ground-truth spines | 54 |  |
-| Correctly identified | 13 of 54 |  |
-| Accuracy | 24.1% | >= 70.0% |
-| Packet books with status identified | 13 |  |
-| Confidently wrong | 0 of 13 |  |
-| Confidently wrong rate | 0.0% | <= 3.0% |
+| Correctly identified | 30 of 54 |  |
+| Accuracy | 55.6% | >= 70.0% |
+| Packet books with status identified | 31 |  |
+| Confidently wrong | 1 of 31 |  |
+| Confidently wrong rate | 3.2% | <= 3.0% |
 | Result | FAIL |  |
 
 ## Confidently wrong books
 
-No confidently wrong books.
+| Book | Slot | Ground truth | Packet title | Match score | Frame |
+|---|---|---|---|---|---|
+| b04-005 | S4 #5 | Mosella | Die Mosella | 78 | frames/00208_1793132912946.jpg |
 
 ## Unidentified and review queue
 
 | Measure | Count |
 |---|---|
-| Unidentified books | 35 |
-| Books needing appraisal | 13 |
-| Review queue entries | 149 |
-| Review queue, high | 13 |
-| Review queue, medium | 91 |
-| Review queue, low | 45 |
+| Unidentified books | 31 |
+| Books needing appraisal | 0 |
+| Review queue entries | 150 |
+| Review queue, high | 0 |
+| Review queue, medium | 112 |
+| Review queue, low | 38 |
 
 ## Spine dimensions
 
@@ -103,33 +107,33 @@ Not evaluated: room.json not found in the ground-truth directory.
 
 | Seconds after the sweep ended | Source | Bar | Result |
 |---|---|---|---|
-| 78.7 | after_sweep | < 300 | PASS |
+| 58.0 | after_sweep | < 300 | PASS |
 
 ## Cost and latency per stage
 
 | Stage | Seconds | USD at paid rates |
 |---|---|---|
-| live | 99.7 | 0.0468 |
-| spines | 108.4 | 0.0276 |
-| reading | 75.3 | 0.0079 |
-| items | 11.9 | 0.0002 |
-| keyframes | 94.1 | 0.0000 |
-| tracks | 66.8 | 0.0000 |
-| scale | 62.0 | 0.0000 |
-| resolution | 91.9 | 0.0000 |
-| room | 4.5 | 0.0000 |
+| spines | 108.6 | 0.0230 |
+| live | 112.1 | 0.0745 |
+| reading | 87.1 | 0.0079 |
+| items | 11.6 | 0.0002 |
+| keyframes | 104.7 | 0.0000 |
+| tracks | 76.3 | 0.0000 |
+| scale | 73.0 | 0.0000 |
+| resolution | 96.9 | 0.0000 |
+| room | 5.1 | 0.0000 |
 | appraisal | 0.0 | 0.0000 |
 | pricing | 0.2 | 0.0000 |
 | packet | 0.0 | 0.0000 |
-| keyframes_busy | 1.1 | 0.0000 |
-| spines_busy | 174.7 | 0.0000 |
-| tracks_busy | 10.9 | 0.0000 |
+| keyframes_busy | 1.2 | 0.0000 |
+| spines_busy | 186.0 | 0.0000 |
+| tracks_busy | 13.5 | 0.0000 |
 | scale_busy | 0.0 | 0.0000 |
-| resolution_busy | 2125.2 | 0.0000 |
-| reading_busy | 45.4 | 0.0000 |
-| items_busy | 11.9 | 0.0000 |
-| room_busy | 4.5 | 0.0000 |
+| resolution_busy | 1905.0 | 0.0000 |
+| reading_busy | 47.9 | 0.0000 |
+| items_busy | 11.6 | 0.0000 |
+| room_busy | 5.1 | 0.0000 |
 | appraisal_busy | 0.0 | 0.0000 |
 | pricing_busy | 0.2 | 0.0000 |
-| after_sweep | 78.7 | 0.0000 |
-| total (stage sum) | 2988.6 | 0.0826 |
+| after_sweep | 58.0 | 0.0000 |
+| total (stage sum) | 2846.2 | 0.1057 |

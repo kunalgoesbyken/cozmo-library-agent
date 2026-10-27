@@ -134,9 +134,36 @@ def title_similarity(a: str, b: str) -> float:
     return max(0.0, base - gates.extra_token_penalty * (unmatched(left, right) + unmatched(right, left)))
 
 
+def title_without_author(candidate: Candidate) -> str:
+    author = set(tokens(candidate.author))
+    return WORD_SEPARATOR.join(t for t in tokens(candidate.title) if t not in author)
+
+
+def display_title(candidate: Candidate) -> str:
+    gates = load_resolve_config().gates
+    author = set(tokens(candidate.author))
+    words = candidate.title.split()
+    removed = {i for i, w in enumerate(words) if tokens(w) and set(tokens(w)) <= author}
+    if not removed:
+        return candidate.title
+    joining = {i for r in removed for i in (r - 1, r + 1)
+               if 0 <= i < len(words) and len("".join(tokens(words[i]))) < gates.distinctive_min_chars}
+    kept = [w for i, w in enumerate(words) if i not in removed | joining]
+    return WORD_SEPARATOR.join(kept).strip(" ,:;-") or candidate.title
+
+
+def shown_title(reading: Reading, candidate: Candidate) -> str:
+    bare = display_title(candidate)
+    closer = title_similarity(reading.title_verbatim, bare) > title_similarity(reading.title_verbatim, candidate.title)
+    return bare if closer else candidate.title
+
+
 def score_candidate(reading: Reading, candidate: Candidate) -> float:
     gates = load_resolve_config().gates
     title = title_similarity(reading.title_verbatim, candidate.title)
+    bare = title_without_author(candidate)
+    if bare:
+        title = max(title, title_similarity(reading.title_verbatim, bare))
     if not tokens(reading.author_verbatim):
         return title
     author = fuzz.token_set_ratio(reading.author_verbatim, candidate.author, processor=default_process)
@@ -153,11 +180,18 @@ def distinctive_tokens(reading: Reading, candidate: Candidate) -> int:
     )
 
 
+def surnames(candidate: Candidate) -> set[str]:
+    gates = load_resolve_config().gates
+    return {t for t in tokens(candidate.author) if len(t) >= gates.distinctive_min_chars}
+
+
 def same_work(a: Candidate, b: Candidate) -> bool:
     gates = load_resolve_config().gates
-    if title_similarity(a.title, b.title) < gates.agree_score:
+    if title_similarity(title_without_author(a) or a.title, title_without_author(b) or b.title) < gates.agree_score:
         return False
     if not a.author or not b.author:
+        return True
+    if surnames(a) & surnames(b):
         return True
     return fuzz.token_set_ratio(a.author, b.author, processor=default_process) >= gates.author_match
 
@@ -185,10 +219,17 @@ def rank(reading: Reading, candidates: list[Candidate]) -> list[Scored]:
     return sorted(scored, key=lambda s: s.score, reverse=True)
 
 
+def interchangeable(top: Scored, other: Scored) -> bool:
+    gates = load_resolve_config().gates
+    same_title = title_similarity(title_without_author(top.best) or top.best.title, title_without_author(other.best) or other.best.title)
+    return same_title >= gates.agree_score and top.author_matched and other.author_matched
+
+
 def margin_of(candidates: list[Scored]) -> float:
     if not candidates:
         return 0.0
-    return candidates[0].score - (candidates[1].score if len(candidates) > 1 else 0.0)
+    rivals = [c for c in candidates[1:] if not interchangeable(candidates[0], c)]
+    return candidates[0].score - (rivals[0].score if rivals else 0.0)
 
 
 def catalogue_agrees(candidates: list[Scored]) -> bool:
@@ -357,7 +398,7 @@ async def resolve(
     return base.model_copy(
         update={
             "status": "identified",
-            "title": top.best.title,
+            "title": shown_title(reading, top.best),
             "author": top.best.author,
             "edition": edition.publisher if choice.publisher_known else "",
             "isbn": edition.isbn if edition else "",

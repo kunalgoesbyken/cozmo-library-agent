@@ -1,9 +1,9 @@
 {
   "sweep": {
-    "id": "2cfa238aa7524fbeaebaf3f84598bf3b",
-    "captured_at": "2026-10-27T19:28:26.114000+00:00",
+    "id": "e5bee844d3f74a4b836be8b350e71d93",
+    "captured_at": "2026-10-27T20:26:49.467000+00:00",
     "device": "Windows NT 10.0; Win64; x64",
-    "duration_s": 93.94,
+    "duration_s": 104.934,
     "country": "IN",
     "currency": "INR"
   },
@@ -23,14 +23,14 @@
           "amount": 14.99,
           "source": "Penguin UK (equivalent edition, ISBN 9780140135824)",
           "url": "https://www.penguin.co.uk/books/13519/victorian-cities-by-asa-briggs/9780140135824",
-          "retrieved_at": "2026-10-27T19:31:00.059755+00:00",
+          "retrieved_at": "2026-10-27T20:29:19.921642+00:00",
           "converted": false
         },
         "used_value": {
           "amount": 7.5,
           "source": "Penguin UK (equivalent edition, ISBN 9780140135824)",
           "url": "https://www.penguin.co.uk/books/13519/victorian-cities-by-asa-briggs/9780140135824",
-          "retrieved_at": "2026-10-27T19:31:00.059755+00:00",
+          "retrieved_at": "2026-10-27T20:29:19.921642+00:00",
           "condition_assumed": "good",
           "method": "condition_factor:v1:good",
           "source_type": "derived"
@@ -39,15 +39,14 @@
         "original_currency": "INR",
         "fx": null,
         "review": [
-          "equivalent_edition_priced: ISBN 9780140135824 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
-          "identified_from_catalogue_only: OCR did not confirm the spine text; title and author match one catalogue record"
+          "equivalent_edition_priced: ISBN 9780140135824 is the most recent catalogue edition that fits the spine; the exact printed edition is not known"
         ],
         "evidence": [
           "f6ea00e930d14c5ad03942ca74e9a8e54422a716"
         ]
       },
       {
-        "book_id": "b01-034",
+        "book_id": "b02-002",
         "title": "Palladio",
         "author": "James S. Ackerman",
         "edition": "Penguin UK",
@@ -58,14 +57,14 @@
           "amount": 6.99,
           "source": "Penguin UK",
           "url": "https://www.penguin.co.uk/books/13442/palladio-by-massar-james-ackermanphyllis/9780141936383",
-          "retrieved_at": "2026-10-27T19:31:14.116708+00:00",
+          "retrieved_at": "2026-10-27T20:29:27.687942+00:00",
           "converted": false
         },
         "used_value": {
           "amount": 3.5,
           "source": "Penguin UK",
           "url": "https://www.penguin.co.uk/books/13442/palladio-by-massar-james-ackermanphyllis/9780141936383",
-          "retrieved_at": "2026-10-27T19:31:14.116708+00:00",
+          "retrieved_at": "2026-10-27T20:29:27.687942+00:00",
           "condition_assumed": "good",
           "method": "condition_factor:v1:good",
           "source_type": "derived"
@@ -100,13 +99,13 @@
       "id": "b01-001",
       "shelf": "S1",
       "position": 1,
-      "frame_ref": "frames/00001_1793129306114.jpg",
+      "frame_ref": "frames/00010_1793132813926.jpg",
       "crop_ref": "frames/crops/b01-001.jpg",
       "box": [
-        76,
-        46,
-        163,
-        1080
+        4,
+        81,
+        74,
+        1076
       ],
       "frame_size": [
         1920,
@@ -125,7 +124,7 @@
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 30.0,
-        "thickness_cm": 2.5,
+        "thickness_cm": 2.4,
         "book_format": "large_format"
       },
       "id_confidence": null,
@@ -151,336 +150,21 @@
       "id": "b01-002",
       "shelf": "S1",
       "position": 2,
-      "frame_ref": "frames/00011_1793129311056.jpg",
+      "frame_ref": "frames/00010_1793132813926.jpg",
       "crop_ref": "frames/crops/b01-002.jpg",
       "box": [
-        32,
-        60,
+        52,
+        86,
         118,
-        1074
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 30.0,
-        "thickness_cm": 2.5,
-        "book_format": "large_format"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b01-003",
-      "shelf": "S1",
-      "position": 3,
-      "frame_ref": "frames/00011_1793129311056.jpg",
-      "crop_ref": "frames/crops/b01-003.jpg",
-      "box": [
-        91,
-        57,
-        174,
-        1074
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 21.0,
-        "thickness_cm": 2.5,
-        "book_format": "trade_paperback"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b01-004",
-      "shelf": "S1",
-      "position": 4,
-      "frame_ref": "frames/00011_1793129311056.jpg",
-      "crop_ref": "frames/crops/b01-004.jpg",
-      "box": [
-        150,
-        50,
-        266,
-        1074
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 21.0,
-        "thickness_cm": 2.3,
-        "book_format": "trade_paperback"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b01-005",
-      "shelf": "S1",
-      "position": 5,
-      "frame_ref": "frames/00017_1793129314082.jpg",
-      "crop_ref": "frames/crops/b01-005.jpg",
-      "box": [
-        138,
-        203,
-        253,
-        1075
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "needs_appraisal",
-      "title": "Landscape Into Art",
-      "author": "Kenneth Clark",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": true,
-      "equivalent_edition": false,
-      "corroboration": "ocr",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 30.0,
-        "thickness_cm": 3.2,
-        "book_format": "large_format"
-      },
-      "id_confidence": 1.0,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": [
-        "http://books.google.co.in/books?id=AvjqAAAAMAAJ&dq=landscape+into+art+kenneth+clark&hl=&source=gbs_api"
-      ]
-    },
-    {
-      "id": "b01-006",
-      "shelf": "S1",
-      "position": 6,
-      "frame_ref": "frames/00029_1793129320047.jpg",
-      "crop_ref": "frames/crops/b01-006.jpg",
-      "box": [
-        43,
-        50,
-        150,
-        1075
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 21.0,
-        "thickness_cm": 2.3,
-        "book_format": "trade_paperback"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b01-007",
-      "shelf": "S1",
-      "position": 7,
-      "frame_ref": "frames/00029_1793129320047.jpg",
-      "crop_ref": "frames/crops/b01-007.jpg",
-      "box": [
-        123,
-        47,
-        221,
-        1075
+        1076
       ],
       "frame_size": [
         1920,
         1080
       ],
       "status": "identified",
-      "title": "Riddles in Mathematics",
-      "author": "Eugene P. Northrop",
-      "edition": "",
-      "isbn": "9780486795003",
-      "edition_unverified": true,
-      "equivalent_edition": true,
-      "corroboration": "ocr",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 30.0,
-        "thickness_cm": 2.5,
-        "book_format": "large_format"
-      },
-      "id_confidence": 1.0,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": [
-        "http://books.google.co.in/books?id=_JgD0QEACAAJ&dq=intitle:riddles+in+mathematics+inauthor:eugene+p.+northrop&hl=&source=gbs_api",
-        "http://books.google.co.in/books?id=gW9GAAAAYAAJ&dq=intitle:riddles+in+mathematics+inauthor:eugene+p.+northrop&hl=&source=gbs_api",
-        "http://books.google.co.in/books?id=zY6stwEACAAJ&dq=intitle:riddles+in+mathematics+inauthor:eugene+p.+northrop&hl=&source=gbs_api",
-        "http://books.google.co.in/books?id=afaJAwAAQBAJ&dq=intitle:riddles+in+mathematics+inauthor:eugene+p.+northrop&hl=&source=gbs_api",
-        "http://books.google.co.in/books?id=-clNwAEACAAJ&dq=intitle:riddles+in+mathematics+inauthor:eugene+p.+northrop&hl=&source=gbs_api",
-        "https://openlibrary.org/books/OL38383123M"
-      ]
-    },
-    {
-      "id": "b01-008",
-      "shelf": "S1",
-      "position": 8,
-      "frame_ref": "frames/00011_1793129311056.jpg",
-      "crop_ref": "frames/crops/b01-008.jpg",
-      "box": [
-        456,
-        47,
-        596,
-        1074
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "needs_appraisal",
-      "title": "The Pelican History of Music, Vol. 1-3",
-      "author": "Denis Stevens, Alec Robertson",
+      "title": "Modern German Art",
+      "author": "Peter Thoene",
       "edition": "",
       "isbn": "",
       "edition_unverified": true,
@@ -491,7 +175,7 @@
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 30.0,
-        "thickness_cm": 2.3,
+        "thickness_cm": 2.0,
         "book_format": "large_format"
       },
       "id_confidence": 1.0,
@@ -512,21 +196,22 @@
         "source_type": null
       },
       "evidence": [
-        "http://books.google.co.in/books?id=nXApjwEACAAJ&dq=the+pelican+history+of+music:+vol.+1+stevens+robertson&hl=&source=gbs_api",
-        "http://books.google.co.in/books?id=j7tJwQEACAAJ&dq=the+pelican+history+of+music:+vol.+1+stevens+robertson&hl=&source=gbs_api"
+        "http://books.google.co.in/books?id=qIayzQEACAAJ&dq=intitle:modern+german+art+inauthor:peter&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=_Gs_MwEACAAJ&dq=intitle:modern+german+art+inauthor:peter&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=6dclzwEACAAJ&dq=intitle:modern+german+art+inauthor:peter&hl=&source=gbs_api"
       ]
     },
     {
-      "id": "b01-009",
+      "id": "b01-003",
       "shelf": "S1",
-      "position": 9,
-      "frame_ref": "frames/00017_1793129314082.jpg",
-      "crop_ref": "frames/crops/b01-009.jpg",
+      "position": 3,
+      "frame_ref": "frames/00010_1793132813926.jpg",
+      "crop_ref": "frames/crops/b01-003.jpg",
       "box": [
-        482,
-        203,
-        645,
-        1075
+        115,
+        81,
+        181,
+        1076
       ],
       "frame_size": [
         1920,
@@ -568,16 +253,120 @@
       "evidence": []
     },
     {
-      "id": "b01-010",
+      "id": "b01-004",
       "shelf": "S1",
-      "position": 10,
-      "frame_ref": "frames/00060_1793129335549.jpg",
-      "crop_ref": "frames/crops/b01-010.jpg",
+      "position": 4,
+      "frame_ref": "frames/00018_1793132817907.jpg",
+      "crop_ref": "frames/crops/b01-004.jpg",
       "box": [
-        4,
-        81,
-        97,
-        1075
+        30,
+        208,
+        145,
+        1029
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 21.0,
+        "thickness_cm": 2.4,
+        "book_format": "trade_paperback"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b01-005",
+      "shelf": "S1",
+      "position": 5,
+      "frame_ref": "frames/00018_1793132817907.jpg",
+      "crop_ref": "frames/crops/b01-005.jpg",
+      "box": [
+        127,
+        213,
+        229,
+        1028
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "identified",
+      "title": "Landscape Into Art",
+      "author": "Kenneth Clark",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": true,
+      "equivalent_edition": false,
+      "corroboration": "ocr",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 21.0,
+        "thickness_cm": 2.3,
+        "book_format": "trade_paperback"
+      },
+      "id_confidence": 1.0,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": [
+        "http://books.google.co.in/books?id=AvjqAAAAMAAJ&dq=landscape+into+art+kenneth+clark&hl=&source=gbs_api"
+      ]
+    },
+    {
+      "id": "b01-006",
+      "shelf": "S1",
+      "position": 6,
+      "frame_ref": "frames/00018_1793132817907.jpg",
+      "crop_ref": "frames/crops/b01-006.jpg",
+      "box": [
+        205,
+        208,
+        310,
+        1028
       ],
       "frame_size": [
         1920,
@@ -596,8 +385,222 @@
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 30.0,
-        "thickness_cm": 0.8,
+        "thickness_cm": 3.1,
         "book_format": "large_format"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b01-007",
+      "shelf": "S1",
+      "position": 7,
+      "frame_ref": "frames/00034_1793132825921.jpg",
+      "crop_ref": "frames/crops/b01-007.jpg",
+      "box": [
+        41,
+        291,
+        138,
+        1075
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "identified",
+      "title": "Riddles in Mathematics",
+      "author": "Eugene P. Northrop",
+      "edition": "",
+      "isbn": "9780486795003",
+      "edition_unverified": true,
+      "equivalent_edition": true,
+      "corroboration": "ocr",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 30.0,
+        "thickness_cm": 2.7,
+        "book_format": "large_format"
+      },
+      "id_confidence": 1.0,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": [
+        "http://books.google.co.in/books?id=_JgD0QEACAAJ&dq=intitle:riddles+in+mathematics+inauthor:eugene+p.+northrop&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=gW9GAAAAYAAJ&dq=intitle:riddles+in+mathematics+inauthor:eugene+p.+northrop&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=zY6stwEACAAJ&dq=intitle:riddles+in+mathematics+inauthor:eugene+p.+northrop&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=afaJAwAAQBAJ&dq=intitle:riddles+in+mathematics+inauthor:eugene+p.+northrop&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=-clNwAEACAAJ&dq=intitle:riddles+in+mathematics+inauthor:eugene+p.+northrop&hl=&source=gbs_api",
+        "https://openlibrary.org/books/OL38383123M"
+      ]
+    },
+    {
+      "id": "b01-008",
+      "shelf": "S1",
+      "position": 8,
+      "frame_ref": "frames/00042_1793132829944.jpg",
+      "crop_ref": "frames/crops/b01-008.jpg",
+      "box": [
+        10,
+        68,
+        123,
+        935
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "identified",
+      "title": "The Pelican History of Music, Vol. 1-3",
+      "author": "Denis Stevens, Alec Robertson",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": true,
+      "equivalent_edition": false,
+      "corroboration": "ocr",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 30.0,
+        "thickness_cm": 0.7,
+        "book_format": "large_format"
+      },
+      "id_confidence": 1.0,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": [
+        "http://books.google.co.in/books?id=nXApjwEACAAJ&dq=the+pelican+history+of+music:+vol.+1+stevens+robertson&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=j7tJwQEACAAJ&dq=the+pelican+history+of+music:+vol.+1+stevens+robertson&hl=&source=gbs_api"
+      ]
+    },
+    {
+      "id": "b01-009",
+      "shelf": "S1",
+      "position": 9,
+      "frame_ref": "frames/00042_1793132829944.jpg",
+      "crop_ref": "frames/crops/b01-009.jpg",
+      "box": [
+        115,
+        78,
+        255,
+        946
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 17.5,
+        "thickness_cm": 2.0,
+        "book_format": "mass_market"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b01-010",
+      "shelf": "S1",
+      "position": 10,
+      "frame_ref": "frames/00042_1793132829944.jpg",
+      "crop_ref": "frames/crops/b01-010.jpg",
+      "box": [
+        239,
+        65,
+        348,
+        953
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 21.0,
+        "thickness_cm": 2.1,
+        "book_format": "trade_paperback"
       },
       "id_confidence": null,
       "replacement_cost": {
@@ -622,13 +625,13 @@
       "id": "b01-011",
       "shelf": "S1",
       "position": 11,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-011.jpg",
       "box": [
-        11,
-        48,
-        97,
-        1063
+        337,
+        65,
+        466,
+        962
       ],
       "frame_size": [
         1920,
@@ -641,28 +644,28 @@
       "isbn": "9780140135824",
       "edition_unverified": true,
       "equivalent_edition": true,
-      "corroboration": "catalogue_only",
+      "corroboration": "ocr",
       "spine_height_cm": null,
       "spine_thickness_cm": null,
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
-        "height_cm": 30.0,
-        "thickness_cm": 2.3,
-        "book_format": "large_format"
+        "height_cm": 23.5,
+        "thickness_cm": 2.9,
+        "book_format": "hardcover"
       },
-      "id_confidence": 0.5,
+      "id_confidence": 1.0,
       "replacement_cost": {
         "amount": 1900.43,
         "source": "Penguin UK (equivalent edition, ISBN 9780140135824)",
         "url": "https://www.penguin.co.uk/books/13519/victorian-cities-by-asa-briggs/9780140135824",
-        "retrieved_at": "2026-10-27T19:31:00.059755+00:00",
+        "retrieved_at": "2026-10-27T20:29:19.921642+00:00",
         "converted": true
       },
       "used_value": {
         "amount": 950.22,
         "source": "Penguin UK (equivalent edition, ISBN 9780140135824)",
         "url": "https://www.penguin.co.uk/books/13519/victorian-cities-by-asa-briggs/9780140135824",
-        "retrieved_at": "2026-10-27T19:31:00.059755+00:00",
+        "retrieved_at": "2026-10-27T20:29:19.921642+00:00",
         "condition_assumed": "good",
         "method": "condition_factor:v1:good:from_converted",
         "source_type": "derived"
@@ -680,13 +683,13 @@
       "id": "b01-012",
       "shelf": "S1",
       "position": 12,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-012.jpg",
       "box": [
-        83,
-        48,
-        165,
-        1066
+        456,
+        81,
+        538,
+        974
       ],
       "frame_size": [
         1920,
@@ -705,7 +708,7 @@
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 30.0,
-        "thickness_cm": 2.1,
+        "thickness_cm": 2.3,
         "book_format": "large_format"
       },
       "id_confidence": null,
@@ -731,26 +734,26 @@
       "id": "b01-013",
       "shelf": "S1",
       "position": 13,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-013.jpg",
       "box": [
-        156,
-        49,
-        239,
-        1067
+        537,
+        74,
+        614,
+        974
       ],
       "frame_size": [
         1920,
         1080
       ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
+      "status": "identified",
+      "title": "Dictionary of American Politics",
+      "author": "EUGENE J. MCCARTHY",
       "edition": "",
       "isbn": "",
-      "edition_unverified": false,
+      "edition_unverified": true,
       "equivalent_edition": false,
-      "corroboration": "",
+      "corroboration": "ocr",
       "spine_height_cm": null,
       "spine_thickness_cm": null,
       "scale_method": "book_format_prior",
@@ -759,7 +762,7 @@
         "thickness_cm": 2.1,
         "book_format": "large_format"
       },
-      "id_confidence": null,
+      "id_confidence": 1.0,
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -776,19 +779,21 @@
         "method": "",
         "source_type": null
       },
-      "evidence": []
+      "evidence": [
+        "http://books.google.co.in/books?id=5gdNPQAACAAJ&dq=dictionary+of+american+politics+eugene+j.+mccarthy&hl=&source=gbs_api"
+      ]
     },
     {
       "id": "b01-014",
       "shelf": "S1",
       "position": 14,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-014.jpg",
       "box": [
-        226,
-        48,
-        306,
-        1066
+        608,
+        72,
+        681,
+        976
       ],
       "frame_size": [
         1920,
@@ -807,7 +812,7 @@
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 30.0,
-        "thickness_cm": 1.9,
+        "thickness_cm": 2.0,
         "book_format": "large_format"
       },
       "id_confidence": 1.0,
@@ -836,13 +841,13 @@
       "id": "b01-015",
       "shelf": "S1",
       "position": 15,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-015.jpg",
       "box": [
-        288,
-        55,
-        369,
-        1066
+        672,
+        70,
+        743,
+        974
       ],
       "frame_size": [
         1920,
@@ -861,7 +866,7 @@
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 30.0,
-        "thickness_cm": 2.2,
+        "thickness_cm": 2.3,
         "book_format": "large_format"
       },
       "id_confidence": null,
@@ -887,35 +892,35 @@
       "id": "b01-016",
       "shelf": "S1",
       "position": 16,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-016.jpg",
       "box": [
-        375,
-        57,
-        476,
-        1067
+        747,
+        72,
+        845,
+        974
       ],
       "frame_size": [
         1920,
         1080
       ],
-      "status": "needs_appraisal",
+      "status": "identified",
       "title": "A History of Modern Japan",
       "author": "Richard Storry",
       "edition": "",
       "isbn": "",
       "edition_unverified": true,
       "equivalent_edition": false,
-      "corroboration": "ocr",
+      "corroboration": "catalogue_only",
       "spine_height_cm": null,
       "spine_thickness_cm": null,
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
-        "height_cm": 30.0,
-        "thickness_cm": 3.0,
-        "book_format": "large_format"
+        "height_cm": 21.0,
+        "thickness_cm": 2.1,
+        "book_format": "trade_paperback"
       },
-      "id_confidence": 0.667,
+      "id_confidence": 0.5,
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -941,13 +946,13 @@
       "id": "b01-017",
       "shelf": "S1",
       "position": 17,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-017.jpg",
       "box": [
-        467,
-        57,
-        543,
-        1067
+        841,
+        72,
+        916,
+        974
       ],
       "frame_size": [
         1920,
@@ -966,7 +971,7 @@
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 30.0,
-        "thickness_cm": 1.9,
+        "thickness_cm": 1.7,
         "book_format": "large_format"
       },
       "id_confidence": null,
@@ -992,13 +997,13 @@
       "id": "b01-018",
       "shelf": "S1",
       "position": 18,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-018.jpg",
       "box": [
-        526,
-        57,
-        588,
-        1067
+        912,
+        68,
+        969,
+        976
       ],
       "frame_size": [
         1920,
@@ -1017,7 +1022,7 @@
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 30.0,
-        "thickness_cm": 1.3,
+        "thickness_cm": 1.4,
         "book_format": "large_format"
       },
       "id_confidence": 1.0,
@@ -1038,8 +1043,9 @@
         "source_type": null
       },
       "evidence": [
+        "http://books.google.co.in/books?id=Fo53tgEACAAJ&dq=intitle:the+elizabethan+world+picture+inauthor:e.+m.+w.+tillyard&hl=&source=gbs_api",
         "https://play.google.com/store/books/details?id=tTRT-KIo4-IC&source=gbs_api",
-        "http://books.google.co.in/books?id=DAYD0gEACAAJ&dq=intitle:the+elizabethan+world+picture+inauthor:e.+m.+w.+tillyard&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=l8PxnQEACAAJ&dq=intitle:the+elizabethan+world+picture+inauthor:e.+m.+w.+tillyard&hl=&source=gbs_api",
         "https://openlibrary.org/books/OL51655155M"
       ]
     },
@@ -1047,19 +1053,19 @@
       "id": "b01-019",
       "shelf": "S1",
       "position": 19,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-019.jpg",
       "box": [
-        568,
-        58,
-        670,
-        1067
+        953,
+        57,
+        1058,
+        1074
       ],
       "frame_size": [
         1920,
         1080
       ],
-      "status": "needs_appraisal",
+      "status": "identified",
       "title": "A History of Modern France",
       "author": "Alfred Cobban",
       "edition": "",
@@ -1072,7 +1078,7 @@
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 30.0,
-        "thickness_cm": 2.6,
+        "thickness_cm": 2.5,
         "book_format": "large_format"
       },
       "id_confidence": 1.0,
@@ -1094,6 +1100,8 @@
       },
       "evidence": [
         "http://books.google.co.in/books?id=l_6gswEACAAJ&dq=intitle:a+history+of+modern+france:+1+inauthor:alfred+cobban&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=_zR5QwAACAAJ&dq=intitle:a+history+of+modern+france:+1+inauthor:alfred+cobban&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=UItFnQEACAAJ&dq=intitle:a+history+of+modern+france:+1+inauthor:alfred+cobban&hl=&source=gbs_api",
         "http://books.google.co.in/books?id=uTQ9AAAAIAAJ&dq=intitle:a+history+of+modern+france:+1+inauthor:alfred+cobban&hl=&source=gbs_api"
       ]
     },
@@ -1101,35 +1109,35 @@
       "id": "b01-020",
       "shelf": "S1",
       "position": 20,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-020.jpg",
       "box": [
-        661,
+        1047,
         57,
-        755,
-        1066
+        1144,
+        1074
       ],
       "frame_size": [
         1920,
         1080
       ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
+      "status": "identified",
+      "title": "A History of Modern France",
+      "author": "Alfred Cobban",
       "edition": "",
       "isbn": "",
-      "edition_unverified": false,
+      "edition_unverified": true,
       "equivalent_edition": false,
-      "corroboration": "",
+      "corroboration": "ocr",
       "spine_height_cm": null,
       "spine_thickness_cm": null,
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
-        "height_cm": 30.0,
-        "thickness_cm": 2.5,
-        "book_format": "large_format"
+        "height_cm": 21.0,
+        "thickness_cm": 2.1,
+        "book_format": "trade_paperback"
       },
-      "id_confidence": null,
+      "id_confidence": 0.667,
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -1146,19 +1154,23 @@
         "method": "",
         "source_type": null
       },
-      "evidence": []
+      "evidence": [
+        "http://books.google.co.in/books?id=l_6gswEACAAJ&dq=intitle:a+history+of+modern+france:+2+inauthor:alfred+cobban&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=uTQ9AAAAIAAJ&dq=intitle:a+history+of+modern+france:+2+inauthor:alfred+cobban&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=R7sMAQAAMAAJ&dq=intitle:a+history+of+modern+france:+2+inauthor:alfred+cobban&hl=&source=gbs_api"
+      ]
     },
     {
       "id": "b01-021",
       "shelf": "S1",
       "position": 21,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-021.jpg",
       "box": [
-        742,
-        47,
-        840,
-        1067
+        1130,
+        57,
+        1227,
+        1074
       ],
       "frame_size": [
         1920,
@@ -1177,7 +1189,7 @@
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 30.0,
-        "thickness_cm": 2.6,
+        "thickness_cm": 2.3,
         "book_format": "large_format"
       },
       "id_confidence": 1.0,
@@ -1199,20 +1211,21 @@
       },
       "evidence": [
         "https://play.google.com/store/books/details?id=TSk_EAAAQBAJ&source=gbs_api",
-        "http://books.google.co.in/books?id=EFUUnwEACAAJ&dq=intitle:the+presentation+of+self+in+everyday+life+inauthor:erving+goffman&hl=&source=gbs_api"
+        "http://books.google.co.in/books?id=EFUUnwEACAAJ&dq=intitle:the+presentation+of+self+in+everyday+life+inauthor:erving+goffman&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=GdBK0gEACAAJ&dq=intitle:the+presentation+of+self+in+everyday+life+inauthor:erving+goffman&hl=&source=gbs_api"
       ]
     },
     {
       "id": "b01-022",
       "shelf": "S1",
       "position": 22,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-022.jpg",
       "box": [
-        832,
-        48,
-        913,
-        1066
+        1213,
+        55,
+        1290,
+        1074
       ],
       "frame_size": [
         1920,
@@ -1257,19 +1270,19 @@
       "id": "b01-023",
       "shelf": "S1",
       "position": 23,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-023.jpg",
       "box": [
-        902,
-        48,
-        1001,
-        1066
+        1285,
+        46,
+        1381,
+        1074
       ],
       "frame_size": [
         1920,
         1080
       ],
-      "status": "needs_appraisal",
+      "status": "identified",
       "title": "The Multinationals",
       "author": "Christopher Tugendhat",
       "edition": "",
@@ -1310,12 +1323,12 @@
       "id": "b01-024",
       "shelf": "S1",
       "position": 24,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-024.jpg",
       "box": [
-        995,
-        45,
-        1072,
+        1372,
+        46,
+        1449,
         1074
       ],
       "frame_size": [
@@ -1365,19 +1378,19 @@
       "id": "b01-025",
       "shelf": "S1",
       "position": 25,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-025.jpg",
       "box": [
-        1063,
-        44,
-        1149,
+        1447,
+        39,
+        1533,
         1074
       ],
       "frame_size": [
         1920,
         1080
       ],
-      "status": "needs_appraisal",
+      "status": "identified",
       "title": "Selected Essays and Articles",
       "author": "John Berger",
       "edition": "",
@@ -1390,7 +1403,7 @@
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 30.0,
-        "thickness_cm": 2.4,
+        "thickness_cm": 2.5,
         "book_format": "large_format"
       },
       "id_confidence": 1.0,
@@ -1418,26 +1431,26 @@
       "id": "b01-026",
       "shelf": "S1",
       "position": 26,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-026.jpg",
       "box": [
-        1147,
-        45,
-        1240,
+        1530,
+        46,
+        1618,
         1074
       ],
       "frame_size": [
         1920,
         1080
       ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
+      "status": "identified",
+      "title": "Japanese Imperialism Today",
+      "author": "Jon Halliday, Gavan McCormack",
       "edition": "",
       "isbn": "",
-      "edition_unverified": false,
+      "edition_unverified": true,
       "equivalent_edition": false,
-      "corroboration": "",
+      "corroboration": "ocr",
       "spine_height_cm": null,
       "spine_thickness_cm": null,
       "scale_method": "book_format_prior",
@@ -1446,7 +1459,7 @@
         "thickness_cm": 2.7,
         "book_format": "large_format"
       },
-      "id_confidence": null,
+      "id_confidence": 0.97,
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -1463,25 +1476,27 @@
         "method": "",
         "source_type": null
       },
-      "evidence": []
+      "evidence": [
+        "http://books.google.co.in/books?id=xWOhQwAACAAJ&dq=japanese+imperialism+today+halliday+and+mccormack&hl=&source=gbs_api"
+      ]
     },
     {
       "id": "b01-027",
       "shelf": "S1",
       "position": 27,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-027.jpg",
       "box": [
-        1240,
-        57,
-        1339,
-        1075
+        1622,
+        55,
+        1717,
+        1074
       ],
       "frame_size": [
         1920,
         1080
       ],
-      "status": "needs_appraisal",
+      "status": "identified",
       "title": "Beardsley",
       "author": "Stanley Weintraub",
       "edition": "",
@@ -1494,7 +1509,7 @@
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 30.0,
-        "thickness_cm": 2.9,
+        "thickness_cm": 2.8,
         "book_format": "large_format"
       },
       "id_confidence": 1.0,
@@ -1522,13 +1537,13 @@
       "id": "b01-028",
       "shelf": "S1",
       "position": 28,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-028.jpg",
       "box": [
-        1338,
-        50,
-        1416,
-        1075
+        1721,
+        55,
+        1793,
+        1074
       ],
       "frame_size": [
         1920,
@@ -1547,7 +1562,7 @@
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 30.0,
-        "thickness_cm": 2.2,
+        "thickness_cm": 2.3,
         "book_format": "large_format"
       },
       "id_confidence": 1.0,
@@ -1577,13 +1592,13 @@
       "id": "b01-029",
       "shelf": "S1",
       "position": 29,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-029.jpg",
       "box": [
-        1414,
-        51,
-        1484,
-        1075
+        1791,
+        52,
+        1859,
+        1074
       ],
       "frame_size": [
         1920,
@@ -1632,13 +1647,13 @@
       "id": "b01-030",
       "shelf": "S1",
       "position": 30,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00049_1793132833412.jpg",
       "crop_ref": "frames/crops/b01-030.jpg",
       "box": [
-        1486,
-        44,
-        1552,
-        1075
+        1760,
+        75,
+        1831,
+        1080
       ],
       "frame_size": [
         1920,
@@ -1657,7 +1672,7 @@
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 30.0,
-        "thickness_cm": 1.9,
+        "thickness_cm": 2.0,
         "book_format": "large_format"
       },
       "id_confidence": 1.0,
@@ -1688,19 +1703,19 @@
       "id": "b01-031",
       "shelf": "S1",
       "position": 31,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00049_1793132833412.jpg",
       "crop_ref": "frames/crops/b01-031.jpg",
       "box": [
-        1551,
-        45,
-        1622,
-        1075
+        1826,
+        77,
+        1902,
+        1080
       ],
       "frame_size": [
         1920,
         1080
       ],
-      "status": "needs_appraisal",
+      "status": "identified",
       "title": "Weimar culture",
       "author": "Peter Gay",
       "edition": "",
@@ -1741,32 +1756,83 @@
       "id": "b01-032",
       "shelf": "S1",
       "position": 32,
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00049_1793132833412.jpg",
       "crop_ref": "frames/crops/b01-032.jpg",
       "box": [
-        1632,
-        43,
-        1739,
-        1074
+        1901,
+        77,
+        1920,
+        1080
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 30.0,
+        "thickness_cm": 0.5,
+        "book_format": "large_format"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b02-001",
+      "shelf": "S1",
+      "position": 33,
+      "frame_ref": "frames/00090_1793132853928.jpg",
+      "crop_ref": "frames/crops/b02-001.jpg",
+      "box": [
+        1651,
+        78,
+        1740,
+        1075
       ],
       "frame_size": [
         1920,
         1080
       ],
       "status": "identified",
-      "title": "Concepts of Modern Mathematics",
-      "author": "Ian Stewart",
-      "edition": "",
-      "isbn": "9781306346030",
-      "edition_unverified": true,
-      "equivalent_edition": true,
+      "title": "The Moscow Puzzles",
+      "author": "Boris A. Kordemsky",
+      "edition": "Penguin Books Ltd",
+      "isbn": "9780140218305",
+      "edition_unverified": false,
+      "equivalent_edition": false,
       "corroboration": "ocr",
       "spine_height_cm": null,
       "spine_thickness_cm": null,
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 30.0,
-        "thickness_cm": 3.3,
+        "thickness_cm": 3.1,
         "book_format": "large_format"
       },
       "id_confidence": 1.0,
@@ -1787,33 +1853,93 @@
         "source_type": null
       },
       "evidence": [
-        "http://books.google.co.in/books?id=qEgjAwAAQBAJ&dq=intitle:concepts+of+modern+mathematics+inauthor:stewart&hl=&source=gbs_api",
-        "https://play.google.com/store/books/details?id=4WPDAgAAQBAJ&source=gbs_api",
-        "https://openlibrary.org/books/OL38282855M"
+        "http://books.google.co.in/books?id=GE2RBQAAQBAJ&dq=the+moscow+puzzles+kordemsky&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=nZcEtAEACAAJ&dq=the+moscow+puzzles+kordemsky&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=3j6ktwEACAAJ&dq=the+moscow+puzzles+kordemsky&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=Bbh4vgAACAAJ&dq=the+moscow+puzzles+kordemsky&hl=&source=gbs_api",
+        "https://play.google.com/store/books/details?id=7fipBgAAQBAJ&source=gbs_api",
+        "https://openlibrary.org/books/OL9305201M"
       ]
     },
     {
-      "id": "b01-033",
+      "id": "b02-002",
       "shelf": "S1",
-      "position": 33,
-      "frame_ref": "frames/00068_1793129339554.jpg",
-      "crop_ref": "frames/crops/b01-033.jpg",
+      "position": 34,
+      "frame_ref": "frames/00090_1793132853928.jpg",
+      "crop_ref": "frames/crops/b02-002.jpg",
       "box": [
-        1741,
-        42,
-        1830,
-        1074
+        1749,
+        78,
+        1833,
+        1075
       ],
       "frame_size": [
         1920,
         1080
       ],
       "status": "identified",
-      "title": "The Moscow Puzzles",
-      "author": "Boris A. Kordemsky",
-      "edition": "Penguin Books Ltd",
-      "isbn": "9780140218305",
+      "title": "Palladio",
+      "author": "James S. Ackerman",
+      "edition": "Penguin UK",
+      "isbn": "9780141936383",
       "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "ocr",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 30.0,
+        "thickness_cm": 2.7,
+        "book_format": "large_format"
+      },
+      "id_confidence": 1.0,
+      "replacement_cost": {
+        "amount": 886.19,
+        "source": "Penguin UK",
+        "url": "https://www.penguin.co.uk/books/13442/palladio-by-massar-james-ackermanphyllis/9780141936383",
+        "retrieved_at": "2026-10-27T20:29:27.687942+00:00",
+        "converted": true
+      },
+      "used_value": {
+        "amount": 443.1,
+        "source": "Penguin UK",
+        "url": "https://www.penguin.co.uk/books/13442/palladio-by-massar-james-ackermanphyllis/9780141936383",
+        "retrieved_at": "2026-10-27T20:29:27.687942+00:00",
+        "condition_assumed": "good",
+        "method": "condition_factor:v1:good:from_converted",
+        "source_type": "derived"
+      },
+      "evidence": [
+        "http://books.google.co.in/books?id=GR5CngEACAAJ&dq=palladio+james+s.+ackerman&hl=&source=gbs_api",
+        "https://play.google.com/store/books/details?id=NNwfvs21hKYC&source=gbs_api",
+        "http://books.google.co.in/books?id=1_W-irKyNKMC&dq=palladio+james+s.+ackerman&hl=&source=gbs_api",
+        "da5a533cd218899862bb34b045152426548b3c0f",
+        "4cfca8554556c803666d44a706007f3d30255763"
+      ]
+    },
+    {
+      "id": "b02-003",
+      "shelf": "S1",
+      "position": 35,
+      "frame_ref": "frames/00110_1793132863900.jpg",
+      "crop_ref": "frames/crops/b02-003.jpg",
+      "box": [
+        1533,
+        43,
+        1623,
+        1076
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "identified",
+      "title": "Victorian Architecture",
+      "author": "Robert Furneaux Jordan",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": true,
       "equivalent_edition": false,
       "corroboration": "ocr",
       "spine_height_cm": null,
@@ -1842,135 +1968,21 @@
         "source_type": null
       },
       "evidence": [
-        "http://books.google.co.in/books?id=Bbh4vgAACAAJ&dq=intitle:the+moscow+puzzles+inauthor:boris+a.+kordemsky&hl=&source=gbs_api",
-        "http://books.google.co.in/books?id=GE2RBQAAQBAJ&dq=intitle:the+moscow+puzzles+inauthor:boris+a.+kordemsky&hl=&source=gbs_api",
-        "http://books.google.co.in/books?id=nZcEtAEACAAJ&dq=intitle:the+moscow+puzzles+inauthor:boris+a.+kordemsky&hl=&source=gbs_api",
-        "https://play.google.com/store/books/details?id=7fipBgAAQBAJ&source=gbs_api",
-        "https://openlibrary.org/books/OL9305201M"
+        "http://books.google.co.in/books?id=YVRztgAACAAJ&dq=victorian+architecture+robert+furneaux+jordan&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=9tFPAAAAMAAJ&dq=victorian+architecture+robert+furneaux+jordan&hl=&source=gbs_api"
       ]
     },
     {
-      "id": "b01-034",
-      "shelf": "S1",
-      "position": 34,
-      "frame_ref": "frames/00068_1793129339554.jpg",
-      "crop_ref": "frames/crops/b01-034.jpg",
-      "box": [
-        1843,
-        37,
-        1920,
-        1075
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "identified",
-      "title": "Palladio",
-      "author": "James S. Ackerman",
-      "edition": "Penguin UK",
-      "isbn": "9780141936383",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "ocr",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 30.0,
-        "thickness_cm": 2.4,
-        "book_format": "large_format"
-      },
-      "id_confidence": 1.0,
-      "replacement_cost": {
-        "amount": 886.19,
-        "source": "Penguin UK",
-        "url": "https://www.penguin.co.uk/books/13442/palladio-by-massar-james-ackermanphyllis/9780141936383",
-        "retrieved_at": "2026-10-27T19:31:14.116708+00:00",
-        "converted": true
-      },
-      "used_value": {
-        "amount": 443.1,
-        "source": "Penguin UK",
-        "url": "https://www.penguin.co.uk/books/13442/palladio-by-massar-james-ackermanphyllis/9780141936383",
-        "retrieved_at": "2026-10-27T19:31:14.116708+00:00",
-        "condition_assumed": "good",
-        "method": "condition_factor:v1:good:from_converted",
-        "source_type": "derived"
-      },
-      "evidence": [
-        "http://books.google.co.in/books?id=GR5CngEACAAJ&dq=palladio+james+s.+ackerman&hl=&source=gbs_api",
-        "https://play.google.com/store/books/details?id=NNwfvs21hKYC&source=gbs_api",
-        "http://books.google.co.in/books?id=1_W-irKyNKMC&dq=palladio+james+s.+ackerman&hl=&source=gbs_api",
-        "da5a533cd218899862bb34b045152426548b3c0f",
-        "4cfca8554556c803666d44a706007f3d30255763"
-      ]
-    },
-    {
-      "id": "b02-001",
-      "shelf": "S1",
-      "position": 35,
-      "frame_ref": "frames/00087_1793129349051.jpg",
-      "crop_ref": "frames/crops/b02-001.jpg",
-      "box": [
-        1632,
-        127,
-        1740,
-        1072
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "needs_appraisal",
-      "title": "Victorian Architecture",
-      "author": "Robert Furneaux Jordan",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": true,
-      "equivalent_edition": false,
-      "corroboration": "ocr",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 30.0,
-        "thickness_cm": 2.3,
-        "book_format": "large_format"
-      },
-      "id_confidence": 1.0,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": [
-        "http://books.google.co.in/books?id=YVRztgAACAAJ&dq=victorian+architecture+furneaux+jordan&hl=&source=gbs_api",
-        "http://books.google.co.in/books?id=RKUyAQAAIAAJ&dq=victorian+architecture+furneaux+jordan&hl=&source=gbs_api"
-      ]
-    },
-    {
-      "id": "b02-002",
+      "id": "b02-004",
       "shelf": "S1",
       "position": 36,
-      "frame_ref": "frames/00087_1793129349051.jpg",
-      "crop_ref": "frames/crops/b02-002.jpg",
+      "frame_ref": "frames/00110_1793132863900.jpg",
+      "crop_ref": "frames/crops/b02-004.jpg",
       "box": [
-        1740,
-        127,
-        1817,
-        1072
+        1632,
+        43,
+        1722,
+        1076
       ],
       "frame_size": [
         1920,
@@ -1989,7 +2001,7 @@
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 30.0,
-        "thickness_cm": 2.9,
+        "thickness_cm": 2.8,
         "book_format": "large_format"
       },
       "id_confidence": 0.5,
@@ -2015,15 +2027,15 @@
       ]
     },
     {
-      "id": "b02-003",
+      "id": "b02-005",
       "shelf": "S1",
       "position": 37,
-      "frame_ref": "frames/00087_1793129349051.jpg",
-      "crop_ref": "frames/crops/b02-003.jpg",
+      "frame_ref": "frames/00110_1793132863900.jpg",
+      "crop_ref": "frames/crops/b02-005.jpg",
       "box": [
-        1813,
-        127,
-        1883,
+        1713,
+        43,
+        1785,
         1076
       ],
       "frame_size": [
@@ -2043,7 +2055,7 @@
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 30.0,
-        "thickness_cm": 2.1,
+        "thickness_cm": 2.2,
         "book_format": "large_format"
       },
       "id_confidence": null,
@@ -2064,743 +2076,18 @@
         "source_type": null
       },
       "evidence": []
-    },
-    {
-      "id": "b02-004",
-      "shelf": "S1",
-      "position": 38,
-      "frame_ref": "frames/00117_1793129364051.jpg",
-      "crop_ref": "frames/crops/b02-004.jpg",
-      "box": [
-        1450,
-        45,
-        1536,
-        1067
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 30.0,
-        "thickness_cm": 2.4,
-        "book_format": "large_format"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b02-005",
-      "shelf": "S1",
-      "position": 39,
-      "frame_ref": "frames/00110_1793129360585.jpg",
-      "crop_ref": "frames/crops/b02-005.jpg",
-      "box": [
-        1629,
-        0,
-        1793,
-        1080
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "needs_appraisal",
-      "title": "Modern Movements in Architecture",
-      "author": "Charles Jencks",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": true,
-      "equivalent_edition": false,
-      "corroboration": "ocr",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 23.5,
-        "thickness_cm": 3.4,
-        "book_format": "hardcover"
-      },
-      "id_confidence": 1.0,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": [
-        "http://books.google.co.in/books?id=dspPAAAAMAAJ&dq=modern+movements+in+architecture+charles+jencks&hl=&source=gbs_api",
-        "http://books.google.co.in/books?id=-o00swEACAAJ&dq=modern+movements+in+architecture+charles+jencks&hl=&source=gbs_api"
-      ]
     },
     {
       "id": "b02-006",
       "shelf": "S1",
-      "position": 40,
-      "frame_ref": "frames/00110_1793129360585.jpg",
+      "position": 38,
+      "frame_ref": "frames/00110_1793132863900.jpg",
       "crop_ref": "frames/crops/b02-006.jpg",
       "box": [
-        1781,
-        0,
-        1919,
-        1080
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "needs_appraisal",
-      "title": "Asimov's Guide to Science",
-      "author": "I. Asimov",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": true,
-      "equivalent_edition": false,
-      "corroboration": "ocr",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 23.5,
-        "thickness_cm": 3.6,
-        "book_format": "hardcover"
-      },
-      "id_confidence": 1.0,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": [
-        "http://books.google.co.in/books?id=QT2PoAEACAAJ&dq=asimov%27s+guide+to+science+1&hl=&source=gbs_api",
-        "http://books.google.co.in/books?id=UaS4AAAAIAAJ&dq=asimov%27s+guide+to+science+1&hl=&source=gbs_api",
-        "http://books.google.co.in/books?id=sHVnRAAACAAJ&dq=asimov%27s+guide+to+science+1&hl=&source=gbs_api"
-      ]
-    },
-    {
-      "id": "b02-007",
-      "shelf": "S1",
-      "position": 41,
-      "frame_ref": "frames/00117_1793129364051.jpg",
-      "crop_ref": "frames/crops/b02-007.jpg",
-      "box": [
-        1840,
-        39,
-        1918,
-        1078
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 30.0,
-        "thickness_cm": 2.2,
-        "book_format": "large_format"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b03-001",
-      "shelf": "S3",
-      "position": 1,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-001.jpg",
-      "box": [
-        0,
-        81,
-        49,
-        1056
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 30.0,
-        "thickness_cm": 1.5,
-        "book_format": "large_format"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b03-002",
-      "shelf": "S3",
-      "position": 2,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-002.jpg",
-      "box": [
-        48,
-        75,
-        224,
-        1056
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 23.5,
-        "thickness_cm": 4.1,
-        "book_format": "hardcover"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b03-003",
-      "shelf": "S3",
-      "position": 3,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-003.jpg",
-      "box": [
-        214,
-        81,
-        322,
-        1056
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 21.0,
-        "thickness_cm": 2.2,
-        "book_format": "trade_paperback"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b03-004",
-      "shelf": "S3",
-      "position": 4,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-004.jpg",
-      "box": [
-        320,
-        81,
-        436,
-        1056
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 21.0,
-        "thickness_cm": 2.4,
-        "book_format": "trade_paperback"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b03-005",
-      "shelf": "S3",
-      "position": 5,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-005.jpg",
-      "box": [
-        434,
-        81,
-        518,
-        1053
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "needs_appraisal",
-      "title": "Ausonius Mosella",
-      "author": "Decimus Magnus Ausonius",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "ocr",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 30.0,
-        "thickness_cm": 2.5,
-        "book_format": "large_format"
-      },
-      "id_confidence": 1.0,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": [
-        "http://books.google.co.in/books?id=NdP7zgEACAAJ&dq=ausonius+%C2%B7+mosella&hl=&source=gbs_api"
-      ]
-    },
-    {
-      "id": "b03-006",
-      "shelf": "S3",
-      "position": 6,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-006.jpg",
-      "box": [
-        516,
-        81,
-        657,
-        1056
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "needs_appraisal",
-      "title": "Anthologia latina",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "ocr",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 17.5,
-        "thickness_cm": 2.4,
-        "book_format": "mass_market"
-      },
-      "id_confidence": 1.0,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": [
-        "http://books.google.co.in/books?id=ucWiswEACAAJ&dq=intitle:anthologia+latina+%C2%B7+i+1&hl=&source=gbs_api"
-      ]
-    },
-    {
-      "id": "b03-007",
-      "shelf": "S3",
-      "position": 7,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-007.jpg",
-      "box": [
-        650,
-        253,
-        745,
-        1053
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 21.0,
-        "thickness_cm": 2.4,
-        "book_format": "trade_paperback"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b03-008",
-      "shelf": "S3",
-      "position": 8,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-008.jpg",
-      "box": [
-        743,
-        77,
-        856,
-        1053
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 21.0,
-        "thickness_cm": 1.8,
-        "book_format": "trade_paperback"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b03-009",
-      "shelf": "S3",
-      "position": 9,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-009.jpg",
-      "box": [
-        801,
-        277,
-        925,
-        1053
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 23.5,
-        "thickness_cm": 2.7,
-        "book_format": "hardcover"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b03-010",
-      "shelf": "S3",
-      "position": 10,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-010.jpg",
-      "box": [
-        909,
-        275,
-        934,
-        1053
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 30.0,
-        "thickness_cm": 0.4,
-        "book_format": "large_format"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b03-011",
-      "shelf": "S3",
-      "position": 11,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-011.jpg",
-      "box": [
-        918,
-        75,
-        1010,
-        1053
+        1784,
+        43,
+        1867,
+        1069
       ],
       "frame_size": [
         1920,
@@ -2842,38 +2129,38 @@
       "evidence": []
     },
     {
-      "id": "b03-012",
-      "shelf": "S3",
-      "position": 12,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-012.jpg",
+      "id": "b02-007",
+      "shelf": "S1",
+      "position": 39,
+      "frame_ref": "frames/00121_1793132869403.jpg",
+      "crop_ref": "frames/crops/b02-007.jpg",
       "box": [
-        1011,
-        81,
-        1106,
-        1056
+        1699,
+        0,
+        1865,
+        1080
       ],
       "frame_size": [
         1920,
         1080
       ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
+      "status": "identified",
+      "title": "Modern Movements in Architecture",
+      "author": "Charles Jencks",
       "edition": "",
       "isbn": "",
-      "edition_unverified": false,
+      "edition_unverified": true,
       "equivalent_edition": false,
-      "corroboration": "",
+      "corroboration": "ocr",
       "spine_height_cm": null,
       "spine_thickness_cm": null,
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
-        "height_cm": 30.0,
-        "thickness_cm": 2.8,
-        "book_format": "large_format"
+        "height_cm": 23.5,
+        "thickness_cm": 3.6,
+        "book_format": "hardcover"
       },
-      "id_confidence": null,
+      "id_confidence": 1.0,
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -2890,325 +2177,22 @@
         "method": "",
         "source_type": null
       },
-      "evidence": []
+      "evidence": [
+        "http://books.google.co.in/books?id=dspPAAAAMAAJ&dq=modern+movements+in+architecture+charles+jencks&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=-o00swEACAAJ&dq=modern+movements+in+architecture+charles+jencks&hl=&source=gbs_api"
+      ]
     },
     {
-      "id": "b03-013",
-      "shelf": "S3",
-      "position": 13,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-013.jpg",
+      "id": "b02-008",
+      "shelf": "S1",
+      "position": 40,
+      "frame_ref": "frames/00126_1793132871914.jpg",
+      "crop_ref": "frames/crops/b02-008.jpg",
       "box": [
-        1096,
-        124,
-        1141,
-        1056
-      ],
-      "frame_size": [
-        1920,
+        1780,
+        213,
+        1915,
         1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 30.0,
-        "thickness_cm": 1.2,
-        "book_format": "large_format"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b03-014",
-      "shelf": "S3",
-      "position": 14,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-014.jpg",
-      "box": [
-        1133,
-        129,
-        1245,
-        1056
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 21.0,
-        "thickness_cm": 2.3,
-        "book_format": "trade_paperback"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b03-015",
-      "shelf": "S3",
-      "position": 15,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-015.jpg",
-      "box": [
-        1235,
-        129,
-        1346,
-        1056
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 21.0,
-        "thickness_cm": 2.3,
-        "book_format": "trade_paperback"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b03-016",
-      "shelf": "S3",
-      "position": 16,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-016.jpg",
-      "box": [
-        1340,
-        151,
-        1441,
-        1053
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 21.0,
-        "thickness_cm": 2.2,
-        "book_format": "trade_paperback"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b03-017",
-      "shelf": "S3",
-      "position": 17,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-017.jpg",
-      "box": [
-        1434,
-        81,
-        1547,
-        1053
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 21.0,
-        "thickness_cm": 2.4,
-        "book_format": "trade_paperback"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b03-018",
-      "shelf": "S3",
-      "position": 18,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-018.jpg",
-      "box": [
-        1547,
-        81,
-        1628,
-        1056
-      ],
-      "frame_size": [
-        1920,
-        1080
-      ],
-      "status": "unidentified",
-      "title": "",
-      "author": "",
-      "edition": "",
-      "isbn": "",
-      "edition_unverified": false,
-      "equivalent_edition": false,
-      "corroboration": "",
-      "spine_height_cm": null,
-      "spine_thickness_cm": null,
-      "scale_method": "book_format_prior",
-      "dims_estimated_from_prior": {
-        "height_cm": 30.0,
-        "thickness_cm": 2.5,
-        "book_format": "large_format"
-      },
-      "id_confidence": null,
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "evidence": []
-    },
-    {
-      "id": "b03-019",
-      "shelf": "S3",
-      "position": 19,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-019.jpg",
-      "box": [
-        1627,
-        129,
-        1810,
-        1056
       ],
       "frame_size": [
         1920,
@@ -3227,7 +2211,7 @@
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 23.5,
-        "thickness_cm": 4.6,
+        "thickness_cm": 3.7,
         "book_format": "hardcover"
       },
       "id_confidence": null,
@@ -3250,16 +2234,220 @@
       "evidence": []
     },
     {
-      "id": "b03-020",
-      "shelf": "S3",
-      "position": 20,
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-020.jpg",
+      "id": "b02-009",
+      "shelf": "S1",
+      "position": 41,
+      "frame_ref": "frames/00131_1793132874392.jpg",
+      "crop_ref": "frames/crops/b02-009.jpg",
       "box": [
-        1806,
-        81,
-        1919,
-        1056
+        1865,
+        15,
+        1920,
+        1080
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 30.0,
+        "thickness_cm": 2.1,
+        "book_format": "large_format"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b02-010",
+      "shelf": "S1",
+      "position": 42,
+      "frame_ref": "frames/00136_1793132876921.jpg",
+      "crop_ref": "frames/crops/b02-010.jpg",
+      "box": [
+        1847,
+        120,
+        1920,
+        1079
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 30.0,
+        "thickness_cm": 2.3,
+        "book_format": "large_format"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b04-001",
+      "shelf": "S4",
+      "position": 1,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-001.jpg",
+      "box": [
+        0,
+        204,
+        40,
+        1027
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 30.0,
+        "thickness_cm": 1.4,
+        "book_format": "large_format"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b04-002",
+      "shelf": "S4",
+      "position": 2,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-002.jpg",
+      "box": [
+        44,
+        204,
+        216,
+        1022
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 23.5,
+        "thickness_cm": 4.4,
+        "book_format": "hardcover"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b04-003",
+      "shelf": "S4",
+      "position": 3,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-003.jpg",
+      "box": [
+        219,
+        200,
+        321,
+        1027
       ],
       "frame_size": [
         1920,
@@ -3278,8 +2466,890 @@
       "scale_method": "book_format_prior",
       "dims_estimated_from_prior": {
         "height_cm": 21.0,
-        "thickness_cm": 2.4,
+        "thickness_cm": 2.7,
         "book_format": "trade_paperback"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b04-004",
+      "shelf": "S4",
+      "position": 4,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-004.jpg",
+      "box": [
+        321,
+        200,
+        433,
+        1027
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 17.5,
+        "thickness_cm": 2.4,
+        "book_format": "mass_market"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b04-005",
+      "shelf": "S4",
+      "position": 5,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-005.jpg",
+      "box": [
+        432,
+        200,
+        518,
+        1027
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "identified",
+      "title": "Die Mosella",
+      "author": "Decimus Magnus Ausonius",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "ocr",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 30.0,
+        "thickness_cm": 2.9,
+        "book_format": "large_format"
+      },
+      "id_confidence": 1.0,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": [
+        "https://play.google.com/store/books/details?id=aUPZsi6jeYoC&source=gbs_api",
+        "http://books.google.co.in/books?id=NdP7zgEACAAJ&dq=mosella+ausonius&hl=&source=gbs_api"
+      ]
+    },
+    {
+      "id": "b04-006",
+      "shelf": "S4",
+      "position": 6,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-006.jpg",
+      "box": [
+        518,
+        200,
+        649,
+        1027
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "identified",
+      "title": "Anthologia latina",
+      "author": "Alexander Riese",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "ocr",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 23.5,
+        "thickness_cm": 3.7,
+        "book_format": "hardcover"
+      },
+      "id_confidence": 1.0,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": [
+        "https://play.google.com/store/books/details?id=pLkpAAAAYAAJ&source=gbs_api",
+        "https://play.google.com/store/books/details?id=7IBKAAAAYAAJ&source=gbs_api"
+      ]
+    },
+    {
+      "id": "b04-007",
+      "shelf": "S4",
+      "position": 7,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-007.jpg",
+      "box": [
+        648,
+        200,
+        750,
+        1027
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 17.5,
+        "thickness_cm": 2.3,
+        "book_format": "mass_market"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b04-008",
+      "shelf": "S4",
+      "position": 8,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-008.jpg",
+      "box": [
+        749,
+        204,
+        811,
+        1027
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 30.0,
+        "thickness_cm": 2.1,
+        "book_format": "large_format"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b04-009",
+      "shelf": "S4",
+      "position": 9,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-009.jpg",
+      "box": [
+        811,
+        204,
+        925,
+        1027
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "identified",
+      "title": "Lateinische Gedichte deutscher Humanisten",
+      "author": "Harry C. Schnur",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "ocr",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 23.5,
+        "thickness_cm": 4.1,
+        "book_format": "hardcover"
+      },
+      "id_confidence": 1.0,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": [
+        "http://books.google.co.in/books?id=Pa890AEACAAJ&dq=intitle:lateinische+gedichte+deutscher+humanisten&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=eN0MzwEACAAJ&dq=intitle:lateinische+gedichte+deutscher+humanisten&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=ZrZurgEACAAJ&dq=intitle:lateinische+gedichte+deutscher+humanisten&hl=&source=gbs_api",
+        "http://books.google.co.in/books?id=Mpo_AAAAMAAJ&dq=intitle:lateinische+gedichte+deutscher+humanisten&hl=&source=gbs_api"
+      ]
+    },
+    {
+      "id": "b04-010",
+      "shelf": "S4",
+      "position": 10,
+      "frame_ref": "frames/00198_1793132907932.jpg",
+      "crop_ref": "frames/crops/b04-010.jpg",
+      "box": [
+        909,
+        282,
+        931,
+        1065
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 30.0,
+        "thickness_cm": 0.5,
+        "book_format": "large_format"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b04-011",
+      "shelf": "S4",
+      "position": 11,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-011.jpg",
+      "box": [
+        926,
+        204,
+        1014,
+        1027
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 21.0,
+        "thickness_cm": 2.1,
+        "book_format": "trade_paperback"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b04-012",
+      "shelf": "S4",
+      "position": 12,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-012.jpg",
+      "box": [
+        1013,
+        200,
+        1100,
+        1027
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 30.0,
+        "thickness_cm": 2.7,
+        "book_format": "large_format"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b04-013",
+      "shelf": "S4",
+      "position": 13,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-013.jpg",
+      "box": [
+        1100,
+        200,
+        1138,
+        1027
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 30.0,
+        "thickness_cm": 1.5,
+        "book_format": "large_format"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b04-014",
+      "shelf": "S4",
+      "position": 14,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-014.jpg",
+      "box": [
+        1137,
+        200,
+        1245,
+        1027
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "identified",
+      "title": "Werke",
+      "author": "Sallust",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "catalogue_only",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 17.5,
+        "thickness_cm": 2.3,
+        "book_format": "mass_market"
+      },
+      "id_confidence": 0.5,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": [
+        "http://books.google.co.in/books?id=HccEowinLDsC&dq=werke+sallust&hl=&source=gbs_api"
+      ]
+    },
+    {
+      "id": "b04-015",
+      "shelf": "S4",
+      "position": 15,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-015.jpg",
+      "box": [
+        1244,
+        200,
+        1351,
+        1027
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 17.5,
+        "thickness_cm": 2.4,
+        "book_format": "mass_market"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b04-016",
+      "shelf": "S4",
+      "position": 16,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-016.jpg",
+      "box": [
+        1351,
+        200,
+        1440,
+        1027
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 21.0,
+        "thickness_cm": 2.1,
+        "book_format": "trade_paperback"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b04-017",
+      "shelf": "S4",
+      "position": 17,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-017.jpg",
+      "box": [
+        1440,
+        200,
+        1548,
+        1027
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 23.5,
+        "thickness_cm": 2.9,
+        "book_format": "hardcover"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b04-018",
+      "shelf": "S4",
+      "position": 18,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-018.jpg",
+      "box": [
+        1548,
+        200,
+        1632,
+        1027
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "identified",
+      "title": "Historiarum libri IX.",
+      "author": "Herodotus",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "ocr",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 21.0,
+        "thickness_cm": 2.3,
+        "book_format": "trade_paperback"
+      },
+      "id_confidence": 1.0,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": [
+        "https://play.google.com/store/books/details?id=OVgMAAAAYAAJ&source=gbs_api"
+      ]
+    },
+    {
+      "id": "b04-019",
+      "shelf": "S4",
+      "position": 19,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-019.jpg",
+      "box": [
+        1632,
+        200,
+        1807,
+        1027
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 23.5,
+        "thickness_cm": 4.4,
+        "book_format": "hardcover"
+      },
+      "id_confidence": null,
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "evidence": []
+    },
+    {
+      "id": "b04-020",
+      "shelf": "S4",
+      "position": 20,
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-020.jpg",
+      "box": [
+        1806,
+        200,
+        1920,
+        1027
+      ],
+      "frame_size": [
+        1920,
+        1080
+      ],
+      "status": "unidentified",
+      "title": "",
+      "author": "",
+      "edition": "",
+      "isbn": "",
+      "edition_unverified": false,
+      "equivalent_edition": false,
+      "corroboration": "",
+      "spine_height_cm": null,
+      "spine_thickness_cm": null,
+      "scale_method": "book_format_prior",
+      "dims_estimated_from_prior": {
+        "height_cm": 23.5,
+        "thickness_cm": 3.7,
+        "book_format": "hardcover"
       },
       "id_confidence": null,
       "replacement_cost": {
@@ -3303,19 +3373,19 @@
   ],
   "items": [],
   "totals": {
-    "book_count": 61,
-    "books_identified": 13,
-    "books_unidentified": 35,
-    "books_needs_appraisal": 13,
+    "book_count": 62,
+    "books_identified": 31,
+    "books_unidentified": 31,
+    "books_needs_appraisal": 0,
     "shelf_run_m": null,
-    "shelf_run_estimated_m": 1.466,
+    "shelf_run_estimated_m": 1.51,
     "books_replacement_cost": 2786.62,
     "books_used_value": 1393.32,
     "books_used_value_observed": 0.0,
     "books_used_value_derived": 1393.32,
     "items_replacement_cost_low": 0.0,
     "items_replacement_cost_high": 0.0,
-    "excluded_from_totals": 11
+    "excluded_from_totals": 29
   },
   "review_queue": [
     {
@@ -3323,15 +3393,15 @@
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[0]",
-      "frame_ref": "frames/00001_1793129306114.jpg",
+      "frame_ref": "frames/00010_1793132813926.jpg",
       "crop_ref": "frames/crops/b01-001.jpg"
     },
     {
       "ref_id": "b01-002",
       "severity": "medium",
-      "reason": "spine could not be identified",
+      "reason": "identified but no sourced replacement price",
       "line_ref": "books[1]",
-      "frame_ref": "frames/00011_1793129311056.jpg",
+      "frame_ref": "frames/00010_1793132813926.jpg",
       "crop_ref": "frames/crops/b01-002.jpg"
     },
     {
@@ -3339,7 +3409,7 @@
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[2]",
-      "frame_ref": "frames/00011_1793129311056.jpg",
+      "frame_ref": "frames/00010_1793132813926.jpg",
       "crop_ref": "frames/crops/b01-003.jpg"
     },
     {
@@ -3347,15 +3417,15 @@
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[3]",
-      "frame_ref": "frames/00011_1793129311056.jpg",
+      "frame_ref": "frames/00018_1793132817907.jpg",
       "crop_ref": "frames/crops/b01-004.jpg"
     },
     {
       "ref_id": "b01-005",
-      "severity": "high",
-      "reason": "needs appraisal: not priced automatically",
+      "severity": "medium",
+      "reason": "identified but no sourced replacement price",
       "line_ref": "books[4]",
-      "frame_ref": "frames/00017_1793129314082.jpg",
+      "frame_ref": "frames/00018_1793132817907.jpg",
       "crop_ref": "frames/crops/b01-005.jpg"
     },
     {
@@ -3363,7 +3433,7 @@
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[5]",
-      "frame_ref": "frames/00029_1793129320047.jpg",
+      "frame_ref": "frames/00018_1793132817907.jpg",
       "crop_ref": "frames/crops/b01-006.jpg"
     },
     {
@@ -3371,15 +3441,15 @@
       "severity": "medium",
       "reason": "identified but no sourced replacement price",
       "line_ref": "books[6]",
-      "frame_ref": "frames/00029_1793129320047.jpg",
+      "frame_ref": "frames/00034_1793132825921.jpg",
       "crop_ref": "frames/crops/b01-007.jpg"
     },
     {
       "ref_id": "b01-008",
-      "severity": "high",
-      "reason": "needs appraisal: not priced automatically",
+      "severity": "medium",
+      "reason": "identified but no sourced replacement price",
       "line_ref": "books[7]",
-      "frame_ref": "frames/00011_1793129311056.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-008.jpg"
     },
     {
@@ -3387,7 +3457,7 @@
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[8]",
-      "frame_ref": "frames/00017_1793129314082.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-009.jpg"
     },
     {
@@ -3395,7 +3465,7 @@
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[9]",
-      "frame_ref": "frames/00060_1793129335549.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-010.jpg"
     },
     {
@@ -3403,15 +3473,15 @@
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[11]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-012.jpg"
     },
     {
       "ref_id": "b01-013",
       "severity": "medium",
-      "reason": "spine could not be identified",
+      "reason": "identified but no sourced replacement price",
       "line_ref": "books[12]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-013.jpg"
     },
     {
@@ -3419,7 +3489,7 @@
       "severity": "medium",
       "reason": "identified but no sourced replacement price",
       "line_ref": "books[13]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-014.jpg"
     },
     {
@@ -3427,15 +3497,15 @@
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[14]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-015.jpg"
     },
     {
       "ref_id": "b01-016",
-      "severity": "high",
-      "reason": "needs appraisal: not priced automatically",
+      "severity": "medium",
+      "reason": "identified but no sourced replacement price",
       "line_ref": "books[15]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-016.jpg"
     },
     {
@@ -3443,7 +3513,7 @@
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[16]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-017.jpg"
     },
     {
@@ -3451,23 +3521,23 @@
       "severity": "medium",
       "reason": "identified but no sourced replacement price",
       "line_ref": "books[17]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-018.jpg"
     },
     {
       "ref_id": "b01-019",
-      "severity": "high",
-      "reason": "needs appraisal: not priced automatically",
+      "severity": "medium",
+      "reason": "identified but no sourced replacement price",
       "line_ref": "books[18]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-019.jpg"
     },
     {
       "ref_id": "b01-020",
       "severity": "medium",
-      "reason": "spine could not be identified",
+      "reason": "identified but no sourced replacement price",
       "line_ref": "books[19]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-020.jpg"
     },
     {
@@ -3475,7 +3545,7 @@
       "severity": "medium",
       "reason": "identified but no sourced replacement price",
       "line_ref": "books[20]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-021.jpg"
     },
     {
@@ -3483,15 +3553,15 @@
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[21]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-022.jpg"
     },
     {
       "ref_id": "b01-023",
-      "severity": "high",
-      "reason": "needs appraisal: not priced automatically",
+      "severity": "medium",
+      "reason": "identified but no sourced replacement price",
       "line_ref": "books[22]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-023.jpg"
     },
     {
@@ -3499,31 +3569,31 @@
       "severity": "medium",
       "reason": "identified but no sourced replacement price",
       "line_ref": "books[23]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-024.jpg"
     },
     {
       "ref_id": "b01-025",
-      "severity": "high",
-      "reason": "needs appraisal: not priced automatically",
+      "severity": "medium",
+      "reason": "identified but no sourced replacement price",
       "line_ref": "books[24]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-025.jpg"
     },
     {
       "ref_id": "b01-026",
       "severity": "medium",
-      "reason": "spine could not be identified",
+      "reason": "identified but no sourced replacement price",
       "line_ref": "books[25]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-026.jpg"
     },
     {
       "ref_id": "b01-027",
-      "severity": "high",
-      "reason": "needs appraisal: not priced automatically",
+      "severity": "medium",
+      "reason": "identified but no sourced replacement price",
       "line_ref": "books[26]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-027.jpg"
     },
     {
@@ -3531,7 +3601,7 @@
       "severity": "medium",
       "reason": "identified but no sourced replacement price",
       "line_ref": "books[27]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-028.jpg"
     },
     {
@@ -3539,7 +3609,7 @@
       "severity": "medium",
       "reason": "identified but no sourced replacement price",
       "line_ref": "books[28]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-029.jpg"
     },
     {
@@ -3547,255 +3617,263 @@
       "severity": "medium",
       "reason": "identified but no sourced replacement price",
       "line_ref": "books[29]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00049_1793132833412.jpg",
       "crop_ref": "frames/crops/b01-030.jpg"
     },
     {
       "ref_id": "b01-031",
-      "severity": "high",
-      "reason": "needs appraisal: not priced automatically",
+      "severity": "medium",
+      "reason": "identified but no sourced replacement price",
       "line_ref": "books[30]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00049_1793132833412.jpg",
       "crop_ref": "frames/crops/b01-031.jpg"
     },
     {
       "ref_id": "b01-032",
       "severity": "medium",
-      "reason": "identified but no sourced replacement price",
+      "reason": "spine could not be identified",
       "line_ref": "books[31]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00049_1793132833412.jpg",
       "crop_ref": "frames/crops/b01-032.jpg"
     },
     {
-      "ref_id": "b01-033",
+      "ref_id": "b02-001",
       "severity": "medium",
       "reason": "identified but no sourced replacement price",
       "line_ref": "books[32]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
-      "crop_ref": "frames/crops/b01-033.jpg"
-    },
-    {
-      "ref_id": "b02-001",
-      "severity": "high",
-      "reason": "needs appraisal: not priced automatically",
-      "line_ref": "books[34]",
-      "frame_ref": "frames/00087_1793129349051.jpg",
+      "frame_ref": "frames/00090_1793132853928.jpg",
       "crop_ref": "frames/crops/b02-001.jpg"
-    },
-    {
-      "ref_id": "b02-002",
-      "severity": "medium",
-      "reason": "identified but no sourced replacement price",
-      "line_ref": "books[35]",
-      "frame_ref": "frames/00087_1793129349051.jpg",
-      "crop_ref": "frames/crops/b02-002.jpg"
     },
     {
       "ref_id": "b02-003",
       "severity": "medium",
-      "reason": "spine could not be identified",
-      "line_ref": "books[36]",
-      "frame_ref": "frames/00087_1793129349051.jpg",
+      "reason": "identified but no sourced replacement price",
+      "line_ref": "books[34]",
+      "frame_ref": "frames/00110_1793132863900.jpg",
       "crop_ref": "frames/crops/b02-003.jpg"
     },
     {
       "ref_id": "b02-004",
       "severity": "medium",
-      "reason": "spine could not be identified",
-      "line_ref": "books[37]",
-      "frame_ref": "frames/00117_1793129364051.jpg",
+      "reason": "identified but no sourced replacement price",
+      "line_ref": "books[35]",
+      "frame_ref": "frames/00110_1793132863900.jpg",
       "crop_ref": "frames/crops/b02-004.jpg"
     },
     {
       "ref_id": "b02-005",
-      "severity": "high",
-      "reason": "needs appraisal: not priced automatically",
-      "line_ref": "books[38]",
-      "frame_ref": "frames/00110_1793129360585.jpg",
+      "severity": "medium",
+      "reason": "spine could not be identified",
+      "line_ref": "books[36]",
+      "frame_ref": "frames/00110_1793132863900.jpg",
       "crop_ref": "frames/crops/b02-005.jpg"
     },
     {
       "ref_id": "b02-006",
-      "severity": "high",
-      "reason": "needs appraisal: not priced automatically",
-      "line_ref": "books[39]",
-      "frame_ref": "frames/00110_1793129360585.jpg",
+      "severity": "medium",
+      "reason": "spine could not be identified",
+      "line_ref": "books[37]",
+      "frame_ref": "frames/00110_1793132863900.jpg",
       "crop_ref": "frames/crops/b02-006.jpg"
     },
     {
       "ref_id": "b02-007",
       "severity": "medium",
-      "reason": "spine could not be identified",
-      "line_ref": "books[40]",
-      "frame_ref": "frames/00117_1793129364051.jpg",
+      "reason": "identified but no sourced replacement price",
+      "line_ref": "books[38]",
+      "frame_ref": "frames/00121_1793132869403.jpg",
       "crop_ref": "frames/crops/b02-007.jpg"
     },
     {
-      "ref_id": "b03-001",
+      "ref_id": "b02-008",
+      "severity": "medium",
+      "reason": "spine could not be identified",
+      "line_ref": "books[39]",
+      "frame_ref": "frames/00126_1793132871914.jpg",
+      "crop_ref": "frames/crops/b02-008.jpg"
+    },
+    {
+      "ref_id": "b02-009",
+      "severity": "medium",
+      "reason": "spine could not be identified",
+      "line_ref": "books[40]",
+      "frame_ref": "frames/00131_1793132874392.jpg",
+      "crop_ref": "frames/crops/b02-009.jpg"
+    },
+    {
+      "ref_id": "b02-010",
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[41]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-001.jpg"
+      "frame_ref": "frames/00136_1793132876921.jpg",
+      "crop_ref": "frames/crops/b02-010.jpg"
     },
     {
-      "ref_id": "b03-002",
+      "ref_id": "b04-001",
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[42]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-002.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-001.jpg"
     },
     {
-      "ref_id": "b03-003",
+      "ref_id": "b04-002",
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[43]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-003.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-002.jpg"
     },
     {
-      "ref_id": "b03-004",
+      "ref_id": "b04-003",
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[44]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-004.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-003.jpg"
     },
     {
-      "ref_id": "b03-005",
-      "severity": "high",
-      "reason": "needs appraisal: not priced automatically",
-      "line_ref": "books[45]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-005.jpg"
-    },
-    {
-      "ref_id": "b03-006",
-      "severity": "high",
-      "reason": "needs appraisal: not priced automatically",
-      "line_ref": "books[46]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-006.jpg"
-    },
-    {
-      "ref_id": "b03-007",
+      "ref_id": "b04-004",
       "severity": "medium",
       "reason": "spine could not be identified",
-      "line_ref": "books[47]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-007.jpg"
+      "line_ref": "books[45]",
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-004.jpg"
     },
     {
-      "ref_id": "b03-008",
+      "ref_id": "b04-005",
+      "severity": "medium",
+      "reason": "identified but no sourced replacement price",
+      "line_ref": "books[46]",
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-005.jpg"
+    },
+    {
+      "ref_id": "b04-006",
+      "severity": "medium",
+      "reason": "identified but no sourced replacement price",
+      "line_ref": "books[47]",
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-006.jpg"
+    },
+    {
+      "ref_id": "b04-007",
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[48]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-008.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-007.jpg"
     },
     {
-      "ref_id": "b03-009",
+      "ref_id": "b04-008",
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[49]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-009.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-008.jpg"
     },
     {
-      "ref_id": "b03-010",
+      "ref_id": "b04-009",
       "severity": "medium",
-      "reason": "spine could not be identified",
+      "reason": "identified but no sourced replacement price",
       "line_ref": "books[50]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-010.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-009.jpg"
     },
     {
-      "ref_id": "b03-011",
+      "ref_id": "b04-010",
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[51]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-011.jpg"
+      "frame_ref": "frames/00198_1793132907932.jpg",
+      "crop_ref": "frames/crops/b04-010.jpg"
     },
     {
-      "ref_id": "b03-012",
+      "ref_id": "b04-011",
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[52]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-012.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-011.jpg"
     },
     {
-      "ref_id": "b03-013",
+      "ref_id": "b04-012",
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[53]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-013.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-012.jpg"
     },
     {
-      "ref_id": "b03-014",
+      "ref_id": "b04-013",
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[54]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-014.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-013.jpg"
     },
     {
-      "ref_id": "b03-015",
+      "ref_id": "b04-014",
       "severity": "medium",
-      "reason": "spine could not be identified",
+      "reason": "identified but no sourced replacement price",
       "line_ref": "books[55]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-015.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-014.jpg"
     },
     {
-      "ref_id": "b03-016",
+      "ref_id": "b04-015",
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[56]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-016.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-015.jpg"
     },
     {
-      "ref_id": "b03-017",
+      "ref_id": "b04-016",
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[57]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-017.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-016.jpg"
     },
     {
-      "ref_id": "b03-018",
+      "ref_id": "b04-017",
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[58]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-018.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-017.jpg"
     },
     {
-      "ref_id": "b03-019",
+      "ref_id": "b04-018",
       "severity": "medium",
-      "reason": "spine could not be identified",
+      "reason": "identified but no sourced replacement price",
       "line_ref": "books[59]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-019.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-018.jpg"
     },
     {
-      "ref_id": "b03-020",
+      "ref_id": "b04-019",
       "severity": "medium",
       "reason": "spine could not be identified",
       "line_ref": "books[60]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-020.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-019.jpg"
+    },
+    {
+      "ref_id": "b04-020",
+      "severity": "medium",
+      "reason": "spine could not be identified",
+      "line_ref": "books[61]",
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-020.jpg"
     },
     {
       "ref_id": "b01-001",
       "severity": "low",
-      "reason": "measured outside the row reference frame 68: no shared boundaries",
+      "reason": "measured outside the row reference frame 49: no shared boundaries",
       "line_ref": "books[0]",
-      "frame_ref": "frames/00001_1793129306114.jpg",
+      "frame_ref": "frames/00010_1793132813926.jpg",
       "crop_ref": "frames/crops/b01-001.jpg"
     },
     {
@@ -3803,31 +3881,31 @@
       "severity": "low",
       "reason": "identification: not_confident",
       "line_ref": "books[0]",
-      "frame_ref": "frames/00001_1793129306114.jpg",
+      "frame_ref": "frames/00010_1793132813926.jpg",
       "crop_ref": "frames/crops/b01-001.jpg"
     },
     {
       "ref_id": "b01-002",
       "severity": "low",
-      "reason": "measured outside the row reference frame 68: no shared boundaries",
+      "reason": "measured outside the row reference frame 49: no shared boundaries",
       "line_ref": "books[1]",
-      "frame_ref": "frames/00011_1793129311056.jpg",
+      "frame_ref": "frames/00010_1793132813926.jpg",
       "crop_ref": "frames/crops/b01-002.jpg"
     },
     {
       "ref_id": "b01-002",
-      "severity": "low",
-      "reason": "identification: not_confident",
+      "severity": "medium",
+      "reason": "no_isbn",
       "line_ref": "books[1]",
-      "frame_ref": "frames/00011_1793129311056.jpg",
+      "frame_ref": "frames/00010_1793132813926.jpg",
       "crop_ref": "frames/crops/b01-002.jpg"
     },
     {
       "ref_id": "b01-003",
       "severity": "low",
-      "reason": "measured outside the row reference frame 68: no shared boundaries",
+      "reason": "measured outside the row reference frame 49: no shared boundaries",
       "line_ref": "books[2]",
-      "frame_ref": "frames/00011_1793129311056.jpg",
+      "frame_ref": "frames/00010_1793132813926.jpg",
       "crop_ref": "frames/crops/b01-003.jpg"
     },
     {
@@ -3835,15 +3913,15 @@
       "severity": "low",
       "reason": "identification: not_corroborated",
       "line_ref": "books[2]",
-      "frame_ref": "frames/00011_1793129311056.jpg",
+      "frame_ref": "frames/00010_1793132813926.jpg",
       "crop_ref": "frames/crops/b01-003.jpg"
     },
     {
       "ref_id": "b01-004",
       "severity": "low",
-      "reason": "measured outside the row reference frame 68: no shared boundaries",
+      "reason": "measured outside the row reference frame 49: no shared boundaries",
       "line_ref": "books[3]",
-      "frame_ref": "frames/00011_1793129311056.jpg",
+      "frame_ref": "frames/00018_1793132817907.jpg",
       "crop_ref": "frames/crops/b01-004.jpg"
     },
     {
@@ -3851,15 +3929,15 @@
       "severity": "low",
       "reason": "identification: not_confident",
       "line_ref": "books[3]",
-      "frame_ref": "frames/00011_1793129311056.jpg",
+      "frame_ref": "frames/00018_1793132817907.jpg",
       "crop_ref": "frames/crops/b01-004.jpg"
     },
     {
       "ref_id": "b01-005",
       "severity": "low",
-      "reason": "measured outside the row reference frame 68: no shared boundaries",
+      "reason": "measured outside the row reference frame 49: no shared boundaries",
       "line_ref": "books[4]",
-      "frame_ref": "frames/00017_1793129314082.jpg",
+      "frame_ref": "frames/00018_1793132817907.jpg",
       "crop_ref": "frames/crops/b01-005.jpg"
     },
     {
@@ -3867,15 +3945,15 @@
       "severity": "medium",
       "reason": "no_isbn",
       "line_ref": "books[4]",
-      "frame_ref": "frames/00017_1793129314082.jpg",
+      "frame_ref": "frames/00018_1793132817907.jpg",
       "crop_ref": "frames/crops/b01-005.jpg"
     },
     {
       "ref_id": "b01-006",
       "severity": "low",
-      "reason": "measured outside the row reference frame 68: no shared boundaries",
+      "reason": "measured outside the row reference frame 49: no shared boundaries",
       "line_ref": "books[5]",
-      "frame_ref": "frames/00029_1793129320047.jpg",
+      "frame_ref": "frames/00018_1793132817907.jpg",
       "crop_ref": "frames/crops/b01-006.jpg"
     },
     {
@@ -3883,15 +3961,15 @@
       "severity": "low",
       "reason": "identification: not_confident",
       "line_ref": "books[5]",
-      "frame_ref": "frames/00029_1793129320047.jpg",
+      "frame_ref": "frames/00018_1793132817907.jpg",
       "crop_ref": "frames/crops/b01-006.jpg"
     },
     {
       "ref_id": "b01-007",
       "severity": "low",
-      "reason": "measured outside the row reference frame 68: no shared boundaries",
+      "reason": "measured outside the row reference frame 49: no shared boundaries",
       "line_ref": "books[6]",
-      "frame_ref": "frames/00029_1793129320047.jpg",
+      "frame_ref": "frames/00034_1793132825921.jpg",
       "crop_ref": "frames/crops/b01-007.jpg"
     },
     {
@@ -3899,7 +3977,7 @@
       "severity": "medium",
       "reason": "equivalent_edition_priced: ISBN 9780486795003 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
       "line_ref": "books[6]",
-      "frame_ref": "frames/00029_1793129320047.jpg",
+      "frame_ref": "frames/00034_1793132825921.jpg",
       "crop_ref": "frames/crops/b01-007.jpg"
     },
     {
@@ -3907,55 +3985,31 @@
       "severity": "medium",
       "reason": "no_price_source",
       "line_ref": "books[6]",
-      "frame_ref": "frames/00029_1793129320047.jpg",
+      "frame_ref": "frames/00034_1793132825921.jpg",
       "crop_ref": "frames/crops/b01-007.jpg"
-    },
-    {
-      "ref_id": "b01-008",
-      "severity": "low",
-      "reason": "measured outside the row reference frame 68: no shared boundaries",
-      "line_ref": "books[7]",
-      "frame_ref": "frames/00011_1793129311056.jpg",
-      "crop_ref": "frames/crops/b01-008.jpg"
     },
     {
       "ref_id": "b01-008",
       "severity": "medium",
       "reason": "no_isbn",
       "line_ref": "books[7]",
-      "frame_ref": "frames/00011_1793129311056.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-008.jpg"
     },
     {
       "ref_id": "b01-009",
       "severity": "low",
-      "reason": "measured outside the row reference frame 68: no shared boundaries",
-      "line_ref": "books[8]",
-      "frame_ref": "frames/00017_1793129314082.jpg",
-      "crop_ref": "frames/crops/b01-009.jpg"
-    },
-    {
-      "ref_id": "b01-009",
-      "severity": "low",
       "reason": "identification: not_confident",
       "line_ref": "books[8]",
-      "frame_ref": "frames/00017_1793129314082.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-009.jpg"
-    },
-    {
-      "ref_id": "b01-010",
-      "severity": "low",
-      "reason": "measured outside the row reference frame 68: no shared boundaries",
-      "line_ref": "books[9]",
-      "frame_ref": "frames/00060_1793129335549.jpg",
-      "crop_ref": "frames/crops/b01-010.jpg"
     },
     {
       "ref_id": "b01-010",
       "severity": "low",
       "reason": "identification: not_confident",
       "line_ref": "books[9]",
-      "frame_ref": "frames/00060_1793129335549.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-010.jpg"
     },
     {
@@ -3963,15 +4017,7 @@
       "severity": "medium",
       "reason": "equivalent_edition_priced: ISBN 9780140135824 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
       "line_ref": "books[10]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
-      "crop_ref": "frames/crops/b01-011.jpg"
-    },
-    {
-      "ref_id": "b01-011",
-      "severity": "medium",
-      "reason": "identified_from_catalogue_only: OCR did not confirm the spine text; title and author match one catalogue record",
-      "line_ref": "books[10]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-011.jpg"
     },
     {
@@ -3979,23 +4025,23 @@
       "severity": "medium",
       "reason": "converted: GBP to INR at 126.78 on 2026-10-27",
       "line_ref": "books[10]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-011.jpg"
     },
     {
       "ref_id": "b01-012",
       "severity": "low",
-      "reason": "identification: not_corroborated",
+      "reason": "identification: not_confident",
       "line_ref": "books[11]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-012.jpg"
     },
     {
       "ref_id": "b01-013",
-      "severity": "low",
-      "reason": "identification: not_confident",
+      "severity": "medium",
+      "reason": "no_isbn",
       "line_ref": "books[12]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-013.jpg"
     },
     {
@@ -4003,7 +4049,7 @@
       "severity": "medium",
       "reason": "equivalent_edition_priced: ISBN 9780140124750 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
       "line_ref": "books[13]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-014.jpg"
     },
     {
@@ -4011,7 +4057,7 @@
       "severity": "medium",
       "reason": "no_price_source",
       "line_ref": "books[13]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-014.jpg"
     },
     {
@@ -4019,15 +4065,23 @@
       "severity": "low",
       "reason": "identification: not_confident",
       "line_ref": "books[14]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-015.jpg"
+    },
+    {
+      "ref_id": "b01-016",
+      "severity": "medium",
+      "reason": "identified_from_catalogue_only: OCR did not confirm the spine text; title and author match one catalogue record",
+      "line_ref": "books[15]",
+      "frame_ref": "frames/00042_1793132829944.jpg",
+      "crop_ref": "frames/crops/b01-016.jpg"
     },
     {
       "ref_id": "b01-016",
       "severity": "medium",
       "reason": "no_isbn",
       "line_ref": "books[15]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-016.jpg"
     },
     {
@@ -4035,7 +4089,7 @@
       "severity": "low",
       "reason": "identification: not_confident",
       "line_ref": "books[16]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-017.jpg"
     },
     {
@@ -4043,7 +4097,7 @@
       "severity": "medium",
       "reason": "equivalent_edition_priced: ISBN 9781351304320 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
       "line_ref": "books[17]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-018.jpg"
     },
     {
@@ -4051,7 +4105,7 @@
       "severity": "medium",
       "reason": "no_price_source",
       "line_ref": "books[17]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-018.jpg"
     },
     {
@@ -4059,15 +4113,15 @@
       "severity": "medium",
       "reason": "no_isbn",
       "line_ref": "books[18]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-019.jpg"
     },
     {
       "ref_id": "b01-020",
-      "severity": "low",
-      "reason": "identification: not_corroborated",
+      "severity": "medium",
+      "reason": "no_isbn",
       "line_ref": "books[19]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-020.jpg"
     },
     {
@@ -4075,7 +4129,7 @@
       "severity": "medium",
       "reason": "equivalent_edition_priced: ISBN 9780593468296 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
       "line_ref": "books[20]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-021.jpg"
     },
     {
@@ -4083,7 +4137,7 @@
       "severity": "medium",
       "reason": "no_price_source",
       "line_ref": "books[20]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-021.jpg"
     },
     {
@@ -4091,7 +4145,7 @@
       "severity": "low",
       "reason": "identification: not_confident",
       "line_ref": "books[21]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-022.jpg"
     },
     {
@@ -4099,7 +4153,7 @@
       "severity": "medium",
       "reason": "no_isbn",
       "line_ref": "books[22]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-023.jpg"
     },
     {
@@ -4107,7 +4161,7 @@
       "severity": "medium",
       "reason": "equivalent_edition_priced: ISBN 9780880291705 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
       "line_ref": "books[23]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-024.jpg"
     },
     {
@@ -4115,7 +4169,7 @@
       "severity": "medium",
       "reason": "no_price_source",
       "line_ref": "books[23]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-024.jpg"
     },
     {
@@ -4123,15 +4177,15 @@
       "severity": "medium",
       "reason": "no_isbn",
       "line_ref": "books[24]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-025.jpg"
     },
     {
       "ref_id": "b01-026",
-      "severity": "low",
-      "reason": "identification: not_confident",
+      "severity": "medium",
+      "reason": "no_isbn",
       "line_ref": "books[25]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-026.jpg"
     },
     {
@@ -4139,7 +4193,7 @@
       "severity": "medium",
       "reason": "no_isbn",
       "line_ref": "books[26]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-027.jpg"
     },
     {
@@ -4147,7 +4201,7 @@
       "severity": "medium",
       "reason": "equivalent_edition_priced: ISBN 9781281741448 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
       "line_ref": "books[27]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-028.jpg"
     },
     {
@@ -4155,7 +4209,7 @@
       "severity": "medium",
       "reason": "no_price_source",
       "line_ref": "books[27]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-028.jpg"
     },
     {
@@ -4163,7 +4217,7 @@
       "severity": "medium",
       "reason": "equivalent_edition_priced: ISBN 9781138141841 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
       "line_ref": "books[28]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-029.jpg"
     },
     {
@@ -4171,7 +4225,7 @@
       "severity": "medium",
       "reason": "no_price_source",
       "line_ref": "books[28]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00042_1793132829944.jpg",
       "crop_ref": "frames/crops/b01-029.jpg"
     },
     {
@@ -4179,7 +4233,7 @@
       "severity": "medium",
       "reason": "no_price_source",
       "line_ref": "books[29]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00049_1793132833412.jpg",
       "crop_ref": "frames/crops/b01-030.jpg"
     },
     {
@@ -4187,295 +4241,319 @@
       "severity": "medium",
       "reason": "no_isbn",
       "line_ref": "books[30]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00049_1793132833412.jpg",
       "crop_ref": "frames/crops/b01-031.jpg"
     },
     {
       "ref_id": "b01-032",
-      "severity": "medium",
-      "reason": "equivalent_edition_priced: ISBN 9781306346030 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
+      "severity": "low",
+      "reason": "identification: illegible",
       "line_ref": "books[31]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
+      "frame_ref": "frames/00049_1793132833412.jpg",
       "crop_ref": "frames/crops/b01-032.jpg"
-    },
-    {
-      "ref_id": "b01-032",
-      "severity": "medium",
-      "reason": "no_price_source",
-      "line_ref": "books[31]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
-      "crop_ref": "frames/crops/b01-032.jpg"
-    },
-    {
-      "ref_id": "b01-033",
-      "severity": "medium",
-      "reason": "no_price_source",
-      "line_ref": "books[32]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
-      "crop_ref": "frames/crops/b01-033.jpg"
-    },
-    {
-      "ref_id": "b01-034",
-      "severity": "medium",
-      "reason": "converted: GBP to INR at 126.78 on 2026-10-27",
-      "line_ref": "books[33]",
-      "frame_ref": "frames/00068_1793129339554.jpg",
-      "crop_ref": "frames/crops/b01-034.jpg"
     },
     {
       "ref_id": "b02-001",
       "severity": "medium",
-      "reason": "no_isbn",
-      "line_ref": "books[34]",
-      "frame_ref": "frames/00087_1793129349051.jpg",
+      "reason": "no_price_source",
+      "line_ref": "books[32]",
+      "frame_ref": "frames/00090_1793132853928.jpg",
       "crop_ref": "frames/crops/b02-001.jpg"
     },
     {
       "ref_id": "b02-002",
       "severity": "medium",
-      "reason": "equivalent_edition_priced: ISBN 9780520260153 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
-      "line_ref": "books[35]",
-      "frame_ref": "frames/00087_1793129349051.jpg",
-      "crop_ref": "frames/crops/b02-002.jpg"
-    },
-    {
-      "ref_id": "b02-002",
-      "severity": "medium",
-      "reason": "identified_from_catalogue_only: OCR did not confirm the spine text; title and author match one catalogue record",
-      "line_ref": "books[35]",
-      "frame_ref": "frames/00087_1793129349051.jpg",
-      "crop_ref": "frames/crops/b02-002.jpg"
-    },
-    {
-      "ref_id": "b02-002",
-      "severity": "medium",
-      "reason": "no_price_source",
-      "line_ref": "books[35]",
-      "frame_ref": "frames/00087_1793129349051.jpg",
+      "reason": "converted: GBP to INR at 126.78 on 2026-10-27",
+      "line_ref": "books[33]",
+      "frame_ref": "frames/00090_1793132853928.jpg",
       "crop_ref": "frames/crops/b02-002.jpg"
     },
     {
       "ref_id": "b02-003",
-      "severity": "low",
-      "reason": "identification: not_confident",
-      "line_ref": "books[36]",
-      "frame_ref": "frames/00087_1793129349051.jpg",
+      "severity": "medium",
+      "reason": "no_isbn",
+      "line_ref": "books[34]",
+      "frame_ref": "frames/00110_1793132863900.jpg",
       "crop_ref": "frames/crops/b02-003.jpg"
     },
     {
       "ref_id": "b02-004",
-      "severity": "low",
-      "reason": "identification: not_confident",
-      "line_ref": "books[37]",
-      "frame_ref": "frames/00117_1793129364051.jpg",
+      "severity": "medium",
+      "reason": "equivalent_edition_priced: ISBN 9780520260153 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
+      "line_ref": "books[35]",
+      "frame_ref": "frames/00110_1793132863900.jpg",
+      "crop_ref": "frames/crops/b02-004.jpg"
+    },
+    {
+      "ref_id": "b02-004",
+      "severity": "medium",
+      "reason": "identified_from_catalogue_only: OCR did not confirm the spine text; title and author match one catalogue record",
+      "line_ref": "books[35]",
+      "frame_ref": "frames/00110_1793132863900.jpg",
+      "crop_ref": "frames/crops/b02-004.jpg"
+    },
+    {
+      "ref_id": "b02-004",
+      "severity": "medium",
+      "reason": "no_price_source",
+      "line_ref": "books[35]",
+      "frame_ref": "frames/00110_1793132863900.jpg",
       "crop_ref": "frames/crops/b02-004.jpg"
     },
     {
       "ref_id": "b02-005",
-      "severity": "medium",
-      "reason": "no_isbn",
-      "line_ref": "books[38]",
-      "frame_ref": "frames/00110_1793129360585.jpg",
+      "severity": "low",
+      "reason": "identification: not_corroborated",
+      "line_ref": "books[36]",
+      "frame_ref": "frames/00110_1793132863900.jpg",
       "crop_ref": "frames/crops/b02-005.jpg"
     },
     {
       "ref_id": "b02-006",
-      "severity": "medium",
-      "reason": "no_isbn",
-      "line_ref": "books[39]",
-      "frame_ref": "frames/00110_1793129360585.jpg",
+      "severity": "low",
+      "reason": "identification: not_corroborated",
+      "line_ref": "books[37]",
+      "frame_ref": "frames/00110_1793132863900.jpg",
       "crop_ref": "frames/crops/b02-006.jpg"
     },
     {
       "ref_id": "b02-007",
-      "severity": "low",
-      "reason": "identification: illegible",
-      "line_ref": "books[40]",
-      "frame_ref": "frames/00117_1793129364051.jpg",
+      "severity": "medium",
+      "reason": "no_isbn",
+      "line_ref": "books[38]",
+      "frame_ref": "frames/00121_1793132869403.jpg",
       "crop_ref": "frames/crops/b02-007.jpg"
     },
     {
-      "ref_id": "b03-001",
+      "ref_id": "b02-008",
+      "severity": "low",
+      "reason": "identification: not_confident",
+      "line_ref": "books[39]",
+      "frame_ref": "frames/00126_1793132871914.jpg",
+      "crop_ref": "frames/crops/b02-008.jpg"
+    },
+    {
+      "ref_id": "b02-009",
+      "severity": "low",
+      "reason": "identification: illegible",
+      "line_ref": "books[40]",
+      "frame_ref": "frames/00131_1793132874392.jpg",
+      "crop_ref": "frames/crops/b02-009.jpg"
+    },
+    {
+      "ref_id": "b02-010",
       "severity": "low",
       "reason": "identification: illegible",
       "line_ref": "books[41]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-001.jpg"
+      "frame_ref": "frames/00136_1793132876921.jpg",
+      "crop_ref": "frames/crops/b02-010.jpg"
     },
     {
-      "ref_id": "b03-002",
+      "ref_id": "b04-001",
       "severity": "low",
-      "reason": "identification: not_confident",
+      "reason": "identification: illegible",
       "line_ref": "books[42]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-002.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-001.jpg"
     },
     {
-      "ref_id": "b03-003",
+      "ref_id": "b04-002",
       "severity": "low",
-      "reason": "identification: not_corroborated",
+      "reason": "identification: illegible",
       "line_ref": "books[43]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-003.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-002.jpg"
     },
     {
-      "ref_id": "b03-004",
+      "ref_id": "b04-003",
       "severity": "low",
       "reason": "identification: not_confident",
       "line_ref": "books[44]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-004.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-003.jpg"
     },
     {
-      "ref_id": "b03-005",
-      "severity": "medium",
-      "reason": "no_isbn",
+      "ref_id": "b04-004",
+      "severity": "low",
+      "reason": "identification: not_confident",
       "line_ref": "books[45]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-005.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-004.jpg"
     },
     {
-      "ref_id": "b03-006",
+      "ref_id": "b04-005",
       "severity": "medium",
       "reason": "no_isbn",
       "line_ref": "books[46]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-006.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-005.jpg"
     },
     {
-      "ref_id": "b03-007",
+      "ref_id": "b04-006",
+      "severity": "medium",
+      "reason": "no_isbn",
+      "line_ref": "books[47]",
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-006.jpg"
+    },
+    {
+      "ref_id": "b04-007",
       "severity": "low",
       "reason": "identification: illegible",
-      "line_ref": "books[47]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-007.jpg"
-    },
-    {
-      "ref_id": "b03-008",
-      "severity": "low",
-      "reason": "identification: not_confident",
       "line_ref": "books[48]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-008.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-007.jpg"
     },
     {
-      "ref_id": "b03-009",
+      "ref_id": "b04-008",
       "severity": "low",
       "reason": "identification: not_confident",
       "line_ref": "books[49]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-009.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-008.jpg"
     },
     {
-      "ref_id": "b03-010",
-      "severity": "low",
-      "reason": "identification: illegible",
+      "ref_id": "b04-009",
+      "severity": "medium",
+      "reason": "no_isbn",
       "line_ref": "books[50]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-010.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-009.jpg"
     },
     {
-      "ref_id": "b03-011",
+      "ref_id": "b04-010",
       "severity": "low",
       "reason": "identification: illegible",
       "line_ref": "books[51]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-011.jpg"
+      "frame_ref": "frames/00198_1793132907932.jpg",
+      "crop_ref": "frames/crops/b04-010.jpg"
     },
     {
-      "ref_id": "b03-012",
+      "ref_id": "b04-011",
       "severity": "low",
       "reason": "identification: illegible",
       "line_ref": "books[52]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-012.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-011.jpg"
     },
     {
-      "ref_id": "b03-013",
+      "ref_id": "b04-012",
       "severity": "low",
-      "reason": "identification: not_confident",
+      "reason": "identification: illegible",
       "line_ref": "books[53]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-013.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-012.jpg"
     },
     {
-      "ref_id": "b03-014",
-      "severity": "low",
-      "reason": "identification: not_corroborated",
-      "line_ref": "books[54]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-014.jpg"
-    },
-    {
-      "ref_id": "b03-015",
-      "severity": "low",
-      "reason": "identification: illegible",
-      "line_ref": "books[55]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-015.jpg"
-    },
-    {
-      "ref_id": "b03-016",
+      "ref_id": "b04-013",
       "severity": "low",
       "reason": "identification: not_confident",
-      "line_ref": "books[56]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-016.jpg"
+      "line_ref": "books[54]",
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-013.jpg"
     },
     {
-      "ref_id": "b03-017",
-      "severity": "low",
-      "reason": "identification: no_catalogue_match",
-      "line_ref": "books[57]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-017.jpg"
+      "ref_id": "b04-014",
+      "severity": "medium",
+      "reason": "identified_from_catalogue_only: OCR did not confirm the spine text; title and author match one catalogue record",
+      "line_ref": "books[55]",
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-014.jpg"
     },
     {
-      "ref_id": "b03-018",
-      "severity": "low",
-      "reason": "identification: no_catalogue_match",
-      "line_ref": "books[58]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-018.jpg"
+      "ref_id": "b04-014",
+      "severity": "medium",
+      "reason": "no_isbn",
+      "line_ref": "books[55]",
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-014.jpg"
     },
     {
-      "ref_id": "b03-019",
-      "severity": "low",
-      "reason": "identification: not_corroborated",
-      "line_ref": "books[59]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-019.jpg"
-    },
-    {
-      "ref_id": "b03-020",
+      "ref_id": "b04-015",
       "severity": "low",
       "reason": "identification: illegible",
+      "line_ref": "books[56]",
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-015.jpg"
+    },
+    {
+      "ref_id": "b04-016",
+      "severity": "low",
+      "reason": "identification: not_confident",
+      "line_ref": "books[57]",
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-016.jpg"
+    },
+    {
+      "ref_id": "b04-017",
+      "severity": "low",
+      "reason": "identification: not_confident",
+      "line_ref": "books[58]",
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-017.jpg"
+    },
+    {
+      "ref_id": "b04-018",
+      "severity": "medium",
+      "reason": "no_isbn",
+      "line_ref": "books[59]",
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-018.jpg"
+    },
+    {
+      "ref_id": "b04-019",
+      "severity": "low",
+      "reason": "identification: not_corroborated",
       "line_ref": "books[60]",
-      "frame_ref": "frames/00188_1793129399562.jpg",
-      "crop_ref": "frames/crops/b03-020.jpg"
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-019.jpg"
+    },
+    {
+      "ref_id": "b04-020",
+      "severity": "low",
+      "reason": "identification: illegible",
+      "line_ref": "books[61]",
+      "frame_ref": "frames/00208_1793132912946.jpg",
+      "crop_ref": "frames/crops/b04-020.jpg"
     },
     {
       "ref_id": "S1",
       "severity": "medium",
-      "reason": "41 books on S1 have no measured size (no scale marker was visible); sizes are estimates from the book format",
+      "reason": "42 books on S1 have no measured size (no scale marker was visible); sizes are estimates from the book format",
       "line_ref": "books",
-      "frame_ref": "frames/00001_1793129306114.jpg",
+      "frame_ref": "frames/00010_1793132813926.jpg",
       "crop_ref": ""
     },
     {
-      "ref_id": "S3",
+      "ref_id": "S4",
       "severity": "medium",
-      "reason": "20 books on S3 have no measured size (no scale marker was visible); sizes are estimates from the book format",
+      "reason": "20 books on S4 have no measured size (no scale marker was visible); sizes are estimates from the book format",
       "line_ref": "books",
-      "frame_ref": "frames/00188_1793129399562.jpg",
+      "frame_ref": "frames/00208_1793132912946.jpg",
       "crop_ref": ""
     },
     {
-      "ref_id": "S3",
+      "ref_id": "S1",
       "severity": "medium",
-      "reason": "count_mismatch: gemini 20 rfdetr 17 (re-queried)",
+      "reason": "count_mismatch: gemini 26 rfdetr 23",
       "line_ref": "frames",
-      "frame_ref": "frames/00176_1793129393569.jpg",
+      "frame_ref": "frames/00049_1793132833412.jpg",
+      "crop_ref": ""
+    },
+    {
+      "ref_id": "S4",
+      "severity": "medium",
+      "reason": "count_mismatch: gemini 20 rfdetr 17",
+      "line_ref": "frames",
+      "frame_ref": "frames/00169_1793132893432.jpg",
+      "crop_ref": ""
+    },
+    {
+      "ref_id": "S4",
+      "severity": "medium",
+      "reason": "count_mismatch: gemini 19 rfdetr 17",
+      "line_ref": "frames",
+      "frame_ref": "frames/00187_1793132902395.jpg",
       "crop_ref": ""
     },
     {
@@ -4489,7 +4567,7 @@
     {
       "ref_id": "room",
       "severity": "medium",
-      "reason": "5 room frames could not be registered to the pan",
+      "reason": "6 room frames could not be registered to the pan",
       "line_ref": "room",
       "frame_ref": "",
       "crop_ref": ""
@@ -4512,39 +4590,39 @@
     }
   ],
   "costs": {
-    "usd_at_paid_rates": 0.08255430000000001,
+    "usd_at_paid_rates": 0.10571080000000001,
     "billed_usd": 0.0,
     "billing": "billed: $0 expected on the Gemini free tier (FREE_TIER=true)",
-    "tokens": 204572,
+    "tokens": 237553,
     "by_stage_usd": {
-      "live": 0.046801999999999996,
-      "spines": 0.02762,
-      "reading": 0.0078927,
-      "items": 0.0002396
+      "spines": 0.0230208,
+      "live": 0.074525,
+      "reading": 0.007927,
+      "items": 0.000238
     }
   },
   "latency_s": {
-    "spines": 108.387,
-    "reading": 75.253,
-    "items": 11.921,
-    "keyframes": 94.065,
-    "tracks": 66.826,
-    "scale": 62.021,
-    "resolution": 91.884,
-    "room": 4.5,
+    "spines": 108.563,
+    "reading": 87.084,
+    "items": 11.587,
+    "keyframes": 104.721,
+    "tracks": 76.337,
+    "scale": 73.032,
+    "resolution": 96.891,
+    "room": 5.149,
     "appraisal": 0.002,
-    "pricing": 0.209,
+    "pricing": 0.194,
     "packet": 0.0,
-    "keyframes_busy": 1.112,
-    "spines_busy": 174.741,
-    "tracks_busy": 10.865,
-    "scale_busy": 0.014,
-    "resolution_busy": 2125.174,
-    "reading_busy": 45.384,
-    "items_busy": 11.921,
-    "room_busy": 4.5,
+    "keyframes_busy": 1.191,
+    "spines_busy": 186.004,
+    "tracks_busy": 13.464,
+    "scale_busy": 0.026,
+    "resolution_busy": 1905.009,
+    "reading_busy": 47.889,
+    "items_busy": 11.587,
+    "room_busy": 5.149,
     "appraisal_busy": 0.002,
-    "pricing_busy": 0.209,
-    "after_sweep": 78.668
+    "pricing_busy": 0.194,
+    "after_sweep": 58.026
   }
 }

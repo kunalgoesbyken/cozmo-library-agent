@@ -4,40 +4,40 @@
       "reading": {
         "track_id": 0,
         "title_verbatim": "BLUE ANGELS AND WHALES",
-        "author_verbatim": "ROBERTS",
+        "author_verbatim": "ROBER GIBBINGS",
         "publisher_verbatim": "PELICAN SPECIAL",
         "legible": true,
         "rotation": "ROTATE_90_CLOCKWISE",
         "failure": ""
       },
       "ocr_text": "BLUE ANGELS AND WHALES",
-      "ocr_score": 0.98298
+      "ocr_score": 0.98859
     },
     "b01-002": {
       "reading": {
         "track_id": 1,
         "title_verbatim": "MODERN GERMAN ART",
         "author_verbatim": "PETER",
-        "publisher_verbatim": "PELICAN",
+        "publisher_verbatim": "PELICAN SPECIAL",
         "legible": true,
         "rotation": "ROTATE_90_CLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "PETER PELICAN MODERN GFRMAN ART",
-      "ocr_score": 0.9801133333333333
+      "ocr_text": "PETER PELICAN MODFRN GERMAN ART",
+      "ocr_score": 0.98855
     },
     "b01-003": {
       "reading": {
         "track_id": 2,
-        "title_verbatim": "An ANTHOLOGY of WAR POETRY",
+        "title_verbatim": "AN ANTHOLOGY OF WAR POETRY",
         "author_verbatim": "JULIAN SYMONS",
         "publisher_verbatim": "PELICAN",
         "legible": true,
         "rotation": "ROTATE_90_CLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "JULIAN SUIONS AN ANTHOLOGT Or WAR POEIRT",
-      "ocr_score": 0.8315
+      "ocr_text": "AN ANTHOLOGT Or WAR PUEIRY",
+      "ocr_score": 0.90291
     },
     "b01-004": {
       "reading": {
@@ -49,8 +49,8 @@
         "rotation": "ROTATE_90_CLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "心 RUSSIAN ART TAMARA TALBOT RICE",
-      "ocr_score": 0.97315
+      "ocr_text": "RUSSIAN ART TAMARA TALI",
+      "ocr_score": 0.94048
     },
     "b01-005": {
       "reading": {
@@ -62,8 +62,8 @@
         "rotation": "ROTATE_90_CLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "Landscape into Art A369 Kenneth Clark Ccafucian Phliosophy",
-      "ocr_score": 0.93475
+      "ocr_text": "Landscape into Art Kenneth Clark Ccafucian Phliosophy",
+      "ocr_score": 0.9464100000000001
     },
     "b01-006": {
       "reading": {
@@ -75,8 +75,8 @@
         "rotation": "ROTATE_90_CLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "Lis Wo-Cht Confucian Phliosophy",
-      "ocr_score": 0.91707
+      "ocr_text": "Lis Wo-Chr Confucian Phliosophy",
+      "ocr_score": 0.911785
     },
     "b01-007": {
       "reading": {
@@ -89,7 +89,7 @@
         "failure": ""
       },
       "ocr_text": "Eugene P. Northrop Riddles in Mathematics",
-      "ocr_score": 0.9917
+      "ocr_score": 0.994555
     },
     "b01-008": {
       "reading": {
@@ -101,8 +101,8 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "3 The Pelican History of Music: Vol.1 ROBEBTSOR",
-      "ocr_score": 0.96102
+      "ocr_text": "3 The Pelican History of Music: Vol.1 ROBEBTSO",
+      "ocr_score": 0.9458566666666667
     },
     "b01-009": {
       "reading": {
@@ -114,21 +114,21 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "dnted by Robertson and Stsvens The Pelican History of Music 2",
-      "ocr_score": 0.9122499999999999
+      "ocr_text": "adued by Robertson and Stavens The Pelican History of Music",
+      "ocr_score": 0.9386099999999999
     },
     "b01-010": {
       "reading": {
         "track_id": 9,
-        "title_verbatim": "History of European Thought 1",
-        "author_verbatim": "Wolff The Awakening of Europe",
+        "title_verbatim": "History of European Thought 1 The Awakening of Europe",
+        "author_verbatim": "Wolff",
         "publisher_verbatim": "PELICAN",
         "legible": true,
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "Wolf The Awakening of Europe History of European Thought 1",
-      "ocr_score": 0.99175
+      "ocr_text": "Wolff The Awakening of Europe History of European Thought 1",
+      "ocr_score": 0.98024
     },
     "b01-011": {
       "reading": {
@@ -137,11 +137,11 @@
         "author_verbatim": "Asa Briggs",
         "publisher_verbatim": "PELICAN",
         "legible": true,
-        "rotation": "ROTATE_90_CLOCKWISE",
+        "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "Vin les es",
-      "ocr_score": 0.57487
+      "ocr_text": "Asa Briggs Vickorian Cilies,",
+      "ocr_score": 0.93778
     },
     "b01-012": {
       "reading": {
@@ -153,8 +153,8 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "Ronald A. Buel Deed End",
-      "ocr_score": 0.96967
+      "ocr_text": "Ronald A. Buel Dead End",
+      "ocr_score": 0.98909
     },
     "b01-013": {
       "reading": {
@@ -166,8 +166,8 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "Eugene J.McCarlhy Dictionary of American Politics",
-      "ocr_score": 0.96225
+      "ocr_text": "Eugene J. McCarthy Dictionary of American Politics",
+      "ocr_score": 0.97342
     },
     "b01-014": {
       "reading": {
@@ -179,8 +179,8 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "14020988 Erving Goffman Stigma",
-      "ocr_score": 0.917265
+      "ocr_text": "1402088 Erving Goffman Stigma",
+      "ocr_score": 0.900875
     },
     "b01-015": {
       "reading": {
@@ -193,7 +193,7 @@
         "failure": ""
       },
       "ocr_text": "Andrew Wilson War Gaming",
-      "ocr_score": 0.99946
+      "ocr_score": 0.99913
     },
     "b01-016": {
       "reading": {
@@ -205,8 +205,8 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "Richard Storry A History of liodcnJapanr-",
-      "ocr_score": 0.81172
+      "ocr_text": "Richard Storry A History ofoe",
+      "ocr_score": 0.88281
     },
     "b01-017": {
       "reading": {
@@ -219,7 +219,7 @@
         "failure": ""
       },
       "ocr_text": "Richard Newnham About Chinese",
-      "ocr_score": 0.99005
+      "ocr_score": 0.99321
     },
     "b01-018": {
       "reading": {
@@ -231,8 +231,8 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "EM.W. Tillyard The Elizabethan World Picture 02.14844",
-      "ocr_score": 0.95208
+      "ocr_text": "EMW.Trllyard The Elizabethan World Picture",
+      "ocr_score": 0.96368
     },
     "b01-019": {
       "reading": {
@@ -244,8 +244,8 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "ISZNS 14 A History of Modern France: 1 02.84832 Alfred Cobban",
-      "ocr_score": 0.91697
+      "ocr_text": "ISEN S:14 A History of Modern France: 1 02.84832 Alfred Cobban",
+      "ocr_score": 0.9149775
     },
     "b01-020": {
       "reading": {
@@ -257,8 +257,8 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "Alired Cobban A Mistory ot Modem Frarco.",
-      "ocr_score": 0.91337
+      "ocr_text": "Alired Cobban A Mistory ot Modem Frarce.2",
+      "ocr_score": 0.8913
     },
     "b01-021": {
       "reading": {
@@ -270,8 +270,8 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "IS8.N Erving Goffman The Presentation of Self in Everyday Life 02.13503",
-      "ocr_score": 0.93702
+      "ocr_text": "IS8N 814 Erving Gofiman The Presentation of Self in Everyday Life 02.13503",
+      "ocr_score": 0.9167975
     },
     "b01-022": {
       "reading": {
@@ -283,8 +283,8 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "ISBN 8 14 H. Wayne Morgan Unity and Culture 02.12434",
-      "ocr_score": 0.9384733333333334
+      "ocr_text": "ISBN H. Wayne Morgan Unity and Culture 02.12434",
+      "ocr_score": 0.96091
     },
     "b01-023": {
       "reading": {
@@ -296,8 +296,8 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "136N014 C. Tugendhat - The Multinationals 02.18952",
-      "ocr_score": 0.84075
+      "ocr_text": "156016 C. Tugendhat - The Multinationals 02.18952",
+      "ocr_score": 0.8495633333333333
     },
     "b01-024": {
       "reading": {
@@ -309,8 +309,8 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "1S8N 014 Cyrus H. Gordon Forgotten Scripts 02.13287",
-      "ocr_score": 0.93967
+      "ocr_text": "IS8N 014 Cyrus H. Gordon Forgotten Scripts 02.13287",
+      "ocr_score": 0.9661733333333333
     },
     "b01-025": {
       "reading": {
@@ -322,8 +322,8 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "ISONO14 John Berger Selected Essays and Articles 02.13183",
-      "ocr_score": 0.9530733333333333
+      "ocr_text": "ISONO14 John Berger Selected Essays and Articles 02.13163",
+      "ocr_score": 0.9795366666666666
     },
     "b01-026": {
       "reading": {
@@ -335,8 +335,8 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "Halliday and McCormack Japanese Imperiallsm Today 15AN 014",
-      "ocr_score": 0.884525
+      "ocr_text": "Halliday and McCormack Japanese Imperialism Today",
+      "ocr_score": 0.97326
     },
     "b01-027": {
       "reading": {
@@ -348,8 +348,8 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "Stanley Weintraub Beardsley IS8N G 14 02.15557",
-      "ocr_score": 0.90469
+      "ocr_text": "Stanley Weintraud Beardsley 1S8NG14 02.15557",
+      "ocr_score": 0.9314266666666667
     },
     "b01-028": {
       "reading": {
@@ -362,7 +362,7 @@
         "failure": ""
       },
       "ocr_text": "Anthony Kenny/Wittgenstein",
-      "ocr_score": 0.98916
+      "ocr_score": 0.99992
     },
     "b01-029": {
       "reading": {
@@ -375,7 +375,7 @@
         "failure": ""
       },
       "ocr_text": "Stanley Cohen and Laurie Taylor/Escape Attempts",
-      "ocr_score": 0.99993
+      "ocr_score": 0.99597
     },
     "b01-030": {
       "reading": {
@@ -387,8 +387,8 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "Chie Nakane/Japanese Society",
-      "ocr_score": 0.99406
+      "ocr_text": "hie Nakane/Japanese Society 158N014 02.16820",
+      "ocr_score": 0.8817733333333333
     },
     "b01-031": {
       "reading": {
@@ -400,38 +400,38 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "Peter Gay/Weimar Culture 13814 02.11215",
-      "ocr_score": 0.83209
+      "ocr_text": "Peter Gay/Weimar Culture 02.1721 5",
+      "ocr_score": 0.9341200000000001
     },
     "b01-032": {
       "reading": {
         "track_id": 31,
-        "title_verbatim": "Concepts of Modern Mathematics",
-        "author_verbatim": "Stewart",
-        "publisher_verbatim": "Penguin",
-        "legible": true,
-        "rotation": "ROTATE_90_COUNTERCLOCKWISE",
+        "title_verbatim": "",
+        "author_verbatim": "",
+        "publisher_verbatim": "",
+        "legible": false,
+        "rotation": "ROTATE_90_CLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "Stewart/Concepts of Modern Mathematics 133N014 02.18401",
-      "ocr_score": 0.86363
+      "ocr_text": "",
+      "ocr_score": 0.0
     },
-    "b01-033": {
+    "b02-001": {
       "reading": {
-        "track_id": 32,
+        "track_id": 0,
         "title_verbatim": "The Moscow Puzzles",
-        "author_verbatim": "Boris A. Kordemsky",
+        "author_verbatim": "Kordemsky",
         "publisher_verbatim": "Penguin",
         "legible": true,
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "A. Kordemsky/The Moscow Puzzles",
-      "ocr_score": 0.98851
+      "ocr_text": "Kordemsky/The Moscow Puzzles",
+      "ocr_score": 0.99932
     },
-    "b01-034": {
+    "b02-002": {
       "reading": {
-        "track_id": 33,
+        "track_id": 1,
         "title_verbatim": "Palladio",
         "author_verbatim": "James S. Ackerman",
         "publisher_verbatim": "Penguin",
@@ -439,25 +439,25 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "James S. Ackerman Palladio",
-      "ocr_score": 0.95844
+      "ocr_text": "es S. Ackerman Palladio",
+      "ocr_score": 0.98129
     },
-    "b02-001": {
+    "b02-003": {
       "reading": {
-        "track_id": 0,
+        "track_id": 2,
         "title_verbatim": "Victorian Architecture",
-        "author_verbatim": "Furneaux Jordan",
+        "author_verbatim": "Robert Furneaux Jordan",
         "publisher_verbatim": "Penguin",
         "legible": true,
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "Furneaux Jordan Victorian Architecture",
-      "ocr_score": 0.99825
+      "ocr_text": "Roberl Furneaux Jordan Victorian Architecture",
+      "ocr_score": 0.97487
     },
-    "b02-002": {
+    "b02-004": {
       "reading": {
-        "track_id": 1,
+        "track_id": 3,
         "title_verbatim": "Los Angeles",
         "author_verbatim": "Reyner Banham",
         "publisher_verbatim": "Penguin",
@@ -468,9 +468,9 @@
       "ocr_text": "",
       "ocr_score": 0.0
     },
-    "b02-003": {
+    "b02-005": {
       "reading": {
-        "track_id": 2,
+        "track_id": 4,
         "title_verbatim": "Chartres",
         "author_verbatim": "George Henderson",
         "publisher_verbatim": "Penguin",
@@ -478,12 +478,12 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "Handerson Charires",
-      "ocr_score": 0.78604
+      "ocr_text": "George Henderson Charea",
+      "ocr_score": 0.89469
     },
-    "b02-004": {
+    "b02-006": {
       "reading": {
-        "track_id": 3,
+        "track_id": 5,
         "title_verbatim": "Gothic",
         "author_verbatim": "George Henderson",
         "publisher_verbatim": "Penguin",
@@ -491,12 +491,12 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "eorge Henderson Golhic",
-      "ocr_score": 0.96399
+      "ocr_text": "eorge Henderson Colhie",
+      "ocr_score": 0.92309
     },
-    "b02-005": {
+    "b02-007": {
       "reading": {
-        "track_id": 4,
+        "track_id": 6,
         "title_verbatim": "Modern Movements in Architecture",
         "author_verbatim": "Charles Jencks",
         "publisher_verbatim": "Penguin",
@@ -504,25 +504,25 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "Charles Jencks Modern Movements in Architecture 15EN014 02.15344",
-      "ocr_score": 0.9188566666666667
+      "ocr_text": "Charles Jencks Modern Movements in Architecture I5AN014 02.15344",
+      "ocr_score": 0.9151566666666667
     },
-    "b02-006": {
+    "b02-008": {
       "reading": {
-        "track_id": 5,
-        "title_verbatim": "ASIMOV'S GUIDE TO SCIENCE 1",
+        "track_id": 7,
+        "title_verbatim": "'S GUIDE TO SCIENCE 1",
         "author_verbatim": "",
         "publisher_verbatim": "Penguin",
         "legible": true,
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "SIMOV'S GUIDE TO SCIENCE ",
-      "ocr_score": 0.97057
+      "ocr_text": "'S GUIDE TO SCIENCE  02.12121",
+      "ocr_score": 0.86873
     },
-    "b02-007": {
+    "b02-009": {
       "reading": {
-        "track_id": 6,
+        "track_id": 8,
         "title_verbatim": "",
         "author_verbatim": "",
         "publisher_verbatim": "",
@@ -533,7 +533,20 @@
       "ocr_text": "",
       "ocr_score": 0.0
     },
-    "b03-001": {
+    "b02-010": {
+      "reading": {
+        "track_id": 9,
+        "title_verbatim": "",
+        "author_verbatim": "LVOCORESSI & GUY WINT",
+        "publisher_verbatim": "Penguin",
+        "legible": false,
+        "rotation": "ROTATE_90_COUNTERCLOCKWISE",
+        "failure": ""
+      },
+      "ocr_text": "LVOCORESSI& GUY WINT",
+      "ocr_score": 0.9391
+    },
+    "b04-001": {
       "reading": {
         "track_id": 0,
         "title_verbatim": "",
@@ -546,72 +559,72 @@
       "ocr_text": "",
       "ocr_score": 0.0
     },
-    "b03-002": {
+    "b04-002": {
       "reading": {
         "track_id": 1,
-        "title_verbatim": "CL. CLAUDIANI QUAE EXSTANT",
-        "author_verbatim": "J. M. GESNER",
+        "title_verbatim": "",
+        "author_verbatim": "J. M. Gesner",
         "publisher_verbatim": "",
-        "legible": true,
+        "legible": false,
         "rotation": "ROTATE_90_CLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "EXSTANT LAUDIANI Ⅱ GESNER ED. QUAE CL.",
-      "ocr_score": 0.9325257142857143
+      "ocr_text": "XSTANT GESNER ED.",
+      "ocr_score": 0.9993566666666666
     },
-    "b03-003": {
+    "b04-003": {
       "reading": {
         "track_id": 2,
-        "title_verbatim": "OEUVRES COMPLÈTES I",
-        "author_verbatim": "CLAUDIEN",
-        "publisher_verbatim": "ÉDITIONS GARNIER PARIS",
+        "title_verbatim": "Œuvres complètes",
+        "author_verbatim": "Claudien",
+        "publisher_verbatim": "Éditions Garnier",
         "legible": true,
         "rotation": "ROTATE_90_CLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "PARIS GARNIER ÉDITIONS V.CRÉPIN nouvelle de Traduction COMPLÈTES ISUVRES CLAUDIEN",
-      "ocr_score": 0.9793988888888888
+      "ocr_text": "PARIS GARNIER ÉDITIONS V. CRÉPIN nouvelle de Traduction CCMPLÈTES ISUVRES CLAUDIEN",
+      "ocr_score": 0.9625066666666666
     },
-    "b03-004": {
+    "b04-004": {
       "reading": {
         "track_id": 3,
-        "title_verbatim": "OEUVRES COMPLÈTES II",
-        "author_verbatim": "CLAUDIEN",
-        "publisher_verbatim": "ÉDITIONS GARNIER PARIS",
+        "title_verbatim": "Œuvres complètes",
+        "author_verbatim": "Claudien",
+        "publisher_verbatim": "Éditions Garnier",
         "legible": true,
         "rotation": "ROTATE_90_CLOCKWISE",
         "failure": ""
       },
       "ocr_text": "PARIS GARNIER ÉDITIONS V. CRÉPIN nouvelle de Traduction COMPLÈTES EUVRES CLAUDIEN",
-      "ocr_score": 0.9823244444444446
+      "ocr_score": 0.9892655555555555
     },
-    "b03-005": {
+    "b04-005": {
       "reading": {
         "track_id": 4,
-        "title_verbatim": "AUSONIUS · MOSELLA",
-        "author_verbatim": "",
+        "title_verbatim": "Mosella",
+        "author_verbatim": "Ausonius",
         "publisher_verbatim": "",
         "legible": true,
         "rotation": "ROTATE_90_CLOCKWISE",
         "failure": ""
       },
       "ocr_text": "AUSONIUS·MOSELLA",
-      "ocr_score": 0.99942
+      "ocr_score": 0.99965
     },
-    "b03-006": {
+    "b04-006": {
       "reading": {
         "track_id": 5,
-        "title_verbatim": "ANTHOLOGIA LATINA · I 1",
+        "title_verbatim": "Anthologia Latina",
         "author_verbatim": "",
         "publisher_verbatim": "",
         "legible": true,
         "rotation": "ROTATE_90_CLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "明 ANTHOLOGIA LATINA: 11",
-      "ocr_score": 0.85668
+      "ocr_text": "ANTHOLOGIA LATIN",
+      "ocr_score": 0.96524
     },
-    "b03-007": {
+    "b04-007": {
       "reading": {
         "track_id": 6,
         "title_verbatim": "",
@@ -624,20 +637,20 @@
       "ocr_text": "",
       "ocr_score": 0.0
     },
-    "b03-008": {
+    "b04-008": {
       "reading": {
         "track_id": 7,
-        "title_verbatim": "ARCHIPOETA VAGANTENBEICHTE",
-        "author_verbatim": "",
+        "title_verbatim": "Vaganten",
+        "author_verbatim": "Archipoeta",
         "publisher_verbatim": "",
         "legible": true,
         "rotation": "ROTATE_90_CLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "ARCHIPOETA VAGANTENBEICHTE",
-      "ocr_score": 0.999715
+      "ocr_text": "ARCHIPOETA VAGANTEN",
+      "ocr_score": 0.9998549999999999
     },
-    "b03-009": {
+    "b04-009": {
       "reading": {
         "track_id": 8,
         "title_verbatim": "Lateinische Gedichte deutscher Humanisten",
@@ -647,10 +660,10 @@
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "Lateinische Gedichte deutscher Humanisten 8739[7] :•",
-      "ocr_score": 0.8318366666666667
+      "ocr_text": "Lateinische Gedichte deutseher Humanisten 8739[7]",
+      "ocr_score": 0.9974449999999999
     },
-    "b03-010": {
+    "b04-010": {
       "reading": {
         "track_id": 9,
         "title_verbatim": "",
@@ -663,7 +676,7 @@
       "ocr_text": "",
       "ocr_score": 0.0
     },
-    "b03-011": {
+    "b04-011": {
       "reading": {
         "track_id": 10,
         "title_verbatim": "",
@@ -676,7 +689,7 @@
       "ocr_text": "",
       "ocr_score": 0.0
     },
-    "b03-012": {
+    "b04-012": {
       "reading": {
         "track_id": 11,
         "title_verbatim": "",
@@ -689,33 +702,33 @@
       "ocr_text": "",
       "ocr_score": 0.0
     },
-    "b03-013": {
+    "b04-013": {
       "reading": {
         "track_id": 12,
-        "title_verbatim": "C. SALLUSTIUS CRISPUS · ERLÄUTERUNGEN",
-        "author_verbatim": "",
+        "title_verbatim": "Erläuterungen",
+        "author_verbatim": "C. Sallustius Crispus",
         "publisher_verbatim": "",
         "legible": true,
         "rotation": "ROTATE_90_CLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "10816 C.SALLUSTIUS CRISPUS·ERLAUTERUNGEN",
-      "ocr_score": 0.988235
+      "ocr_text": "10816 C.SALLUSTIUSCRISPUS·ERLAUTERUNGEN",
+      "ocr_score": 0.9958750000000001
     },
-    "b03-014": {
+    "b04-014": {
       "reading": {
         "track_id": 13,
-        "title_verbatim": "SAL LVST WER KE",
-        "author_verbatim": "",
+        "title_verbatim": "Werke",
+        "author_verbatim": "Sallust",
         "publisher_verbatim": "",
         "legible": true,
         "rotation": "ROTATE_90_CLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "ASE",
-      "ocr_score": 0.54728
+      "ocr_text": "",
+      "ocr_score": 0.0
     },
-    "b03-015": {
+    "b04-015": {
       "reading": {
         "track_id": 14,
         "title_verbatim": "",
@@ -728,59 +741,59 @@
       "ocr_text": "",
       "ocr_score": 0.0
     },
-    "b03-016": {
+    "b04-016": {
       "reading": {
         "track_id": 15,
-        "title_verbatim": "SALLUST · HISTORISCHE SCHRIFTEN",
-        "author_verbatim": "",
-        "publisher_verbatim": "ARTEMIS",
+        "title_verbatim": "Historische Schriften",
+        "author_verbatim": "Sallust",
+        "publisher_verbatim": "Artemis",
         "legible": true,
         "rotation": "ROTATE_90_CLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "ARTEMIS SALLUST·HISTORISCHE SCHRIFTEN",
-      "ocr_score": 0.99953
+      "ocr_text": "ARTEMIS SALLUST·HISTORISCHE SCHRIFT",
+      "ocr_score": 0.9997199999999999
     },
-    "b03-017": {
+    "b04-017": {
       "reading": {
         "track_id": 16,
-        "title_verbatim": "C. Sallusti Crispi CATILINA IVGVRTHA HISTORIARVM FRAGMENTA SELECTA APPENDIX SALLVTIANA",
-        "author_verbatim": "",
-        "publisher_verbatim": "OXFORD CLASSICAL TEXTS",
+        "title_verbatim": "Historicrum fragmenta selecta",
+        "author_verbatim": "Sallustiani",
+        "publisher_verbatim": "Oxford",
         "legible": true,
         "rotation": "ROTATE_90_CLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "OXFORD TEXTS CLASSICAI OXFORD SALLVSTIAN APPENDIX SELECTA FRAGMENTA HISTORIARVI IVGVRTHA CATILINA Crispi C. Sallusti",
-      "ocr_score": 0.9918830769230769
+      "ocr_text": "OXFORD TEXTS CLASSICA OXFORD SALLVSTIAN APPENDIX SELECTA FRAGMENTA HISTORIARVE",
+      "ocr_score": 0.9976933333333332
     },
-    "b03-018": {
+    "b04-018": {
       "reading": {
         "track_id": 17,
-        "title_verbatim": "P. Cornelii Taciti, Historiarum Libri. Erstes Heft. Buch I und II. Zweite, ungearbeitete Auflage.",
+        "title_verbatim": "Historiarum Libri",
         "author_verbatim": "",
         "publisher_verbatim": "",
         "legible": true,
         "rotation": "ROTATE_90_COUNTERCLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "P.Cornelii Taciti, Historiarum Libri. Erstes Heft. Buch I und II. Zweite, uingearbeitete Auflage.",
-      "ocr_score": 0.98085
+      "ocr_text": ", Historiarum Libri. Erstes Heft. Buch I und II. Zweite, ungearbeitete Auflage.",
+      "ocr_score": 0.97665
     },
-    "b03-019": {
+    "b04-019": {
       "reading": {
         "track_id": 18,
-        "title_verbatim": "TACI TVS ANNA LEN",
-        "author_verbatim": "",
+        "title_verbatim": "Annalen",
+        "author_verbatim": "Tacitus",
         "publisher_verbatim": "",
         "legible": true,
         "rotation": "ROTATE_90_CLOCKWISE",
         "failure": ""
       },
-      "ocr_text": "國",
-      "ocr_score": 0.57395
+      "ocr_text": "園",
+      "ocr_score": 0.52875
     },
-    "b03-020": {
+    "b04-020": {
       "reading": {
         "track_id": 19,
         "title_verbatim": "",

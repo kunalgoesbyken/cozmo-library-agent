@@ -1,4 +1,5 @@
 window_ms: 1500
+blur_relative: 0.25
 max_hamming: 6
 hash_size: 8
 dct_size: 32

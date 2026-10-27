@@ -26,7 +26,7 @@ Documents: [architecture](docs/architecture.md), [failure log](docs/failure-log.
 
 Be aware of this before reading any number in this repo.
 
-- Measured, the demo run (`deliverables/`): a live sweep in Chromium with the real voice session, a fake camera panning over two public shelf photos (60 books, hand-counted and hand-read), and the full pipeline against live Gemini, catalogue and retailer pages. Count 61 against 60, 13 of 54 legible titles identified with 0 wrong, 2 books priced, packet 78.7 s after the sweep. See [results](docs/results.md) and [failure log](docs/failure-log.md).
+- Measured, the demo run (`deliverables/`): a live sweep in Chromium with the real voice session, a fake camera panning over two public shelf photos (60 books, hand-counted and hand-read), and the full pipeline against live Gemini, catalogue and retailer pages. The camera whips too fast once, and the agent catches it and asks for a redo. Count 62 against 60, 30 of 54 legible titles correct with 1 arguable wrong, 2 books priced, packet 58 s after the sweep. See [results](docs/results.md) and [failure log](docs/failure-log.md).
 - Not measured: a sweep of a physical shelf, any run with an iPhone, any run with printed ArUco markers (every spine size so far is a format prior labelled as an estimate), room geometry, and hand-measured spines or room dimensions (`spines20.csv` and `room.json` do not exist).
 - Price coverage is limited by what free sources list. Older and out-of-print editions are mostly not listed (see the failure log).
 

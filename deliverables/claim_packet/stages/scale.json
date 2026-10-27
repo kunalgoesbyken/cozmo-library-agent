@@ -2,632 +2,636 @@
   "dims": {
     "b01-001": {
       "height_cm": 30.000000000000004,
-      "thickness_cm": 2.493171277200316,
+      "thickness_cm": 2.375845570037949,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
       "frame_seq": 1,
       "review": [
-        "measured outside the row reference frame 68: no shared boundaries"
+        "measured outside the row reference frame 49: no shared boundaries"
       ],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-002": {
-      "height_cm": 30.0,
-      "thickness_cm": 2.5436726143717503,
+      "height_cm": 29.999999999999996,
+      "thickness_cm": 1.9918792614724585,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 11,
+      "frame_seq": 10,
       "review": [
-        "measured outside the row reference frame 68: no shared boundaries"
+        "measured outside the row reference frame 49: no shared boundaries"
       ],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-003": {
-      "height_cm": 21.0,
-      "thickness_cm": 2.4638398504097245,
+      "height_cm": 30.000000000000004,
+      "thickness_cm": 2.933142679059194,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
       "frame_seq": 1,
       "review": [
-        "measured outside the row reference frame 68: no shared boundaries"
+        "measured outside the row reference frame 49: no shared boundaries"
       ],
-      "book_format": "trade_paperback",
+      "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-004": {
-      "height_cm": 20.999999999999996,
-      "thickness_cm": 2.3489076120655064,
+      "height_cm": 21.0,
+      "thickness_cm": 2.4022438541494795,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
       "frame_seq": 1,
       "review": [
-        "measured outside the row reference frame 68: no shared boundaries"
+        "measured outside the row reference frame 49: no shared boundaries"
       ],
       "book_format": "trade_paperback",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-005": {
-      "height_cm": 29.999999999999996,
-      "thickness_cm": 3.1513294671189396,
+      "height_cm": 20.999999999999996,
+      "thickness_cm": 2.3284823284823277,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
       "frame_seq": 1,
       "review": [
-        "measured outside the row reference frame 68: no shared boundaries"
-      ],
-      "book_format": "large_format",
-      "fallback_reason": "no scale marker was visible"
-    },
-    "b01-006": {
-      "height_cm": 21.0,
-      "thickness_cm": 2.303268544805997,
-      "scale_method": "book_format_prior",
-      "confidence": 0.3,
-      "frame_seq": 1,
-      "review": [
-        "measured outside the row reference frame 68: no shared boundaries"
+        "measured outside the row reference frame 49: no shared boundaries"
       ],
       "book_format": "trade_paperback",
       "fallback_reason": "no scale marker was visible"
     },
-    "b01-007": {
+    "b01-006": {
       "height_cm": 30.000000000000004,
-      "thickness_cm": 2.493171277200316,
+      "thickness_cm": 3.109131239802746,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 38,
+      "frame_seq": 1,
       "review": [
-        "measured outside the row reference frame 68: no shared boundaries"
+        "measured outside the row reference frame 49: no shared boundaries"
+      ],
+      "book_format": "large_format",
+      "fallback_reason": "no scale marker was visible"
+    },
+    "b01-007": {
+      "height_cm": 29.999999999999996,
+      "thickness_cm": 2.7249752774420393,
+      "scale_method": "book_format_prior",
+      "confidence": 0.3,
+      "frame_seq": 37,
+      "review": [
+        "measured outside the row reference frame 49: no shared boundaries"
       ],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-008": {
-      "height_cm": 30.000000000000004,
-      "thickness_cm": 2.300834052343975,
-      "scale_method": "book_format_prior",
-      "confidence": 0.3,
-      "frame_seq": 47,
-      "review": [
-        "measured outside the row reference frame 68: no shared boundaries"
-      ],
-      "book_format": "large_format",
-      "fallback_reason": "no scale marker was visible"
-    },
-    "b01-009": {
-      "height_cm": 30.000000000000004,
-      "thickness_cm": 2.9331426790591952,
-      "scale_method": "book_format_prior",
-      "confidence": 0.3,
-      "frame_seq": 53,
-      "review": [
-        "measured outside the row reference frame 68: no shared boundaries"
-      ],
-      "book_format": "large_format",
-      "fallback_reason": "no scale marker was visible"
-    },
-    "b01-010": {
       "height_cm": 30.0,
-      "thickness_cm": 0.7952725465289667,
+      "thickness_cm": 0.6590079259061359,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 64,
-      "review": [
-        "measured outside the row reference frame 68: no shared boundaries"
-      ],
-      "book_format": "large_format",
-      "fallback_reason": "no scale marker was visible"
-    },
-    "b01-011": {
-      "height_cm": 30.0,
-      "thickness_cm": 2.3466547091904415,
-      "scale_method": "book_format_prior",
-      "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
-    "b01-012": {
-      "height_cm": 30.0,
-      "thickness_cm": 2.0709948970089775,
+    "b01-009": {
+      "height_cm": 17.5,
+      "thickness_cm": 2.0270397322351963,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
+      "review": [],
+      "book_format": "mass_market",
+      "fallback_reason": "no scale marker was visible"
+    },
+    "b01-010": {
+      "height_cm": 21.0,
+      "thickness_cm": 2.0984500085164375,
+      "scale_method": "book_format_prior",
+      "confidence": 0.3,
+      "frame_seq": 49,
+      "review": [],
+      "book_format": "trade_paperback",
+      "fallback_reason": "no scale marker was visible"
+    },
+    "b01-011": {
+      "height_cm": 23.5,
+      "thickness_cm": 2.929401893803189,
+      "scale_method": "book_format_prior",
+      "confidence": 0.3,
+      "frame_seq": 49,
+      "review": [],
+      "book_format": "hardcover",
+      "fallback_reason": "no scale marker was visible"
+    },
+    "b01-012": {
+      "height_cm": 30.000000000000004,
+      "thickness_cm": 2.286190124718484,
+      "scale_method": "book_format_prior",
+      "confidence": 0.3,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-013": {
-      "height_cm": 30.0,
-      "thickness_cm": 2.130591872462471,
+      "height_cm": 30.000000000000004,
+      "thickness_cm": 2.1196464732489257,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-014": {
-      "height_cm": 30.0,
-      "thickness_cm": 1.8922039706484899,
+      "height_cm": 30.000000000000004,
+      "thickness_cm": 2.0136641495864787,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-015": {
       "height_cm": 30.000000000000004,
-      "thickness_cm": 2.23421802369171,
+      "thickness_cm": 2.2710497927667106,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-016": {
-      "height_cm": 30.000000000000004,
-      "thickness_cm": 2.9571254339056203,
+      "height_cm": 21.0,
+      "thickness_cm": 2.144501037540085,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
-      "book_format": "large_format",
+      "book_format": "trade_paperback",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-017": {
-      "height_cm": 30.000000000000004,
-      "thickness_cm": 1.8613378365700335,
+      "height_cm": 29.999999999999996,
+      "thickness_cm": 1.6938898971566871,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-018": {
-      "height_cm": 30.000000000000004,
-      "thickness_cm": 1.3059386433999407,
+      "height_cm": 29.999999999999996,
+      "thickness_cm": 1.361161524500904,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-019": {
       "height_cm": 30.000000000000004,
-      "thickness_cm": 2.599646868777942,
+      "thickness_cm": 2.5035561877667156,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-020": {
-      "height_cm": 30.0,
-      "thickness_cm": 2.464405124159434,
+      "height_cm": 21.0,
+      "thickness_cm": 2.085601935874166,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
-      "book_format": "large_format",
+      "book_format": "trade_paperback",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-021": {
-      "height_cm": 30.000000000000004,
-      "thickness_cm": 2.5721082366934276,
+      "height_cm": 29.999999999999996,
+      "thickness_cm": 2.3139745916515437,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-022": {
-      "height_cm": 30.0,
-      "thickness_cm": 2.100793384735727,
+      "height_cm": 29.999999999999996,
+      "thickness_cm": 2.071990320629162,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-023": {
-      "height_cm": 30.0,
-      "thickness_cm": 2.681863895407311,
+      "height_cm": 29.999999999999996,
+      "thickness_cm": 2.7374470659407066,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-024": {
       "height_cm": 29.999999999999996,
-      "thickness_cm": 2.019755270529263,
+      "thickness_cm": 1.9963702359346769,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-025": {
-      "height_cm": 29.999999999999996,
-      "thickness_cm": 2.35636310082657,
+      "height_cm": 30.0,
+      "thickness_cm": 2.5353706847764528,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-026": {
       "height_cm": 29.999999999999996,
-      "thickness_cm": 2.6831785345717236,
+      "thickness_cm": 2.707199032062917,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-027": {
-      "height_cm": 30.0,
-      "thickness_cm": 2.9053525533579148,
+      "height_cm": 29.999999999999996,
+      "thickness_cm": 2.8130671506351987,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-028": {
       "height_cm": 30.0,
-      "thickness_cm": 2.2355466725886473,
+      "thickness_cm": 2.2939068100358497,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-029": {
-      "height_cm": 30.000000000000004,
-      "thickness_cm": 2.0600603938568653,
+      "height_cm": 30.0,
+      "thickness_cm": 2.1429918883229604,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-030": {
-      "height_cm": 29.999999999999996,
-      "thickness_cm": 1.9272499908051017,
+      "height_cm": 30.0,
+      "thickness_cm": 2.0373514431239386,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-031": {
       "height_cm": 29.999999999999996,
-      "thickness_cm": 2.194363137644743,
+      "thickness_cm": 2.192982456140342,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b01-032": {
       "height_cm": 29.999999999999996,
-      "thickness_cm": 3.2954503659568246,
+      "thickness_cm": 0.5444646098003645,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 68,
-      "review": [],
-      "book_format": "large_format",
-      "fallback_reason": "no scale marker was visible"
-    },
-    "b01-033": {
-      "height_cm": 29.999999999999996,
-      "thickness_cm": 2.8070175438596436,
-      "scale_method": "book_format_prior",
-      "confidence": 0.3,
-      "frame_seq": 68,
-      "review": [],
-      "book_format": "large_format",
-      "fallback_reason": "no scale marker was visible"
-    },
-    "b01-034": {
-      "height_cm": 29.999999999999996,
-      "thickness_cm": 2.4122807017543906,
-      "scale_method": "book_format_prior",
-      "confidence": 0.3,
-      "frame_seq": 68,
+      "frame_seq": 49,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b02-001": {
-      "height_cm": 29.999999999999996,
-      "thickness_cm": 2.344064754788846,
+      "height_cm": 30.0,
+      "thickness_cm": 3.0627750478558617,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 117,
+      "frame_seq": 136,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b02-002": {
-      "height_cm": 29.999999999999996,
-      "thickness_cm": 2.9098925323780733,
+      "height_cm": 30.0,
+      "thickness_cm": 2.6838750419355506,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 117,
+      "frame_seq": 136,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b02-003": {
-      "height_cm": 29.999999999999996,
-      "thickness_cm": 2.145678331955537,
+      "height_cm": 30.0,
+      "thickness_cm": 2.762812543168941,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 117,
+      "frame_seq": 136,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b02-004": {
-      "height_cm": 30.0,
-      "thickness_cm": 2.4183079262638643,
+      "height_cm": 29.999999999999993,
+      "thickness_cm": 2.8164581858233007,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 117,
+      "frame_seq": 136,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b02-005": {
-      "height_cm": 23.499999999999996,
-      "thickness_cm": 3.3695466001125496,
+      "height_cm": 29.999999999999993,
+      "thickness_cm": 2.2342852647313336,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 117,
+      "frame_seq": 136,
       "review": [],
-      "book_format": "hardcover",
+      "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b02-006": {
-      "height_cm": 23.5,
-      "thickness_cm": 3.589000048330192,
+      "height_cm": 29.999999999999993,
+      "thickness_cm": 2.6433797498229836,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 117,
+      "frame_seq": 136,
       "review": [],
-      "book_format": "hardcover",
+      "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
     "b02-007": {
-      "height_cm": 30.000000000000004,
-      "thickness_cm": 2.2491191558500745,
-      "scale_method": "book_format_prior",
-      "confidence": 0.3,
-      "frame_seq": 117,
-      "review": [],
-      "book_format": "large_format",
-      "fallback_reason": "no scale marker was visible"
-    },
-    "b03-001": {
-      "height_cm": 30.0,
-      "thickness_cm": 1.4921023488954945,
-      "scale_method": "book_format_prior",
-      "confidence": 0.3,
-      "frame_seq": 188,
-      "review": [],
-      "book_format": "large_format",
-      "fallback_reason": "no scale marker was visible"
-    },
-    "b03-002": {
       "height_cm": 23.5,
-      "thickness_cm": 4.092536775124302,
+      "thickness_cm": 3.594480376062293,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 188,
+      "frame_seq": 136,
       "review": [],
       "book_format": "hardcover",
       "fallback_reason": "no scale marker was visible"
     },
-    "b03-003": {
-      "height_cm": 20.999999999999996,
-      "thickness_cm": 2.197742418060656,
+    "b02-008": {
+      "height_cm": 23.5,
+      "thickness_cm": 3.685328807583261,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 188,
+      "frame_seq": 136,
       "review": [],
-      "book_format": "trade_paperback",
+      "book_format": "hardcover",
       "fallback_reason": "no scale marker was visible"
     },
-    "b03-004": {
-      "height_cm": 20.999999999999996,
-      "thickness_cm": 2.4479804161566694,
+    "b02-009": {
+      "height_cm": 29.999999999999996,
+      "thickness_cm": 2.1361181985403235,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 188,
-      "review": [],
-      "book_format": "trade_paperback",
-      "fallback_reason": "no scale marker was visible"
-    },
-    "b03-005": {
-      "height_cm": 30.0,
-      "thickness_cm": 2.541910331384015,
-      "scale_method": "book_format_prior",
-      "confidence": 0.3,
-      "frame_seq": 188,
+      "frame_seq": 136,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
-    "b03-006": {
-      "height_cm": 17.5,
-      "thickness_cm": 2.447980416156671,
+    "b02-010": {
+      "height_cm": 29.999999999999996,
+      "thickness_cm": 2.262702980676039,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 188,
+      "frame_seq": 136,
+      "review": [],
+      "book_format": "large_format",
+      "fallback_reason": "no scale marker was visible"
+    },
+    "b04-001": {
+      "height_cm": 29.999999999999993,
+      "thickness_cm": 1.3629449345908122,
+      "scale_method": "book_format_prior",
+      "confidence": 0.3,
+      "frame_seq": 157,
+      "review": [],
+      "book_format": "large_format",
+      "fallback_reason": "no scale marker was visible"
+    },
+    "b04-002": {
+      "height_cm": 23.5,
+      "thickness_cm": 4.372240813981003,
+      "scale_method": "book_format_prior",
+      "confidence": 0.3,
+      "frame_seq": 157,
+      "review": [],
+      "book_format": "hardcover",
+      "fallback_reason": "no scale marker was visible"
+    },
+    "b04-003": {
+      "height_cm": 21.000000000000004,
+      "thickness_cm": 2.6735266170710785,
+      "scale_method": "book_format_prior",
+      "confidence": 0.3,
+      "frame_seq": 157,
+      "review": [],
+      "book_format": "trade_paperback",
+      "fallback_reason": "no scale marker was visible"
+    },
+    "b04-004": {
+      "height_cm": 17.5,
+      "thickness_cm": 2.4117978786684917,
+      "scale_method": "book_format_prior",
+      "confidence": 0.3,
+      "frame_seq": 157,
       "review": [],
       "book_format": "mass_market",
       "fallback_reason": "no scale marker was visible"
     },
-    "b03-007": {
-      "height_cm": 21.0,
-      "thickness_cm": 2.3764817449027937,
-      "scale_method": "book_format_prior",
-      "confidence": 0.3,
-      "frame_seq": 188,
-      "review": [],
-      "book_format": "trade_paperback",
-      "fallback_reason": "no scale marker was visible"
-    },
-    "b03-008": {
-      "height_cm": 21.0,
-      "thickness_cm": 1.8169454644362872,
-      "scale_method": "book_format_prior",
-      "confidence": 0.3,
-      "frame_seq": 188,
-      "review": [],
-      "book_format": "trade_paperback",
-      "fallback_reason": "no scale marker was visible"
-    },
-    "b03-009": {
-      "height_cm": 23.5,
-      "thickness_cm": 2.6796331590350064,
-      "scale_method": "book_format_prior",
-      "confidence": 0.3,
-      "frame_seq": 188,
-      "review": [],
-      "book_format": "hardcover",
-      "fallback_reason": "no scale marker was visible"
-    },
-    "b03-010": {
+    "b04-005": {
       "height_cm": 30.0,
-      "thickness_cm": 0.3508771929824519,
+      "thickness_cm": 2.9342878607097127,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 188,
+      "frame_seq": 157,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
-    "b03-011": {
+    "b04-006": {
+      "height_cm": 23.5,
+      "thickness_cm": 3.686661764190914,
+      "scale_method": "book_format_prior",
+      "confidence": 0.3,
+      "frame_seq": 157,
+      "review": [],
+      "book_format": "hardcover",
+      "fallback_reason": "no scale marker was visible"
+    },
+    "b04-007": {
+      "height_cm": 17.5,
+      "thickness_cm": 2.2534621025963375,
+      "scale_method": "book_format_prior",
+      "confidence": 0.3,
+      "frame_seq": 157,
+      "review": [],
+      "book_format": "mass_market",
+      "fallback_reason": "no scale marker was visible"
+    },
+    "b04-008": {
+      "height_cm": 30.0,
+      "thickness_cm": 2.0993376081941904,
+      "scale_method": "book_format_prior",
+      "confidence": 0.3,
+      "frame_seq": 157,
+      "review": [],
+      "book_format": "large_format",
+      "fallback_reason": "no scale marker was visible"
+    },
+    "b04-009": {
+      "height_cm": 23.499999999999996,
+      "thickness_cm": 4.087808655765052,
+      "scale_method": "book_format_prior",
+      "confidence": 0.3,
+      "frame_seq": 157,
+      "review": [],
+      "book_format": "hardcover",
+      "fallback_reason": "no scale marker was visible"
+    },
+    "b04-010": {
       "height_cm": 30.000000000000004,
-      "thickness_cm": 2.5899001647765836,
+      "thickness_cm": 0.45197740112993756,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 188,
+      "frame_seq": 157,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
-    "b03-012": {
+    "b04-011": {
+      "height_cm": 21.0,
+      "thickness_cm": 2.1292775665399226,
+      "scale_method": "book_format_prior",
+      "confidence": 0.3,
+      "frame_seq": 157,
+      "review": [],
+      "book_format": "trade_paperback",
+      "fallback_reason": "no scale marker was visible"
+    },
+    "b04-012": {
+      "height_cm": 29.999999999999996,
+      "thickness_cm": 2.7441985411113237,
+      "scale_method": "book_format_prior",
+      "confidence": 0.3,
+      "frame_seq": 157,
+      "review": [],
+      "book_format": "large_format",
+      "fallback_reason": "no scale marker was visible"
+    },
+    "b04-013": {
       "height_cm": 30.0,
-      "thickness_cm": 2.7821491713780553,
+      "thickness_cm": 1.493501830975795,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 188,
+      "frame_seq": 157,
       "review": [],
       "book_format": "large_format",
       "fallback_reason": "no scale marker was visible"
     },
-    "b03-013": {
-      "height_cm": 30.0,
-      "thickness_cm": 1.170945904738673,
+    "b04-014": {
+      "height_cm": 17.499999999999996,
+      "thickness_cm": 2.3086142683623336,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 188,
+      "frame_seq": 157,
       "review": [],
-      "book_format": "large_format",
+      "book_format": "mass_market",
       "fallback_reason": "no scale marker was visible"
     },
-    "b03-014": {
-      "height_cm": 21.0,
-      "thickness_cm": 2.3359097043307564,
+    "b04-015": {
+      "height_cm": 17.499999999999996,
+      "thickness_cm": 2.3649219334443394,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 188,
+      "frame_seq": 157,
+      "review": [],
+      "book_format": "mass_market",
+      "fallback_reason": "no scale marker was visible"
+    },
+    "b04-016": {
+      "height_cm": 21.0,
+      "thickness_cm": 2.073455593658366,
+      "scale_method": "book_format_prior",
+      "confidence": 0.3,
+      "frame_seq": 157,
       "review": [],
       "book_format": "trade_paperback",
       "fallback_reason": "no scale marker was visible"
     },
-    "b03-015": {
-      "height_cm": 21.0,
-      "thickness_cm": 2.33590970433076,
-      "scale_method": "book_format_prior",
-      "confidence": 0.3,
-      "frame_seq": 188,
-      "review": [],
-      "book_format": "trade_paperback",
-      "fallback_reason": "no scale marker was visible"
-    },
-    "b03-016": {
-      "height_cm": 21.0,
-      "thickness_cm": 2.2002311167139403,
-      "scale_method": "book_format_prior",
-      "confidence": 0.3,
-      "frame_seq": 188,
-      "review": [],
-      "book_format": "trade_paperback",
-      "fallback_reason": "no scale marker was visible"
-    },
-    "b03-017": {
-      "height_cm": 21.0,
-      "thickness_cm": 2.3578947368421055,
-      "scale_method": "book_format_prior",
-      "confidence": 0.3,
-      "frame_seq": 188,
-      "review": [],
-      "book_format": "trade_paperback",
-      "fallback_reason": "no scale marker was visible"
-    },
-    "b03-018": {
-      "height_cm": 30.0,
-      "thickness_cm": 2.486837248159148,
-      "scale_method": "book_format_prior",
-      "confidence": 0.3,
-      "frame_seq": 188,
-      "review": [],
-      "book_format": "large_format",
-      "fallback_reason": "no scale marker was visible"
-    },
-    "b03-019": {
+    "b04-017": {
       "height_cm": 23.5,
-      "thickness_cm": 4.574489837647732,
+      "thickness_cm": 2.8787679922999487,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 188,
+      "frame_seq": 157,
       "review": [],
       "book_format": "hardcover",
       "fallback_reason": "no scale marker was visible"
     },
-    "b03-020": {
-      "height_cm": 20.999999999999996,
-      "thickness_cm": 2.382700938392496,
+    "b04-018": {
+      "height_cm": 21.0,
+      "thickness_cm": 2.312338222605696,
       "scale_method": "book_format_prior",
       "confidence": 0.3,
-      "frame_seq": 188,
+      "frame_seq": 157,
       "review": [],
       "book_format": "trade_paperback",
+      "fallback_reason": "no scale marker was visible"
+    },
+    "b04-019": {
+      "height_cm": 23.5,
+      "thickness_cm": 4.430930604824766,
+      "scale_method": "book_format_prior",
+      "confidence": 0.3,
+      "frame_seq": 157,
+      "review": [],
+      "book_format": "hardcover",
+      "fallback_reason": "no scale marker was visible"
+    },
+    "b04-020": {
+      "height_cm": 23.5,
+      "thickness_cm": 3.6734951150330843,
+      "scale_method": "book_format_prior",
+      "confidence": 0.3,
+      "frame_seq": 157,
+      "review": [],
+      "book_format": "hardcover",
       "fallback_reason": "no scale marker was visible"
     }
   },

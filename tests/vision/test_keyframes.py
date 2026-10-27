@@ -112,3 +112,26 @@ def test_unreadable_still_raises(tmp_path):
     still = Still(seq=0, t_ms=0, path=str(tmp_path / "missing.png"), w=1, h=1, blur=1.0, glare=0.0, motion_dps=0.0)
     with pytest.raises(ValueError):
         select_keyframes([still], [PhaseMarker(t_ms=0, phase=Phase.rows)])
+
+
+
+def frame_still(tmp_path, seq, blur, value):
+    path = tmp_path / f"{seq}.jpg"
+    image = np.zeros((64, 64), np.uint8)
+    image[:, : 8 * seq % 64] = value
+    cv2.imwrite(str(path), image)
+    return Still(seq=seq, t_ms=seq * 10_000, path=str(path), w=64, h=64, blur=blur, glare=0, motion_dps=0)
+
+
+def test_a_window_far_blurrier_than_the_sweep_gives_no_keyframe(tmp_path):
+    blurred = KeyframeStream(keyframes_module.load_keyframe_config(), blur_floor=0.005)
+    blurred.sharpness = [0.006]
+    blurred.add(frame_still(tmp_path, 3, 0.0002, 90))
+    assert blurred.flush() == []
+
+
+def test_a_uniformly_soft_sweep_keeps_its_keyframes(tmp_path):
+    stream = KeyframeStream(keyframes_module.load_keyframe_config(), blur_floor=0.005)
+    stream.sharpness = [0.004]
+    stream.add(frame_still(tmp_path, 4, 0.0039, 150))
+    assert len(stream.flush()) == 1

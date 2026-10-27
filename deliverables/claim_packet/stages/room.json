@@ -14,7 +14,7 @@
   "confidence": 0.0,
   "review": [
     "no scale marker was visible: depth scale is the model's own",
-    "5 room frames could not be registered to the pan",
+    "6 room frames could not be registered to the pan",
     "the room pan did not close a loop; registration drift unknown",
     "wall points do not enclose the room; pan along every wall-ceiling line"
   ]

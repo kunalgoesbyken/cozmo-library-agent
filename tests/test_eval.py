@@ -43,7 +43,7 @@ def tool():
 
 
 ev = tool()
-CFG = ev.load_eval_config()
+CFG = ev.load_eval_config().model_copy(update={"shelf_label": "{unit}.{row}"})
 
 
 def cfg_with(**changes):
@@ -423,7 +423,8 @@ def write_run(tmp_path, packet):
     return run
 
 
-def test_partial_truth_reports_unevaluated_bars(tmp_path, capsys):
+def test_partial_truth_reports_unevaluated_bars(tmp_path, capsys, monkeypatch):
+    monkeypatch.setattr(ev, "load_eval_config", lambda: CFG)
     run = write_run(tmp_path, toy_packet())
     truth = tmp_path / "truth"
     truth.mkdir()

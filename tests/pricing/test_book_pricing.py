@@ -172,9 +172,10 @@ async def test_unidentified_book_is_not_priced():
     assert result.status == "unidentified" and not result.excluded and result.review == []
 
 
-async def test_no_isbn_needs_appraisal():
+async def test_no_isbn_stays_identified_with_a_blank_price():
     result = await price(res=resolution(isbn=""))
-    assert result.status == "needs_appraisal" and result.review == ["no_isbn"]
+    assert result.status == "identified" and result.excluded and result.review[-1] == "no_isbn"
+    assert result.replacement_cost.amount is None
 
 
 def test_derive_used_uses_the_versioned_factor_and_labels_it():

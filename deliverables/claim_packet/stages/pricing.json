@@ -25,7 +25,7 @@
       "excluded": false
     },
     "b01-002": {
-      "status": "unidentified",
+      "status": "identified",
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -44,9 +44,11 @@
       },
       "original": null,
       "fx": null,
-      "review": [],
+      "review": [
+        "no_isbn"
+      ],
       "evidence": [],
-      "excluded": false
+      "excluded": true
     },
     "b01-003": {
       "status": "unidentified",
@@ -97,7 +99,7 @@
       "excluded": false
     },
     "b01-005": {
-      "status": "needs_appraisal",
+      "status": "identified",
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -120,7 +122,7 @@
         "no_isbn"
       ],
       "evidence": [],
-      "excluded": false
+      "excluded": true
     },
     "b01-006": {
       "status": "unidentified",
@@ -174,7 +176,7 @@
       "excluded": true
     },
     "b01-008": {
-      "status": "needs_appraisal",
+      "status": "identified",
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -197,7 +199,7 @@
         "no_isbn"
       ],
       "evidence": [],
-      "excluded": false
+      "excluded": true
     },
     "b01-009": {
       "status": "unidentified",
@@ -253,14 +255,14 @@
         "amount": 1900.43,
         "source": "Penguin UK (equivalent edition, ISBN 9780140135824)",
         "url": "https://www.penguin.co.uk/books/13519/victorian-cities-by-asa-briggs/9780140135824",
-        "retrieved_at": "2026-10-27T19:31:00.059755+00:00",
+        "retrieved_at": "2026-10-27T20:29:19.921642+00:00",
         "converted": true
       },
       "used_value": {
         "amount": 950.22,
         "source": "Penguin UK (equivalent edition, ISBN 9780140135824)",
         "url": "https://www.penguin.co.uk/books/13519/victorian-cities-by-asa-briggs/9780140135824",
-        "retrieved_at": "2026-10-27T19:31:00.059755+00:00",
+        "retrieved_at": "2026-10-27T20:29:19.921642+00:00",
         "condition_assumed": "good",
         "method": "condition_factor:v1:good:from_converted",
         "source_type": "derived"
@@ -270,7 +272,7 @@
         "currency": "GBP",
         "source": "Penguin UK",
         "url": "https://www.penguin.co.uk/books/13519/victorian-cities-by-asa-briggs/9780140135824",
-        "retrieved_at": "2026-10-27T19:31:00.059755Z",
+        "retrieved_at": "2026-10-27T20:29:19.921642Z",
         "kind": "listing",
         "condition": "new",
         "isbn_on_page": "9780140135824",
@@ -284,12 +286,11 @@
         "rate_date": "2026-10-27",
         "provider": "ECB via Frankfurter v2",
         "url": "https://api.frankfurter.dev/v2/rates?base=GBP&quotes=INR&providers=ECB&date=2026-10-27",
-        "retrieved_at": "2026-10-27T19:31:01.110171Z",
+        "retrieved_at": "2026-10-27T20:29:20.998613Z",
         "cache_ref": "4cfca8554556c803666d44a706007f3d30255763"
       },
       "review": [
         "equivalent_edition_priced: ISBN 9780140135824 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
-        "identified_from_catalogue_only: OCR did not confirm the spine text; title and author match one catalogue record",
         "converted: GBP to INR at 126.78 on 2026-10-27"
       ],
       "evidence": [
@@ -323,7 +324,7 @@
       "excluded": false
     },
     "b01-013": {
-      "status": "unidentified",
+      "status": "identified",
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -342,9 +343,11 @@
       },
       "original": null,
       "fx": null,
-      "review": [],
+      "review": [
+        "no_isbn"
+      ],
       "evidence": [],
-      "excluded": false
+      "excluded": true
     },
     "b01-014": {
       "status": "identified",
@@ -398,7 +401,7 @@
       "excluded": false
     },
     "b01-016": {
-      "status": "needs_appraisal",
+      "status": "identified",
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -418,10 +421,11 @@
       "original": null,
       "fx": null,
       "review": [
+        "identified_from_catalogue_only: OCR did not confirm the spine text; title and author match one catalogue record",
         "no_isbn"
       ],
       "evidence": [],
-      "excluded": false
+      "excluded": true
     },
     "b01-017": {
       "status": "unidentified",
@@ -475,7 +479,7 @@
       "excluded": true
     },
     "b01-019": {
-      "status": "needs_appraisal",
+      "status": "identified",
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -498,10 +502,10 @@
         "no_isbn"
       ],
       "evidence": [],
-      "excluded": false
+      "excluded": true
     },
     "b01-020": {
-      "status": "unidentified",
+      "status": "identified",
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -520,9 +524,11 @@
       },
       "original": null,
       "fx": null,
-      "review": [],
+      "review": [
+        "no_isbn"
+      ],
       "evidence": [],
-      "excluded": false
+      "excluded": true
     },
     "b01-021": {
       "status": "identified",
@@ -576,7 +582,7 @@
       "excluded": false
     },
     "b01-023": {
-      "status": "needs_appraisal",
+      "status": "identified",
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -599,7 +605,7 @@
         "no_isbn"
       ],
       "evidence": [],
-      "excluded": false
+      "excluded": true
     },
     "b01-024": {
       "status": "identified",
@@ -629,7 +635,7 @@
       "excluded": true
     },
     "b01-025": {
-      "status": "needs_appraisal",
+      "status": "identified",
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -652,34 +658,10 @@
         "no_isbn"
       ],
       "evidence": [],
-      "excluded": false
+      "excluded": true
     },
     "b01-026": {
-      "status": "unidentified",
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "original": null,
-      "fx": null,
-      "review": [],
-      "evidence": [],
-      "excluded": false
-    },
-    "b01-027": {
-      "status": "needs_appraisal",
+      "status": "identified",
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -702,7 +684,33 @@
         "no_isbn"
       ],
       "evidence": [],
-      "excluded": false
+      "excluded": true
+    },
+    "b01-027": {
+      "status": "identified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_isbn"
+      ],
+      "evidence": [],
+      "excluded": true
     },
     "b01-028": {
       "status": "identified",
@@ -785,7 +793,7 @@
       "excluded": true
     },
     "b01-031": {
-      "status": "needs_appraisal",
+      "status": "identified",
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -808,9 +816,33 @@
         "no_isbn"
       ],
       "evidence": [],
-      "excluded": false
+      "excluded": true
     },
     "b01-032": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b02-001": {
       "status": "identified",
       "replacement_cost": {
         "amount": null,
@@ -831,52 +863,25 @@
       "original": null,
       "fx": null,
       "review": [
-        "equivalent_edition_priced: ISBN 9781306346030 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
         "no_price_source"
       ],
       "evidence": [],
       "excluded": true
     },
-    "b01-033": {
-      "status": "identified",
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "original": null,
-      "fx": null,
-      "review": [
-        "no_price_source"
-      ],
-      "evidence": [],
-      "excluded": true
-    },
-    "b01-034": {
+    "b02-002": {
       "status": "identified",
       "replacement_cost": {
         "amount": 886.19,
         "source": "Penguin UK",
         "url": "https://www.penguin.co.uk/books/13442/palladio-by-massar-james-ackermanphyllis/9780141936383",
-        "retrieved_at": "2026-10-27T19:31:14.116708+00:00",
+        "retrieved_at": "2026-10-27T20:29:27.687942+00:00",
         "converted": true
       },
       "used_value": {
         "amount": 443.1,
         "source": "Penguin UK",
         "url": "https://www.penguin.co.uk/books/13442/palladio-by-massar-james-ackermanphyllis/9780141936383",
-        "retrieved_at": "2026-10-27T19:31:14.116708+00:00",
+        "retrieved_at": "2026-10-27T20:29:27.687942+00:00",
         "condition_assumed": "good",
         "method": "condition_factor:v1:good:from_converted",
         "source_type": "derived"
@@ -886,7 +891,7 @@
         "currency": "GBP",
         "source": "Penguin UK",
         "url": "https://www.penguin.co.uk/books/13442/palladio-by-massar-james-ackermanphyllis/9780141936383",
-        "retrieved_at": "2026-10-27T19:31:14.116708Z",
+        "retrieved_at": "2026-10-27T20:29:27.687942Z",
         "kind": "listing",
         "condition": "new",
         "isbn_on_page": "9780141936383",
@@ -900,7 +905,7 @@
         "rate_date": "2026-10-27",
         "provider": "ECB via Frankfurter v2",
         "url": "https://api.frankfurter.dev/v2/rates?base=GBP&quotes=INR&providers=ECB&date=2026-10-27",
-        "retrieved_at": "2026-10-27T19:31:01.110171Z",
+        "retrieved_at": "2026-10-27T20:29:20.998613Z",
         "cache_ref": "4cfca8554556c803666d44a706007f3d30255763"
       },
       "review": [
@@ -912,8 +917,8 @@
       ],
       "excluded": false
     },
-    "b02-001": {
-      "status": "needs_appraisal",
+    "b02-003": {
+      "status": "identified",
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -936,9 +941,9 @@
         "no_isbn"
       ],
       "evidence": [],
-      "excluded": false
+      "excluded": true
     },
-    "b02-002": {
+    "b02-004": {
       "status": "identified",
       "replacement_cost": {
         "amount": null,
@@ -966,56 +971,8 @@
       "evidence": [],
       "excluded": true
     },
-    "b02-003": {
-      "status": "unidentified",
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "original": null,
-      "fx": null,
-      "review": [],
-      "evidence": [],
-      "excluded": false
-    },
-    "b02-004": {
-      "status": "unidentified",
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "original": null,
-      "fx": null,
-      "review": [],
-      "evidence": [],
-      "excluded": false
-    },
     "b02-005": {
-      "status": "needs_appraisal",
+      "status": "unidentified",
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -1034,14 +991,12 @@
       },
       "original": null,
       "fx": null,
-      "review": [
-        "no_isbn"
-      ],
+      "review": [],
       "evidence": [],
       "excluded": false
     },
     "b02-006": {
-      "status": "needs_appraisal",
+      "status": "unidentified",
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -1060,134 +1015,12 @@
       },
       "original": null,
       "fx": null,
-      "review": [
-        "no_isbn"
-      ],
+      "review": [],
       "evidence": [],
       "excluded": false
     },
     "b02-007": {
-      "status": "unidentified",
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "original": null,
-      "fx": null,
-      "review": [],
-      "evidence": [],
-      "excluded": false
-    },
-    "b03-001": {
-      "status": "unidentified",
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "original": null,
-      "fx": null,
-      "review": [],
-      "evidence": [],
-      "excluded": false
-    },
-    "b03-002": {
-      "status": "unidentified",
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "original": null,
-      "fx": null,
-      "review": [],
-      "evidence": [],
-      "excluded": false
-    },
-    "b03-003": {
-      "status": "unidentified",
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "original": null,
-      "fx": null,
-      "review": [],
-      "evidence": [],
-      "excluded": false
-    },
-    "b03-004": {
-      "status": "unidentified",
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "original": null,
-      "fx": null,
-      "review": [],
-      "evidence": [],
-      "excluded": false
-    },
-    "b03-005": {
-      "status": "needs_appraisal",
+      "status": "identified",
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -1210,10 +1043,178 @@
         "no_isbn"
       ],
       "evidence": [],
+      "excluded": true
+    },
+    "b02-008": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
       "excluded": false
     },
-    "b03-006": {
-      "status": "needs_appraisal",
+    "b02-009": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b02-010": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b04-001": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b04-002": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b04-003": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b04-004": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b04-005": {
+      "status": "identified",
       "replacement_cost": {
         "amount": null,
         "source": "",
@@ -1236,9 +1237,35 @@
         "no_isbn"
       ],
       "evidence": [],
-      "excluded": false
+      "excluded": true
     },
-    "b03-007": {
+    "b04-006": {
+      "status": "identified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_isbn"
+      ],
+      "evidence": [],
+      "excluded": true
+    },
+    "b04-007": {
       "status": "unidentified",
       "replacement_cost": {
         "amount": null,
@@ -1262,7 +1289,7 @@
       "evidence": [],
       "excluded": false
     },
-    "b03-008": {
+    "b04-008": {
       "status": "unidentified",
       "replacement_cost": {
         "amount": null,
@@ -1286,7 +1313,33 @@
       "evidence": [],
       "excluded": false
     },
-    "b03-009": {
+    "b04-009": {
+      "status": "identified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_isbn"
+      ],
+      "evidence": [],
+      "excluded": true
+    },
+    "b04-010": {
       "status": "unidentified",
       "replacement_cost": {
         "amount": null,
@@ -1310,7 +1363,7 @@
       "evidence": [],
       "excluded": false
     },
-    "b03-010": {
+    "b04-011": {
       "status": "unidentified",
       "replacement_cost": {
         "amount": null,
@@ -1334,7 +1387,7 @@
       "evidence": [],
       "excluded": false
     },
-    "b03-011": {
+    "b04-012": {
       "status": "unidentified",
       "replacement_cost": {
         "amount": null,
@@ -1358,7 +1411,7 @@
       "evidence": [],
       "excluded": false
     },
-    "b03-012": {
+    "b04-013": {
       "status": "unidentified",
       "replacement_cost": {
         "amount": null,
@@ -1382,7 +1435,34 @@
       "evidence": [],
       "excluded": false
     },
-    "b03-013": {
+    "b04-014": {
+      "status": "identified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "identified_from_catalogue_only: OCR did not confirm the spine text; title and author match one catalogue record",
+        "no_isbn"
+      ],
+      "evidence": [],
+      "excluded": true
+    },
+    "b04-015": {
       "status": "unidentified",
       "replacement_cost": {
         "amount": null,
@@ -1406,7 +1486,7 @@
       "evidence": [],
       "excluded": false
     },
-    "b03-014": {
+    "b04-016": {
       "status": "unidentified",
       "replacement_cost": {
         "amount": null,
@@ -1430,7 +1510,7 @@
       "evidence": [],
       "excluded": false
     },
-    "b03-015": {
+    "b04-017": {
       "status": "unidentified",
       "replacement_cost": {
         "amount": null,
@@ -1454,7 +1534,33 @@
       "evidence": [],
       "excluded": false
     },
-    "b03-016": {
+    "b04-018": {
+      "status": "identified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_isbn"
+      ],
+      "evidence": [],
+      "excluded": true
+    },
+    "b04-019": {
       "status": "unidentified",
       "replacement_cost": {
         "amount": null,
@@ -1478,79 +1584,7 @@
       "evidence": [],
       "excluded": false
     },
-    "b03-017": {
-      "status": "unidentified",
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "original": null,
-      "fx": null,
-      "review": [],
-      "evidence": [],
-      "excluded": false
-    },
-    "b03-018": {
-      "status": "unidentified",
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "original": null,
-      "fx": null,
-      "review": [],
-      "evidence": [],
-      "excluded": false
-    },
-    "b03-019": {
-      "status": "unidentified",
-      "replacement_cost": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "converted": false
-      },
-      "used_value": {
-        "amount": null,
-        "source": "",
-        "url": "",
-        "retrieved_at": "",
-        "condition_assumed": "",
-        "method": "",
-        "source_type": null
-      },
-      "original": null,
-      "fx": null,
-      "review": [],
-      "evidence": [],
-      "excluded": false
-    },
-    "b03-020": {
+    "b04-020": {
       "status": "unidentified",
       "replacement_cost": {
         "amount": null,
@@ -1592,14 +1626,14 @@
           "amount": 14.99,
           "source": "Penguin UK (equivalent edition, ISBN 9780140135824)",
           "url": "https://www.penguin.co.uk/books/13519/victorian-cities-by-asa-briggs/9780140135824",
-          "retrieved_at": "2026-10-27T19:31:00.059755+00:00",
+          "retrieved_at": "2026-10-27T20:29:19.921642+00:00",
           "converted": false
         },
         "used_value": {
           "amount": 7.5,
           "source": "Penguin UK (equivalent edition, ISBN 9780140135824)",
           "url": "https://www.penguin.co.uk/books/13519/victorian-cities-by-asa-briggs/9780140135824",
-          "retrieved_at": "2026-10-27T19:31:00.059755+00:00",
+          "retrieved_at": "2026-10-27T20:29:19.921642+00:00",
           "condition_assumed": "good",
           "method": "condition_factor:v1:good",
           "source_type": "derived"
@@ -1608,15 +1642,14 @@
         "original_currency": "INR",
         "fx": null,
         "review": [
-          "equivalent_edition_priced: ISBN 9780140135824 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
-          "identified_from_catalogue_only: OCR did not confirm the spine text; title and author match one catalogue record"
+          "equivalent_edition_priced: ISBN 9780140135824 is the most recent catalogue edition that fits the spine; the exact printed edition is not known"
         ],
         "evidence": [
           "f6ea00e930d14c5ad03942ca74e9a8e54422a716"
         ]
       },
       {
-        "book_id": "b01-034",
+        "book_id": "b02-002",
         "title": "Palladio",
         "author": "James S. Ackerman",
         "edition": "Penguin UK",
@@ -1627,14 +1660,14 @@
           "amount": 6.99,
           "source": "Penguin UK",
           "url": "https://www.penguin.co.uk/books/13442/palladio-by-massar-james-ackermanphyllis/9780141936383",
-          "retrieved_at": "2026-10-27T19:31:14.116708+00:00",
+          "retrieved_at": "2026-10-27T20:29:27.687942+00:00",
           "converted": false
         },
         "used_value": {
           "amount": 3.5,
           "source": "Penguin UK",
           "url": "https://www.penguin.co.uk/books/13442/palladio-by-massar-james-ackermanphyllis/9780141936383",
-          "retrieved_at": "2026-10-27T19:31:14.116708+00:00",
+          "retrieved_at": "2026-10-27T20:29:27.687942+00:00",
           "condition_assumed": "good",
           "method": "condition_factor:v1:good",
           "source_type": "derived"

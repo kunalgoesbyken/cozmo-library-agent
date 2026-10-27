@@ -5,7 +5,7 @@ No physical shelf was available for the demo, so the demo camera was a fake devi
 | Shelf in the packet | Photo | Licence | Books |
 |---|---|---|---|
 | S1 | [Forty-odd Pelican books](https://commons.wikimedia.org/wiki/File:Forty-odd_Pelican_books.jpg), middle row | CC BY-SA 4.0, by Hoary | 41 |
-| S3 | [Part of a bookshelf containing books by Latin poets and historians (1)](https://commons.wikimedia.org/wiki/File:Part_of_a_bookshelf_containing_books_by_Latin_poets_and_historians_(1).jpg) | CC BY-SA 4.0, by Roman Eisele | 19 |
+| S4 | [Part of a bookshelf containing books by Latin poets and historians (1)](https://commons.wikimedia.org/wiki/File:Part_of_a_bookshelf_containing_books_by_Latin_poets_and_historians_(1).jpg) | CC BY-SA 4.0, by Roman Eisele | 19 |
 
 - `books.csv`: every book counted and every legible spine read by hand from the full-resolution photos, left to right. Spines with no readable title are `legible = n`.
 - `items.csv`: the two non-book objects in the frame (a spiral-bound notebook at the left edge of the Pelican row and a white bookend at the right edge). The bar needs 8, so it is not evaluated.
