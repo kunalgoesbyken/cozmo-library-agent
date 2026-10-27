@@ -223,7 +223,7 @@ Models and data:
 | Depth Anything V2 Metric-Indoor-Small | The local model card carries no licence field. Upstream describes the small variant as Apache-2.0; verify |
 | RapidOCR PP-OCRv6 models | Packaged with Apache-2.0 RapidOCR; verify the upstream PaddleOCR model licence |
 | Gemini models | Google API terms; not redistributable |
-| Test shelf photos (Wikimedia Commons, not in git) | CC BY 3.0 (Blytonite) and CC BY-SA 4.0 (Roman Eisele); attribution is in [docs/spike-results.md](docs/spike-results.md) |
+| Test shelf photos (Wikimedia Commons, not in git) | CC BY 3.0 (Blytonite), CC BY-SA 4.0 (Roman Eisele) and CC BY-SA 4.0 (Hoary, the Pelican shelf in the demo); attribution is in [docs/spike-results.md](docs/spike-results.md) |
 
 Ultralytics (AGPL-3.0) and Piper (GPL-3.0) are not used.
 
