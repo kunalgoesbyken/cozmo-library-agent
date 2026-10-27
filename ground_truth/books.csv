@@ -1,0 +1,61 @@
+unit,row,position,title,author,legible,orientation
+S1,1,1,Blue Angels and Whales,Robert Gibbings,y,upright
+S1,1,2,Modern German Art,Peter Thoene,y,upright
+S1,1,3,An Anthology of War Poetry,Julian Symons,y,upright
+S1,1,4,Russian Art,Tamara Talbot Rice,y,upright
+S1,1,5,Landscape into Art,Kenneth Clark,y,upright
+S1,1,6,Confucian Philosophy,Liu Wu-Chi,y,upright
+S1,1,7,Riddles in Mathematics,Eugene P. Northrop,y,upright
+S1,1,8,The Pelican History of Music: Vol. 1,Robertson and Stevens,y,upright
+S1,1,9,The Pelican History of Music 2,Robertson and Stevens,y,upright
+S1,1,10,The Awakening of Europe,Philippe Wolff,y,upright
+S1,1,11,Victorian Cities,Asa Briggs,y,upright
+S1,1,12,Dead End,Ronald A. Buel,y,upright
+S1,1,13,Dictionary of American Politics,Eugene J. McCarthy,y,upright
+S1,1,14,Stigma,Erving Goffman,y,upright
+S1,1,15,War Gaming,Andrew Wilson,y,upright
+S1,1,16,A History of Modern Japan,Richard Storry,y,upright
+S1,1,17,About Chinese,Richard Newnham,y,upright
+S1,1,18,The Elizabethan World Picture,E. M. W. Tillyard,y,upright
+S1,1,19,A History of Modern France: 1,Alfred Cobban,y,upright
+S1,1,20,A History of Modern France: 2,Alfred Cobban,y,upright
+S1,1,21,The Presentation of Self in Everyday Life,Erving Goffman,y,upright
+S1,1,22,Unity and Culture,H. Wayne Morgan,y,upright
+S1,1,23,The Multinationals,C. Tugendhat,y,upright
+S1,1,24,Forgotten Scripts,Cyrus H. Gordon,y,upright
+S1,1,25,Selected Essays and Articles,John Berger,y,upright
+S1,1,26,Japanese Imperialism Today,Halliday and McCormack,y,upright
+S1,1,27,Beardsley,Stanley Weintraub,y,upright
+S1,1,28,Wittgenstein,Anthony Kenny,y,upright
+S1,1,29,Escape Attempts,Stanley Cohen and Laurie Taylor,y,upright
+S1,1,30,Japanese Society,Chie Nakane,y,upright
+S1,1,31,Weimar Culture,Peter Gay,y,upright
+S1,1,32,Concepts of Modern Mathematics,Ian Stewart,y,upright
+S1,1,33,The Moscow Puzzles,Boris A. Kordemsky,y,upright
+S1,1,34,Palladio,James S. Ackerman,y,upright
+S1,1,35,Victorian Architecture,Robert Furneaux Jordan,y,upright
+S1,1,36,Los Angeles,Reyner Banham,y,upright
+S1,1,37,Chartres,George Henderson,y,upright
+S1,1,38,Gothic,George Henderson,y,upright
+S1,1,39,Modern Movements in Architecture,Charles Jencks,y,upright
+S1,1,40,Asimov's Guide to Science 1,Isaac Asimov,y,upright
+S1,1,41,Total War,Peter Calvocoressi and Guy Wint,y,upright
+S3,1,1,,,n,upright
+S3,1,2,Claudiani quae exstant II,J. M. Gesner,y,upright
+S3,1,3,Oeuvres completes I,Claudien,y,upright
+S3,1,4,Oeuvres completes II,Claudien,y,upright
+S3,1,5,Mosella,Ausonius,y,upright
+S3,1,6,Anthologia Latina I 1,,y,upright
+S3,1,7,,,n,upright
+S3,1,8,Vagantenbeichte,Archipoeta,y,upright
+S3,1,9,Lateinische Gedichte deutscher Humanisten,,y,upright
+S3,1,10,,,n,upright
+S3,1,11,,,n,upright
+S3,1,12,Erlauterungen,C. Sallustius Crispus,y,upright
+S3,1,13,Werke,Sallust,y,upright
+S3,1,14,,,n,upright
+S3,1,15,Historische Schriften,Sallust,y,upright
+S3,1,16,Catilina Iugurtha Historiarum fragmenta selecta Appendix Sallustiana,C. Sallusti Crispi,y,upright
+S3,1,17,Historiarum Libri,P. Cornelii Taciti,y,upright
+S3,1,18,Annalen,Tacitus,y,upright
+S3,1,19,,,n,upright

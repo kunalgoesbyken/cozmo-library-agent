@@ -76,7 +76,7 @@ Every price has `source`, `url`, `retrieved_at` and a `cache_ref` to the saved r
 
 ## Budget, quota and deadline
 
-- Budget: each Gemini call is preceded by `Budget.check()` (and a small reserve) and followed by `Budget.record()` into `runs/spend.jsonl`, at paid-tier rates. At USD 0.80 further calls are refused and the live session closes with the reason `budget_exceeded`; the pipeline falls back to local-only results.
+- Budget: each Gemini call is preceded by `Budget.check()` (and a small reserve) and followed by `Budget.record()` into `runs/spend.jsonl`, at paid-tier rates. At USD 2.00 further calls are refused and the live session closes with the reason `budget_exceeded`; the pipeline falls back to local-only results.
 - Quota: per-model `AsyncLimiter` for RPM and a daily counter in `runs/_quota.json` for RPD. A 429 reads the retry delay (capped at 30 s) and fails over to the other vision model; after 3 rounds the call fails and the book goes to review with the reason.
 - Deadline: after the sweep ends the pipeline has 240 s (`deadline_s`). Vision work not finished 150 s after the sweep (`vision_cutoff_s`) is cut and the remaining boxes come from the local detector only, flagged. Unfinished reads and resolutions are reported in the review queue as unfinished, never guessed. The packet is always written.
 - Scraping: 1 request per second per host, robots.txt checked per host and path, SSRF guard on redirects, identified User-Agent from the environment.

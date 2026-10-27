@@ -8,11 +8,18 @@ if (urlToken) {
   sessionStorage.setItem("t", urlToken);
   history.replaceState(null, "", location.pathname);
 }
-const accessToken = sessionStorage.getItem("t") ?? "";
+const accessToken = sessionStorage.getItem("t") ?? localStorage.getItem("t") ?? "";
+if (accessToken) {
+  localStorage.setItem("t", accessToken);
+}
 const ui = new Ui(accessToken);
 const camera = new Camera(ui.video);
 const mic = new MicCapture();
 const playback = new AgentPlayback();
+
+const REASONS: Record<string, string> = {
+  unauthorized: "This link is missing its access code or has expired. Open the full link from your computer again.",
+};
 
 let playing = false;
 let ending = false;
@@ -48,11 +55,11 @@ function onSession(message: ServerMessage): void {
   if (state === "processing" || state === "summary" || state === "closed") {
     stopCapture();
   }
-  if (message.reason) {
-    ui.showStatus(`Session ended: ${String(message.reason).replaceAll("_", " ")}`);
+  if (state === "processing" || state === "summary") {
+    ui.showProcessing();
   }
-  if (state === "summary") {
-    ui.showStatus("Sweep complete.");
+  if (message.reason) {
+    ui.showStatus(REASONS[String(message.reason)] ?? `Session ended: ${String(message.reason).replaceAll("_", " ")}`);
   }
 }
 

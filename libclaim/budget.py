@@ -7,7 +7,7 @@ from libclaim.settings import CONFIG_DIR, ROOT
 
 PRICES_PATH = CONFIG_DIR / "model_prices.yaml"
 DEFAULT_LEDGER = ROOT / "runs" / "spend.jsonl"
-DEFAULT_CAP_USD = 0.80
+DEFAULT_CAP_USD = 2.00
 TOKENS_PER_PRICE_UNIT = 1_000_000
 
 

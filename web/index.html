@@ -3,36 +3,64 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#111111">
+<meta name="theme-color" content="#14161c">
 <title>Library sweep</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
-<header>
-  <h1>Library sweep</h1>
-  <span id="connection" data-tone="idle">idle</span>
-</header>
-<main>
-  <div class="stage">
-    <video id="preview" playsinline muted autoplay></video>
-    <div id="toasts" aria-live="polite"></div>
-  </div>
+<div id="app" data-phase="intro">
+  <video id="preview" playsinline muted autoplay></video>
+
+  <header class="hud">
+    <span id="connection" class="pill" data-tone="idle"><i></i><b>Ready</b></span>
+    <span id="timer" class="pill" hidden>0:00</span>
+  </header>
+
+  <div id="toasts" aria-live="polite"></div>
+
+  <section id="intro" class="panel">
+    <div class="intro-body">
+      <h1>Library sweep</h1>
+      <p class="lead">Talk to the agent while you pan your camera over the books. It counts, identifies and prices them, then hands you a claim report.</p>
+      <ol class="steps">
+        <li><b>Set the books out</b><span>On a shelf, a table or the floor. Stand them upright with the spines facing you. Even five books is enough to test.</span></li>
+        <li><b>Pan slowly</b><span>About one book per second, close enough to read the spines. The agent will tell you to slow down or go back.</span></li>
+        <li><b>Tap End when done</b><span>The report is ready in about five minutes.</span></li>
+      </ol>
+    </div>
+    <div class="intro-foot">
+      <button id="start" type="button" class="primary">Start sweep</button>
+      <p class="hint">Needs camera and microphone. Keep the screen on.</p>
+    </div>
+  </section>
+
   <div id="coverage" aria-label="Coverage"></div>
-  <div class="controls">
-    <button id="start" type="button">Start sweep</button>
-    <button id="end" type="button" hidden>End sweep</button>
-  </div>
-  <div id="result"></div>
-  <section>
-    <h2>Inventory <span id="count">0</span></h2>
-    <ul id="inventory"></ul>
+  <p id="transcript" aria-live="polite"></p>
+
+  <section id="sheet" class="sheet" aria-label="Found so far">
+    <button id="sheet-toggle" type="button" class="sheet-head" aria-expanded="false" aria-controls="inventory">
+      <span class="count"><b id="count">0</b> found</span>
+      <span id="latest" class="latest">Nothing yet. Point the camera at the spines.</span>
+      <span class="chevron" aria-hidden="true"></span>
+    </button>
+    <div class="sheet-body"><ul id="inventory"></ul></div>
+    <button id="end" type="button" class="danger" hidden>End sweep</button>
   </section>
-  <section>
-    <h2>Conversation</h2>
-    <div id="transcript"></div>
+
+  <section id="progress" class="panel" hidden>
+    <div class="intro-body">
+      <h1 id="progress-title">Building your report</h1>
+      <p id="progress-found" class="found"><b id="progress-count">0</b> books found in the sweep</p>
+      <p id="progress-step" class="lead">Starting</p>
+      <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="bar-fill"></i></div>
+      <p class="hint">Counting spines, reading titles, checking catalogues and prices. You can leave this page open.</p>
+    </div>
+    <div class="intro-foot">
+      <div id="result"></div>
+    </div>
   </section>
-</main>
+</div>
 <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

@@ -1,0 +1,21 @@
+{
+  "length_m": null,
+  "width_m": null,
+  "height_m": null,
+  "floor_area_m2": null,
+  "wall_area_m2": null,
+  "wall_area_net_m2": null,
+  "shelved_wall_area_m2": null,
+  "openings": [],
+  "shape": "",
+  "polygon_m": [],
+  "frame_refs": [],
+  "scale_method": "depth_metric_prior",
+  "confidence": 0.0,
+  "review": [
+    "no scale marker was visible: depth scale is the model's own",
+    "5 room frames could not be registered to the pan",
+    "the room pan did not close a loop; registration drift unknown",
+    "wall points do not enclose the room; pan along every wall-ceiling line"
+  ]
+}

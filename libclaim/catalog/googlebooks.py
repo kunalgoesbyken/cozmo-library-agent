@@ -13,6 +13,10 @@ def query_for(title: str, author: str) -> str:
     return f"{query} inauthor:{author}" if author else query
 
 
+def loose_query_for(title: str, author: str) -> str:
+    return f"{title} {author}".strip()
+
+
 class GoogleBooks:
     def __init__(self, http: CatalogHttp, api_key: str | None = None):
         self.http = http
@@ -30,8 +34,11 @@ class GoogleBooks:
 
     async def search(self, title: str, author: str) -> list[Candidate]:
         params = {"q": query_for(title, author), "maxResults": self.config.search_limit}
+        items = await self.volumes(params)
+        if not items:
+            items = await self.volumes({**params, "q": loose_query_for(title, author)})
         candidates = []
-        for item in await self.volumes(params):
+        for item in items:
             info = item.get("volumeInfo", {})
             if not info.get("title"):
                 continue

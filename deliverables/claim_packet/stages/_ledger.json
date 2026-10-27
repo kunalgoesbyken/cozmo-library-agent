@@ -1,0 +1,314 @@
+[
+  {
+    "stage": "live",
+    "seconds": 7.202999999979511,
+    "tokens": 1413,
+    "usd_at_paid_rates": 0.004861
+  },
+  {
+    "stage": "spines",
+    "seconds": 5.10899999999674,
+    "tokens": 3484,
+    "usd_at_paid_rates": 0.0007108
+  },
+  {
+    "stage": "live",
+    "seconds": 1.6560000000172295,
+    "tokens": 1754,
+    "usd_at_paid_rates": 0.0032205000000000003
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.23399999999674,
+    "tokens": 3556,
+    "usd_at_paid_rates": 0.0007396
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.5310000000172295,
+    "tokens": 3577,
+    "usd_at_paid_rates": 0.000748
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.64000000001397,
+    "tokens": 3630,
+    "usd_at_paid_rates": 0.0007692
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.420999999972992,
+    "tokens": 3582,
+    "usd_at_paid_rates": 0.00075
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.454000000027008,
+    "tokens": 3224,
+    "usd_at_paid_rates": 0.0006068000000000001
+  },
+  {
+    "stage": "live",
+    "seconds": 13.702999999979511,
+    "tokens": 2081,
+    "usd_at_paid_rates": 0.0037895
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.782000000006519,
+    "tokens": 3580,
+    "usd_at_paid_rates": 0.0007492
+  },
+  {
+    "stage": "spines",
+    "seconds": 5.452999999979511,
+    "tokens": 3659,
+    "usd_at_paid_rates": 0.0007808000000000001
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.4689999999827705,
+    "tokens": 3636,
+    "usd_at_paid_rates": 0.0007716
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.39100000000326,
+    "tokens": 3507,
+    "usd_at_paid_rates": 0.00072
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.235000000044238,
+    "tokens": 3578,
+    "usd_at_paid_rates": 0.0007484000000000001
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.64100000000326,
+    "tokens": 3308,
+    "usd_at_paid_rates": 0.0006404000000000001
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.328000000037719,
+    "tokens": 3628,
+    "usd_at_paid_rates": 0.0007684000000000001
+  },
+  {
+    "stage": "spines",
+    "seconds": 6.25,
+    "tokens": 3634,
+    "usd_at_paid_rates": 0.0007708000000000001
+  },
+  {
+    "stage": "spines",
+    "seconds": 5.077999999979511,
+    "tokens": 3625,
+    "usd_at_paid_rates": 0.0007672
+  },
+  {
+    "stage": "spines",
+    "seconds": 5.01500000001397,
+    "tokens": 3684,
+    "usd_at_paid_rates": 0.0007908
+  },
+  {
+    "stage": "live",
+    "seconds": 32.70400000002701,
+    "tokens": 4409,
+    "usd_at_paid_rates": 0.007183999999999999
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.719000000040978,
+    "tokens": 3574,
+    "usd_at_paid_rates": 0.0007468
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.4689999999827705,
+    "tokens": 3633,
+    "usd_at_paid_rates": 0.0007704000000000001
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.703000000037719,
+    "tokens": 3518,
+    "usd_at_paid_rates": 0.0007244
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.85899999999674,
+    "tokens": 3463,
+    "usd_at_paid_rates": 0.0007024
+  },
+  {
+    "stage": "spines",
+    "seconds": 3.5,
+    "tokens": 3362,
+    "usd_at_paid_rates": 0.000662
+  },
+  {
+    "stage": "spines",
+    "seconds": 3.4679999999934807,
+    "tokens": 3363,
+    "usd_at_paid_rates": 0.0006624000000000001
+  },
+  {
+    "stage": "reading",
+    "seconds": 5.547000000020489,
+    "tokens": 27231,
+    "usd_at_paid_rates": 0.0031251000000000004
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.296999999962281,
+    "tokens": 3375,
+    "usd_at_paid_rates": 0.0006672000000000001
+  },
+  {
+    "stage": "reading",
+    "seconds": 3.155999999959022,
+    "tokens": 11249,
+    "usd_at_paid_rates": 0.001289
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.60899999999674,
+    "tokens": 3390,
+    "usd_at_paid_rates": 0.0006732
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.89100000000326,
+    "tokens": 3393,
+    "usd_at_paid_rates": 0.0006744000000000001
+  },
+  {
+    "stage": "live",
+    "seconds": 32.84299999999348,
+    "tokens": 6497,
+    "usd_at_paid_rates": 0.009073500000000002
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.23399999999674,
+    "tokens": 3389,
+    "usd_at_paid_rates": 0.0006728000000000001
+  },
+  {
+    "stage": "reading",
+    "seconds": 2.8119999999762513,
+    "tokens": 8008,
+    "usd_at_paid_rates": 0.0009109000000000001
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.0310000000172295,
+    "tokens": 3374,
+    "usd_at_paid_rates": 0.0006668
+  },
+  {
+    "stage": "live",
+    "seconds": 8.51600000000326,
+    "tokens": 7247,
+    "usd_at_paid_rates": 0.0089625
+  },
+  {
+    "stage": "live",
+    "seconds": 3.0310000000172295,
+    "tokens": 7318,
+    "usd_at_paid_rates": 0.009711000000000001
+  },
+  {
+    "stage": "spines",
+    "seconds": 4.077999999979511,
+    "tokens": 3360,
+    "usd_at_paid_rates": 0.0006612
+  },
+  {
+    "stage": "spines",
+    "seconds": 15.703000000037719,
+    "tokens": 4398,
+    "usd_at_paid_rates": 0.007504
+  },
+  {
+    "stage": "items",
+    "seconds": 2.547000000020489,
+    "tokens": 2369,
+    "usd_at_paid_rates": 0.0002396
+  },
+  {
+    "stage": "reading",
+    "seconds": 4.797000000020489,
+    "tokens": 22512,
+    "usd_at_paid_rates": 0.0025677000000000005
+  },
+  {
+    "stage": "keyframes",
+    "seconds": 94.065,
+    "tokens": 0,
+    "usd_at_paid_rates": 0.0
+  },
+  {
+    "stage": "spines",
+    "seconds": 108.387,
+    "tokens": 0,
+    "usd_at_paid_rates": 0.0
+  },
+  {
+    "stage": "tracks",
+    "seconds": 66.826,
+    "tokens": 0,
+    "usd_at_paid_rates": 0.0
+  },
+  {
+    "stage": "scale",
+    "seconds": 62.021,
+    "tokens": 0,
+    "usd_at_paid_rates": 0.0
+  },
+  {
+    "stage": "reading",
+    "seconds": 75.253,
+    "tokens": 0,
+    "usd_at_paid_rates": 0.0
+  },
+  {
+    "stage": "resolution",
+    "seconds": 91.884,
+    "tokens": 0,
+    "usd_at_paid_rates": 0.0
+  },
+  {
+    "stage": "room",
+    "seconds": 4.5,
+    "tokens": 0,
+    "usd_at_paid_rates": 0.0
+  },
+  {
+    "stage": "items",
+    "seconds": 11.921,
+    "tokens": 0,
+    "usd_at_paid_rates": 0.0
+  },
+  {
+    "stage": "appraisal",
+    "seconds": 0.002,
+    "tokens": 0,
+    "usd_at_paid_rates": 0.0
+  },
+  {
+    "stage": "pricing",
+    "seconds": 0.209,
+    "tokens": 0,
+    "usd_at_paid_rates": 0.0
+  },
+  {
+    "stage": "packet",
+    "seconds": 0.0,
+    "tokens": 0,
+    "usd_at_paid_rates": 0.0
+  }
+]

@@ -1,0 +1,1652 @@
+{
+  "books": {
+    "b01-001": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-002": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-003": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-004": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-005": {
+      "status": "needs_appraisal",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_isbn"
+      ],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-006": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-007": {
+      "status": "identified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "equivalent_edition_priced: ISBN 9780486795003 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
+        "no_price_source"
+      ],
+      "evidence": [],
+      "excluded": true
+    },
+    "b01-008": {
+      "status": "needs_appraisal",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_isbn"
+      ],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-009": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-010": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-011": {
+      "status": "identified",
+      "replacement_cost": {
+        "amount": 1900.43,
+        "source": "Penguin UK (equivalent edition, ISBN 9780140135824)",
+        "url": "https://www.penguin.co.uk/books/13519/victorian-cities-by-asa-briggs/9780140135824",
+        "retrieved_at": "2026-10-27T19:31:00.059755+00:00",
+        "converted": true
+      },
+      "used_value": {
+        "amount": 950.22,
+        "source": "Penguin UK (equivalent edition, ISBN 9780140135824)",
+        "url": "https://www.penguin.co.uk/books/13519/victorian-cities-by-asa-briggs/9780140135824",
+        "retrieved_at": "2026-10-27T19:31:00.059755+00:00",
+        "condition_assumed": "good",
+        "method": "condition_factor:v1:good:from_converted",
+        "source_type": "derived"
+      },
+      "original": {
+        "amount": "14.99",
+        "currency": "GBP",
+        "source": "Penguin UK",
+        "url": "https://www.penguin.co.uk/books/13519/victorian-cities-by-asa-briggs/9780140135824",
+        "retrieved_at": "2026-10-27T19:31:00.059755Z",
+        "kind": "listing",
+        "condition": "new",
+        "isbn_on_page": "9780140135824",
+        "availability": "",
+        "cache_ref": "f6ea00e930d14c5ad03942ca74e9a8e54422a716"
+      },
+      "fx": {
+        "base": "GBP",
+        "quote": "INR",
+        "rate": "126.78",
+        "rate_date": "2026-10-27",
+        "provider": "ECB via Frankfurter v2",
+        "url": "https://api.frankfurter.dev/v2/rates?base=GBP&quotes=INR&providers=ECB&date=2026-10-27",
+        "retrieved_at": "2026-10-27T19:31:01.110171Z",
+        "cache_ref": "4cfca8554556c803666d44a706007f3d30255763"
+      },
+      "review": [
+        "equivalent_edition_priced: ISBN 9780140135824 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
+        "identified_from_catalogue_only: OCR did not confirm the spine text; title and author match one catalogue record",
+        "converted: GBP to INR at 126.78 on 2026-10-27"
+      ],
+      "evidence": [
+        "f6ea00e930d14c5ad03942ca74e9a8e54422a716",
+        "4cfca8554556c803666d44a706007f3d30255763"
+      ],
+      "excluded": false
+    },
+    "b01-012": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-013": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-014": {
+      "status": "identified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "equivalent_edition_priced: ISBN 9780140124750 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
+        "no_price_source"
+      ],
+      "evidence": [],
+      "excluded": true
+    },
+    "b01-015": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-016": {
+      "status": "needs_appraisal",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_isbn"
+      ],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-017": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-018": {
+      "status": "identified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "equivalent_edition_priced: ISBN 9781351304320 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
+        "no_price_source"
+      ],
+      "evidence": [],
+      "excluded": true
+    },
+    "b01-019": {
+      "status": "needs_appraisal",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_isbn"
+      ],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-020": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-021": {
+      "status": "identified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "equivalent_edition_priced: ISBN 9780593468296 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
+        "no_price_source"
+      ],
+      "evidence": [],
+      "excluded": true
+    },
+    "b01-022": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-023": {
+      "status": "needs_appraisal",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_isbn"
+      ],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-024": {
+      "status": "identified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "equivalent_edition_priced: ISBN 9780880291705 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
+        "no_price_source"
+      ],
+      "evidence": [],
+      "excluded": true
+    },
+    "b01-025": {
+      "status": "needs_appraisal",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_isbn"
+      ],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-026": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-027": {
+      "status": "needs_appraisal",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_isbn"
+      ],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-028": {
+      "status": "identified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "equivalent_edition_priced: ISBN 9781281741448 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
+        "no_price_source"
+      ],
+      "evidence": [],
+      "excluded": true
+    },
+    "b01-029": {
+      "status": "identified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "equivalent_edition_priced: ISBN 9781138141841 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
+        "no_price_source"
+      ],
+      "evidence": [],
+      "excluded": true
+    },
+    "b01-030": {
+      "status": "identified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_price_source"
+      ],
+      "evidence": [],
+      "excluded": true
+    },
+    "b01-031": {
+      "status": "needs_appraisal",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_isbn"
+      ],
+      "evidence": [],
+      "excluded": false
+    },
+    "b01-032": {
+      "status": "identified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "equivalent_edition_priced: ISBN 9781306346030 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
+        "no_price_source"
+      ],
+      "evidence": [],
+      "excluded": true
+    },
+    "b01-033": {
+      "status": "identified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_price_source"
+      ],
+      "evidence": [],
+      "excluded": true
+    },
+    "b01-034": {
+      "status": "identified",
+      "replacement_cost": {
+        "amount": 886.19,
+        "source": "Penguin UK",
+        "url": "https://www.penguin.co.uk/books/13442/palladio-by-massar-james-ackermanphyllis/9780141936383",
+        "retrieved_at": "2026-10-27T19:31:14.116708+00:00",
+        "converted": true
+      },
+      "used_value": {
+        "amount": 443.1,
+        "source": "Penguin UK",
+        "url": "https://www.penguin.co.uk/books/13442/palladio-by-massar-james-ackermanphyllis/9780141936383",
+        "retrieved_at": "2026-10-27T19:31:14.116708+00:00",
+        "condition_assumed": "good",
+        "method": "condition_factor:v1:good:from_converted",
+        "source_type": "derived"
+      },
+      "original": {
+        "amount": "6.99",
+        "currency": "GBP",
+        "source": "Penguin UK",
+        "url": "https://www.penguin.co.uk/books/13442/palladio-by-massar-james-ackermanphyllis/9780141936383",
+        "retrieved_at": "2026-10-27T19:31:14.116708Z",
+        "kind": "listing",
+        "condition": "new",
+        "isbn_on_page": "9780141936383",
+        "availability": "",
+        "cache_ref": "da5a533cd218899862bb34b045152426548b3c0f"
+      },
+      "fx": {
+        "base": "GBP",
+        "quote": "INR",
+        "rate": "126.78",
+        "rate_date": "2026-10-27",
+        "provider": "ECB via Frankfurter v2",
+        "url": "https://api.frankfurter.dev/v2/rates?base=GBP&quotes=INR&providers=ECB&date=2026-10-27",
+        "retrieved_at": "2026-10-27T19:31:01.110171Z",
+        "cache_ref": "4cfca8554556c803666d44a706007f3d30255763"
+      },
+      "review": [
+        "converted: GBP to INR at 126.78 on 2026-10-27"
+      ],
+      "evidence": [
+        "da5a533cd218899862bb34b045152426548b3c0f",
+        "4cfca8554556c803666d44a706007f3d30255763"
+      ],
+      "excluded": false
+    },
+    "b02-001": {
+      "status": "needs_appraisal",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_isbn"
+      ],
+      "evidence": [],
+      "excluded": false
+    },
+    "b02-002": {
+      "status": "identified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "equivalent_edition_priced: ISBN 9780520260153 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
+        "identified_from_catalogue_only: OCR did not confirm the spine text; title and author match one catalogue record",
+        "no_price_source"
+      ],
+      "evidence": [],
+      "excluded": true
+    },
+    "b02-003": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b02-004": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b02-005": {
+      "status": "needs_appraisal",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_isbn"
+      ],
+      "evidence": [],
+      "excluded": false
+    },
+    "b02-006": {
+      "status": "needs_appraisal",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_isbn"
+      ],
+      "evidence": [],
+      "excluded": false
+    },
+    "b02-007": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-001": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-002": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-003": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-004": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-005": {
+      "status": "needs_appraisal",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_isbn"
+      ],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-006": {
+      "status": "needs_appraisal",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [
+        "no_isbn"
+      ],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-007": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-008": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-009": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-010": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-011": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-012": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-013": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-014": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-015": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-016": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-017": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-018": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-019": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    },
+    "b03-020": {
+      "status": "unidentified",
+      "replacement_cost": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "converted": false
+      },
+      "used_value": {
+        "amount": null,
+        "source": "",
+        "url": "",
+        "retrieved_at": "",
+        "condition_assumed": "",
+        "method": "",
+        "source_type": null
+      },
+      "original": null,
+      "fx": null,
+      "review": [],
+      "evidence": [],
+      "excluded": false
+    }
+  },
+  "items": {},
+  "second_country": {
+    "country": "GB",
+    "currency": "GBP",
+    "books": [
+      {
+        "book_id": "b01-011",
+        "title": "Victorian Cities",
+        "author": "Asa Briggs",
+        "edition": "",
+        "isbn": "9780140135824",
+        "status": "identified",
+        "source_type": "local_listing",
+        "replacement_cost": {
+          "amount": 14.99,
+          "source": "Penguin UK (equivalent edition, ISBN 9780140135824)",
+          "url": "https://www.penguin.co.uk/books/13519/victorian-cities-by-asa-briggs/9780140135824",
+          "retrieved_at": "2026-10-27T19:31:00.059755+00:00",
+          "converted": false
+        },
+        "used_value": {
+          "amount": 7.5,
+          "source": "Penguin UK (equivalent edition, ISBN 9780140135824)",
+          "url": "https://www.penguin.co.uk/books/13519/victorian-cities-by-asa-briggs/9780140135824",
+          "retrieved_at": "2026-10-27T19:31:00.059755+00:00",
+          "condition_assumed": "good",
+          "method": "condition_factor:v1:good",
+          "source_type": "derived"
+        },
+        "original_amount": 1900.43,
+        "original_currency": "INR",
+        "fx": null,
+        "review": [
+          "equivalent_edition_priced: ISBN 9780140135824 is the most recent catalogue edition that fits the spine; the exact printed edition is not known",
+          "identified_from_catalogue_only: OCR did not confirm the spine text; title and author match one catalogue record"
+        ],
+        "evidence": [
+          "f6ea00e930d14c5ad03942ca74e9a8e54422a716"
+        ]
+      },
+      {
+        "book_id": "b01-034",
+        "title": "Palladio",
+        "author": "James S. Ackerman",
+        "edition": "Penguin UK",
+        "isbn": "9780141936383",
+        "status": "identified",
+        "source_type": "local_listing",
+        "replacement_cost": {
+          "amount": 6.99,
+          "source": "Penguin UK",
+          "url": "https://www.penguin.co.uk/books/13442/palladio-by-massar-james-ackermanphyllis/9780141936383",
+          "retrieved_at": "2026-10-27T19:31:14.116708+00:00",
+          "converted": false
+        },
+        "used_value": {
+          "amount": 3.5,
+          "source": "Penguin UK",
+          "url": "https://www.penguin.co.uk/books/13442/palladio-by-massar-james-ackermanphyllis/9780141936383",
+          "retrieved_at": "2026-10-27T19:31:14.116708+00:00",
+          "condition_assumed": "good",
+          "method": "condition_factor:v1:good",
+          "source_type": "derived"
+        },
+        "original_amount": 886.19,
+        "original_currency": "INR",
+        "fx": null,
+        "review": [],
+        "evidence": [
+          "da5a533cd218899862bb34b045152426548b3c0f"
+        ]
+      }
+    ]
+  }
+}

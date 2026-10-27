@@ -1,4 +1,4 @@
-shelf_label: "{unit}.{row}"
+shelf_label: "{unit}"
 truthy: ["y", "yes", "true", "1"]
 closure_tolerance_m: 0.05
 default_interior_angle_deg: 90.0

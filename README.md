@@ -2,6 +2,8 @@
 
 A live voice and vision agent for a home-contents claim. The policyholder opens a web page on a phone, talks to the agent and walks the room once with the camera on. The agent directs the sweep (steady, slower, closer, a missed shelf). When the sweep ends, background stages count and read every book spine, measure what can be measured, price what can be priced from free sources, detect the non-book items and estimate the room. Within 5 minutes it reads a summary back and writes a traceable `claim_packet.json` and an HTML report.
 
+Submission index (video, packet, ground truth, results, architecture, failure log): [deliverables/README.md](deliverables/README.md).
+
 The design rule: the live model only talks and coaches. Every number in the packet is computed by code from saved full-resolution stills and from cached HTTP responses. No language model writes a number, a price or a total.
 
 ## The result contract
@@ -24,9 +26,9 @@ Documents: [architecture](docs/architecture.md), [failure log](docs/failure-log.
 
 Be aware of this before reading any number in this repo.
 
-- Measured: counting on three public shelf photos (52 of 55, 22 of 22, 19 of 19 against my own hand count, not an official ground-truth sheet), the pipeline end to end on those photos against live Gemini and live catalogue and retailer pages, the live voice server against the real Live API for a 6-minute laptop session, and the optional ML models on this laptop.
-- Not measured: any run with an iPhone (microphone, AudioWorklet playback, wake lock, camera permission, tunnel cookies, a real GoAway reconnect), any run with printed ArUco markers (so no marker-calibrated spine dimensions exist; every dimension in the test runs is a format prior and is labelled as an estimate), any ground-truth sheet (`ground_truth/` holds only templates, so `tools/eval.py` evaluates only time and cost), and context compression firing in a long session.
-- Price coverage is limited by what free sources list. In the latest 3-photo run, 24 books were titled, 19 got an ISBN, and one book got a price (a used listing, INR 135, for an equivalent edition). See [failure log](docs/failure-log.md).
+- Measured, the demo run (`deliverables/`): a live sweep in Chromium with the real voice session, a fake camera panning over two public shelf photos (60 books, hand-counted and hand-read), and the full pipeline against live Gemini, catalogue and retailer pages. Count 61 against 60, 13 of 54 legible titles identified with 0 wrong, 2 books priced, packet 78.7 s after the sweep. See [results](docs/results.md) and [failure log](docs/failure-log.md).
+- Not measured: a sweep of a physical shelf, any run with an iPhone, any run with printed ArUco markers (every spine size so far is a format prior labelled as an estimate), room geometry, and hand-measured spines or room dimensions (`spines20.csv` and `room.json` do not exist).
+- Price coverage is limited by what free sources list. Older and out-of-print editions are mostly not listed (see the failure log).
 
 ## Quickstart (base install, about 10 minutes plus downloads)
 
@@ -193,7 +195,7 @@ Development of this repository was assisted by an AI coding assistant (the brief
 
 Free-tier data use: Google's terms for unpaid Gemini API use allow it to use submitted content, including images and audio, to improve its products, and human reviewers may read it (verify the current terms for your key). Do not put people, personal documents or anything private in frame, or use a billed key (`FREE_TIER=false`) if that matters to you.
 
-Budget guard: every Gemini call goes through `libclaim/budget.py`. `check()` before and `record()` after write the token usage to `runs/spend.jsonl`, priced at paid-tier rates from `config/model_prices.yaml`. The guard refuses calls once the ledger reaches USD 0.80 (`DEFAULT_CAP_USD`), and the live server turns that into a `budget` error and a `closed` reason the phone shows. Per-model request limits (`config/llm.yaml`) and a daily counter in `runs/_quota.json` keep the free-tier RPM and RPD limits. `FREE_TIER` only changes how the packet describes billing (`billed_usd` is `0.0` for `true`, the paid-rate amount for `false`, `null` when unset); the ledger always reports `usd_at_paid_rates`.
+Budget guard: every Gemini call goes through `libclaim/budget.py`. `check()` before and `record()` after write the token usage to `runs/spend.jsonl`, priced at paid-tier rates from `config/model_prices.yaml`. The guard refuses calls once the ledger reaches USD 2.00 (`DEFAULT_CAP_USD`), and the live server turns that into a `budget` error and a `closed` reason the phone shows. Per-model request limits (`config/llm.yaml`) and a daily counter in `runs/_quota.json` keep the free-tier RPM and RPD limits. `FREE_TIER` only changes how the packet describes billing (`billed_usd` is `0.0` for `true`, the paid-rate amount for `false`, `null` when unset); the ledger always reports `usd_at_paid_rates`.
 
 ## Licences
 
